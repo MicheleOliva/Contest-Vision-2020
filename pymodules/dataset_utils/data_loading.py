@@ -1,5 +1,7 @@
 import pandas as pd
 import random
+import cv2
+from data_sample import AgeEstimationSample, FaceSample
 
 
 """
@@ -111,30 +113,57 @@ class CustomDataLoader():
     def load_batch(self):
         if self.num_samples < self.batch_size:
             raise ValueError('The number of samples is smaller than the batch size')
-
+        
         # TODO:
-        # - considera batch_size identità che non hai considerato prima
-        # - prendi un'immagine ciascuna
-        # - per ogni immagine, metti l'immagine ed i relativi metadati in un oggetto AgeEstimationSample (file data_sample.py), e crea una lista con questi oggetti
-        # - yielda la lista (vedi se serve altro oltre a yield per fare un iterator in python)
         # GESTIRE BENE situazioni del tipo non ho batch_size identità diverse, ma con quelle che ho apparo comunque a 64 immagini (farò qualche batch con più immagini
         # provenienti dalla stessa identità, ma pazienza)
+        if len(self.identities) < self.batch_size:
+            raise ValueError('The number of identities is smaller than the batch size')
+
         if self.mode != 'testing':
-            self._yield_training_validation()
+            return self._yield_training_validation()
         else:
-            self._yield_testing()
+            return self._yield_testing()
         
     def _yield_training_validation(self):
+        num_identities = len(self.identities)
         batch_index = 0
-        # manage identities in a circular way
-        if 
-        curr_batch_indentities = self.identities[batch_index : (batch_index+1)*self.batch_size]
+        num_ids_to_resample = 0
+        # manage identities in a circular way 
+        ids_start = (batch_index*self.batch_size)%num_identities # identities' batch start
+        ids_end = ((batch_index+1)*self.batch_size)%num_identities # identities' batch end
+        # Manage the indetities array in a circular manner
+        batch_identities = self.identities[ids_start:ids_end] if ids_start < ids_end else self.identities[ids_start:].append(self.identities[:ids_end])
         batch = []
-        for identity in curr_batch_indentities:
-            pass
+        for identity in batch_identities:
+            identity_data = self.groundtruth_metadata[identity]
+            # if there are images available for that identity
+            if identity_data['index'] < len(identity_data['metadata'])-1:
+                # read the image and the necessary metadata
+                img_info = identity_data['metadata'][identity_data['index']]
+                img = cv2.imread(self.dataset_root_path+img_info['path']) # watch out for slashes (/)
+                batch.append(AgeEstimationSample(img, img_info['roi'], img_info['age'], 'BGR')) # cv2 reads as BGR
+                # increase the index, because another sample for that identity has been used
+                identity_data['index'] += 1
+            else:
+                num_ids_to_resample += 1
+
+        # if for some identities there weren't available images, take them from other identities
+        while(num_ids_to_resample > 0):
+            identity = self.identities[ids_end] # remeber that slicing at previous step excludes upper limit
+            identity_data = self.groundtruth_metadata[identity]
+            if identity_data['index'] < len(identity_data['metadata'])-1:
+                # read the image and the necessary metadata
+                img_info = identity_data['metadata'][identity_data['index']]
+                img = cv2.imread(self.dataset_root_path+img_info['path']) # watch out for slashes (/)
+                batch.append(AgeEstimationSample(img, img_info['roi'], img_info['age'], 'BGR')) # cv2 reads as BGR
+                num_ids_to_resample -= 1
+            ids_end += 1
+            
+        return batch
 
     def _yield_testing(self):
-        pass
+        raise NotImplementedError('Data loader for testing data is not implemented yet')
 
     def get_num_samples(self):
         return self.num_samples
