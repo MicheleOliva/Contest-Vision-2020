@@ -11,8 +11,8 @@ from math import floor
 class DataGenerator(tensorflow.keras.utils.Sequence):
 
     def __init__(self, mode, preprocessor: CustomPreprocessor, data_augmenter: CustomAugmenter, output_encoder: CustomOutputEncoder, data_loader: CustomDataLoader, batch_size):
-        if output_encoder is None or data_loader is None or batch_size is None:
-            raise TypeError('Data generator needs the output encoder, data loader and batch size to be specified')
+        if data_loader is None or batch_size is None:
+            raise TypeError('Data generator needs data loader and batch size to be specified')
 
         self.allowed_modes = ['training', 'validation', 'testing']
         if mode is None or mode not in self.allowed_modes:
@@ -31,9 +31,7 @@ class DataGenerator(tensorflow.keras.utils.Sequence):
     # Consider putting a lock as a class member and using it when modifying indexes (useful with multi-threading)
     # curr_batch è il numero del batch per il quale ci stanno chiedendo i sample
     def __getitem__(self, curr_batch):
-        # At this point, x_batch can't be a numpy array becayse numpy array elements must have all the same size.
-        # It will be a numpy array after pre-processing (maybe --> could keep on passing numpy array lists to 
-        # preprocessing and data augmentation in order to keep interfaces homogeneous)
+        # x_batch and y_batch are numpy arrays
         x_batch,y_batch = self.data_loader.load_batch()
 
         if self.preprocessor is not None:
@@ -43,12 +41,10 @@ class DataGenerator(tensorflow.keras.utils.Sequence):
             self.data_augmenter.apply_augmentation(x_batch)
 
         if self.mode != 'testing':
-            # output_encoder is surely not None (there's a check in the constructor)
-            self.output_encoder.encode(y_batch)
+            if self.output_encoder is not None:
+                self.output_encoder.encode(y_batch)
             
-            # TODO: create numpy arrays from custom data sample objects
-
-            # watch out when you create numpy array, 'cause Keras requires the batch dimension to be the first one
+            # watch out when you create numpy arrays, 'cause Keras requires the batch dimension to be the first one
             return x_batch, y_batch # if not working, try np.array(x_batch), np.array(y_batch)
         else:
             return x_batch

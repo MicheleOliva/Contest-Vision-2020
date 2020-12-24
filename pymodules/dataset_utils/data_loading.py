@@ -1,7 +1,8 @@
 import pandas as pd
 import random
 import cv2
-from data_sample import AgeEstimationSample, FaceSample
+#from data_sample import AgeEstimationSample, FaceSample
+import numpy as np
 
 
 """
@@ -170,7 +171,7 @@ class CustomDataLoader():
                 identity_data['index'] += 1
             ids_end = (ids_end+1%num_identities)
             
-        return samples_batch, labels_batch
+        return np.array(samples_batch), np.array(labels_batch)
 
     def _yield_testing(self):
         raise NotImplementedError('Data loader for testing data is not implemented yet')
