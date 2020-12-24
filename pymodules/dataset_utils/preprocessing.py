@@ -18,8 +18,8 @@ class CustomPreprocessor():
         new_w = roi[2]*aug_factor
         new_x = roi[0] - int((new_w - roi[2])/2)
         new_y = roi[1] - int((new_h - roi[3])/2)
-        aug_roi.append(np.amax([0, new_x]))
-        aug_roi.append(np.amax([0, new_y]))
+        aug_roi.append(np.max([0, new_x]))
+        aug_roi.append(np.max([0, new_y]))
         aug_roi.append(int(new_w))
         aug_roi.append(int(new_h))
         return aug_roi        
