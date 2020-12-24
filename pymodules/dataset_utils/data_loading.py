@@ -128,14 +128,14 @@ class CustomDataLoader():
         
     def _yield_training_validation(self):
         num_identities = len(self.identities)
-        self.batch_index = 0
         num_ids_to_resample = 0
         # manage identities in a circular way 
         ids_start = (self.batch_index*self.batch_size)%num_identities # identities' batch start
         ids_end = ((self.batch_index+1)*self.batch_size)%num_identities # identities' batch end
         # Manage the indetities array in a circular manner
         batch_identities = self.identities[ids_start:ids_end] if ids_start < ids_end else self.identities[ids_start:].append(self.identities[:ids_end])
-        batch = []
+        samples_batch = []
+        labels_batch = []
         for identity in batch_identities:
             identity_data = self.groundtruth_metadata[identity]
             # if there are images available for that identity
@@ -143,13 +143,19 @@ class CustomDataLoader():
                 # read the image and the necessary metadata
                 img_info = identity_data['metadata'][identity_data['index']]
                 img = cv2.imread(self.dataset_root_path+img_info['path']) # watch out for slashes (/)
-                batch.append(AgeEstimationSample(img, img_info['roi'], img_info['age'], 'BGR')) # cv2 reads as BGR
+                #batch.append(AgeEstimationSample(img, img_info['roi'], img_info['age'], 'BGR')) # cv2 reads as BGR
+                samples_batch.append(img)
+                labels_batch.append(img_info['age'])
                 # increase the index, because another sample for that identity has been used
                 identity_data['index'] += 1
             else:
                 num_ids_to_resample += 1
 
         # if for some identities there weren't available images, take them from other identities
+        # note that this mechanism solves also the problems arising when less than batch_size identities are available, by
+        # picking multiple images from the available entities
+        # the __len__ method in the data generator associated to this data loader is responsible for avoiding that this
+        # method is called when less than batch_size "fresh" images are available
         while(num_ids_to_resample > 0):
             identity = self.identities[ids_end] # remeber that slicing at previous step excludes upper limit
             identity_data = self.groundtruth_metadata[identity]
@@ -157,11 +163,14 @@ class CustomDataLoader():
                 # read the image and the necessary metadata
                 img_info = identity_data['metadata'][identity_data['index']]
                 img = cv2.imread(self.dataset_root_path+img_info['path']) # watch out for slashes (/)
-                batch.append(AgeEstimationSample(img, img_info['roi'], img_info['age'], 'BGR')) # cv2 reads as BGR
+                #batch.append(AgeEstimationSample(img, img_info['roi'], img_info['age'], 'BGR')) # cv2 reads as BGR
+                samples_batch.append(img)
+                labels_batch.append(img_info['age'])
                 num_ids_to_resample -= 1
+                identity_data['index'] += 1
             ids_end = (ids_end+1%num_identities)
             
-        return batch
+        return samples_batch, labels_batch
 
     def _yield_testing(self):
         raise NotImplementedError('Data loader for testing data is not implemented yet')
@@ -170,13 +179,16 @@ class CustomDataLoader():
         return self.num_samples
 
     def epoch_ended(self):
+        # if not really ended:
+        #   return
         if self.mode == 'training':
             self._shuffle(reinit_indexes=True)
+            self.batch_index = 0
 
     def _shuffle(self, reinit_indexes = False):
         print('Shuffling data...')
         # set seed for reproducibility
-        random.seed(2020)
+        #random.seed()
         # shuffle identities
         random.shuffle(self.identities)
         # shuffle images associated to each identity
