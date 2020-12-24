@@ -28,6 +28,7 @@ class CustomDataLoader():
         self.batch_size = batch_size
         self.mode = mode
         self.dataset_root_path = dataset_root_path
+        self.batch_index = 0
 
         self.identities = [] # list to hold all of the ids, in order to be able to build balanced batches
 
@@ -127,11 +128,11 @@ class CustomDataLoader():
         
     def _yield_training_validation(self):
         num_identities = len(self.identities)
-        batch_index = 0
+        self.batch_index = 0
         num_ids_to_resample = 0
         # manage identities in a circular way 
-        ids_start = (batch_index*self.batch_size)%num_identities # identities' batch start
-        ids_end = ((batch_index+1)*self.batch_size)%num_identities # identities' batch end
+        ids_start = (self.batch_index*self.batch_size)%num_identities # identities' batch start
+        ids_end = ((self.batch_index+1)*self.batch_size)%num_identities # identities' batch end
         # Manage the indetities array in a circular manner
         batch_identities = self.identities[ids_start:ids_end] if ids_start < ids_end else self.identities[ids_start:].append(self.identities[:ids_end])
         batch = []
@@ -158,7 +159,7 @@ class CustomDataLoader():
                 img = cv2.imread(self.dataset_root_path+img_info['path']) # watch out for slashes (/)
                 batch.append(AgeEstimationSample(img, img_info['roi'], img_info['age'], 'BGR')) # cv2 reads as BGR
                 num_ids_to_resample -= 1
-            ids_end += 1
+            ids_end = (ids_end+1%num_identities)
             
         return batch
 
