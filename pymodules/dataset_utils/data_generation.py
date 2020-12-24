@@ -3,7 +3,7 @@ from data_loading import CustomDataLoader
 from preprocessing import CustomPreprocessor
 from data_augmentation import CustomAugmenter
 from output_encoding import CustomOutputEncoder
-from math import ceil
+from math import floor
 
 """
     Strategy design pattern w.r.t. pre-processing, data augmentation, output enconding and file loading
@@ -26,7 +26,7 @@ class DataGenerator(tensorflow.keras.utils.Sequence):
         self.batch_size = batch_size
     
     def __len__(self):
-        return ceil(self.data_loader.get_num_samples()/self.batch_size)
+        return floor(self.data_loader.get_num_samples()/self.batch_size)
 
     # Consider putting a lock as a class member and using it when modifying indexes (useful with multi-threading)
     # curr_batch è il numero del batch per il quale ci stanno chiedendo i sample
