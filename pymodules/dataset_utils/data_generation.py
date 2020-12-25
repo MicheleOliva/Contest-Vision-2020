@@ -36,11 +36,11 @@ class DataGenerator(tensorflow.keras.utils.Sequence):
         # preprocessing and data augmentation in order to keep interfaces homogeneous)
         x_batch,y_batch = self.data_loader.load_batch()
 
-        if self.preprocessor is not None:
-            self.preprocessor.apply_preprocessing(x_batch)
-
         if self.data_augmenter is not None:
             self.data_augmenter.apply_augmentation(x_batch)
+
+        if self.preprocessor is not None:
+            x_batch = self.preprocessor.apply_preprocessing(x_batch)
 
         if self.mode != 'testing':
             # output_encoder is surely not None (there's a check in the constructor)
