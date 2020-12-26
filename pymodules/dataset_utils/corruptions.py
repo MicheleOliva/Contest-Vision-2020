@@ -26,7 +26,7 @@ def gaussian_blur(x, c):
     return x
 
 
-def randomCrop(img, factor=0.1):
+def random_crop(img, factor=0.1):
     width = int(img.shape[1]*(1-factor))
     height = int(img.shape[0]*(1-factor))
     x = random.randint(0, img.shape[1] - width)
