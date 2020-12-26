@@ -29,7 +29,6 @@ class CustomDataLoader():
         self.batch_size = batch_size
         self.mode = mode
         self.dataset_root_path = dataset_root_path
-        self.batch_index = 0
 
         self.identities = [] # list to hold all of the ids, in order to be able to build balanced batches
 
@@ -112,7 +111,7 @@ class CustomDataLoader():
             self.num_samples += 1
         print('Done loading test data!')
 
-    def load_batch(self):
+    def load_batch(self, batch_index):
         if self.num_samples < self.batch_size:
             raise ValueError('The number of samples is smaller than the batch size')
         
@@ -123,16 +122,16 @@ class CustomDataLoader():
             raise ValueError('The number of identities is smaller than the batch size')
 
         if self.mode != 'testing':
-            return self._yield_training_validation()
+            return self._yield_training_validation(batch_index)
         else:
-            return self._yield_testing()
+            return self._yield_testing(batch_index)
         
-    def _yield_training_validation(self):
+    def _yield_training_validation(self, batch_index):
         num_identities = len(self.identities)
         num_ids_to_resample = 0
         # manage identities in a circular way 
-        ids_start = (self.batch_index*self.batch_size)%num_identities # identities' batch start
-        ids_end = ((self.batch_index+1)*self.batch_size)%num_identities # identities' batch end
+        ids_start = (batch_index*self.batch_size)%num_identities # identities' batch start
+        ids_end = ((batch_index+1)*self.batch_size)%num_identities # identities' batch end
         # Manage the indetities array in a circular manner
         batch_identities = self.identities[ids_start:ids_end] if ids_start < ids_end else self.identities[ids_start:].append(self.identities[:ids_end])
         #samples_batch = []
@@ -188,7 +187,7 @@ class CustomDataLoader():
         #return samples_batch, labels_batch
         return batch
 
-    def _yield_testing(self):
+    def _yield_testing(self, batch_index):
         raise NotImplementedError('Data loader for testing data is not implemented yet')
 
     def get_num_samples(self):
@@ -199,7 +198,6 @@ class CustomDataLoader():
         #   return
         if self.mode == 'training':
             self._shuffle(reinit_indexes=True)
-            self.batch_index = 0
 
     def _shuffle(self, reinit_indexes = False):
         print('Shuffling data...')
