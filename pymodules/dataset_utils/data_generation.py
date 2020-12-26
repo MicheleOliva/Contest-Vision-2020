@@ -4,6 +4,8 @@ from preprocessing import CustomPreprocessor
 from data_augmentation import CustomAugmenter
 from output_encoding import CustomOutputEncoder
 from math import floor
+import numpy as np
+
 
 """
     Strategy design pattern w.r.t. pre-processing, data augmentation, output enconding and file loading
@@ -32,25 +34,25 @@ class DataGenerator(tensorflow.keras.utils.Sequence):
     # curr_batch è il numero del batch per il quale ci stanno chiedendo i sample
     def __getitem__(self, curr_batch):
         # x_batch and y_batch cannot be numpy arrays since images do not have the same size
-        data = self.data_loader.load_batch(curr_batch)
+        x_batch, y_batch, roi_batch = self.data_loader.load_batch(curr_batch)
 
         if self.preprocessor is not None:
-            data = self.preprocessor.pre_augmentation(data)
+            x_batch = self.preprocessor.pre_augmentation(x_batch, roi_batch)
 
         if self.data_augmenter is not None:
-            self.data_augmenter.apply_augmentation(data)
+            self.data_augmenter.apply_augmentation(x_batch) # works in place
 
         if self.preprocessor is not None:
-            data = self.preprocessor.post_augmentation(data)
+            x_batch = self.preprocessor.post_augmentation(x_batch)
 
         if self.mode != 'testing':
             if self.output_encoder is not None:
                 self.output_encoder.encode(y_batch)
-            
             # watch out when you create numpy arrays, 'cause Keras requires the batch dimension to be the first one
-            return x_batch, y_batch # if not working, try np.array(x_batch), np.array(y_batch)
+            return np.array(x_batch), np.array(y_batch) # automatically sets batch dimension as the first one
         else:
-            return x_batch
+            raise NotImplementedError('Testing mode is not implemented yet')
+            #return x_batch
     
     def on_epoch_end(self):
         if self.mode == 'training':

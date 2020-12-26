@@ -38,9 +38,8 @@ class CustomPreprocessor():
             return real_img
         return img
     
-    def post_augmentation(self, data):
-        return data + VGGFACE2_MEANS
-
+    def _subtract_vgg_means(self, data):
+        return data - VGGFACE2_MEANS
 
     # data is an array (batch)
     def pre_augmentation(self, data):
@@ -60,5 +59,5 @@ class CustomPreprocessor():
     def post_augmentation(self, data):
         processing = []
         for sample in data:
-            processing.append(AgeEstimationSample(self.post_augmentation(sample), sample.roi, sample.age, 'BGR'))
+            processing.append(AgeEstimationSample(self._subtract_vgg_means(sample), sample.roi, sample.age, 'BGR'))
         return processing

@@ -51,7 +51,7 @@ class CustomAugmenter():
 
             elif corruptions_list[corruption_index] == spatter:
                 severity = random.randint(1,5)
-            # call chose corruption on our sample
+            # call chosen corruption on our sample
             if severity is not None:
                 data[i] = corruptions_list[corruption_index](data[i], severity)
             else:
