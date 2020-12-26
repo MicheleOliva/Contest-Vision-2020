@@ -42,22 +42,15 @@ class CustomPreprocessor():
         return data - VGGFACE2_MEANS
 
     # data is an array (batch)
-    def pre_augmentation(self, data):
+    def pre_augmentation(self, data, rois):
         processing = []
-        for sample in data:
-            roi_list = [sample.roi['upper_left_x'], sample.roi['upper_left_y'], sample.roi['width'], sample.roi['height']]
-            img = self.cut(sample.img, roi_list)
-            new_roi = {
-                'upper_left_x': 0,
-                'upper_left_y': 0,
-                'width': img.shape[1],
-                'height': img.shape[0]
-            }
-            processing.append(AgeEstimationSample(img, new_roi, sample.age, 'BGR'))
+        for sample, roi in zip(data, rois):
+            roi_list = [roi['upper_left_x'], roi['upper_left_y'], roi['width'], roi['height']]
+            processing.append(self.cut(sample.img, roi_list))
         return processing
 
     def post_augmentation(self, data):
         processing = []
         for sample in data:
-            processing.append(AgeEstimationSample(self._subtract_vgg_means(sample), sample.roi, sample.age, 'BGR'))
+            processing.append(self._subtract_vgg_means(sample))
         return processing
