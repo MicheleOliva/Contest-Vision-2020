@@ -32,7 +32,7 @@ class DataGenerator(tensorflow.keras.utils.Sequence):
     # curr_batch è il numero del batch per il quale ci stanno chiedendo i sample
     def __getitem__(self, curr_batch):
         # x_batch and y_batch cannot be numpy arrays since images do not have the same size
-        x_batch,y_batch = self.data_loader.load_batch()
+        x_batch,y_batch = self.data_loader.load_batch(curr_batch)
 
         if self.data_augmenter is not None:
             self.data_augmenter.apply_augmentation(x_batch)
