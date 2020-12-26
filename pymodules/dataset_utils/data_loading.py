@@ -1,7 +1,7 @@
 import pandas as pd
 import random
 import cv2
-#from data_sample import AgeEstimationSample, FaceSample
+from data_sample import AgeEstimationSample, FaceSample
 import numpy as np
 
 
@@ -135,8 +135,9 @@ class CustomDataLoader():
         ids_end = ((self.batch_index+1)*self.batch_size)%num_identities # identities' batch end
         # Manage the indetities array in a circular manner
         batch_identities = self.identities[ids_start:ids_end] if ids_start < ids_end else self.identities[ids_start:].append(self.identities[:ids_end])
-        samples_batch = []
-        labels_batch = []
+        #samples_batch = []
+        #labels_batch = []
+        batch = []
         for identity in batch_identities:
             identity_data = self.groundtruth_metadata[identity]
             # if there are images available for that identity
@@ -144,9 +145,16 @@ class CustomDataLoader():
                 # read the image and the necessary metadata
                 img_info = identity_data['metadata'][identity_data['index']]
                 img = cv2.imread(self.dataset_root_path+img_info['path']) # watch out for slashes (/)
-                #batch.append(AgeEstimationSample(img, img_info['roi'], img_info['age'], 'BGR')) # cv2 reads as BGR
-                samples_batch.append(img)
-                labels_batch.append(img_info['age'])
+                # if OpenCV is unable to read an image, it returns None
+                if img is None:
+                    # increase the index, in order to avoid this path when building subsequent batches with this identity
+                    identity_data['index'] += 1
+                    # sample another image from another identity to replace this one in the batch
+                    num_ids_to_resample += 1
+                    continue
+                batch.append(AgeEstimationSample(img, img_info['roi'], img_info['age'], 'BGR')) # cv2 reads as BGR
+                #samples_batch.append(img)
+                #labels_batch.append(img_info['age'])
                 # increase the index, because another sample for that identity has been used
                 identity_data['index'] += 1
             else:
@@ -164,14 +172,21 @@ class CustomDataLoader():
                 # read the image and the necessary metadata
                 img_info = identity_data['metadata'][identity_data['index']]
                 img = cv2.imread(self.dataset_root_path+img_info['path']) # watch out for slashes (/)
-                #batch.append(AgeEstimationSample(img, img_info['roi'], img_info['age'], 'BGR')) # cv2 reads as BGR
-                samples_batch.append(img)
-                labels_batch.append(img_info['age'])
+                # if the path does not exist or there are problems while reading the image
+                if img is None:
+                    # increase the index, in order to avoid this path when building subsequent batches with this identity
+                    identity_data['index'] += 1
+                    continue
+                batch.append(AgeEstimationSample(img, img_info['roi'], img_info['age'], 'BGR')) # cv2 reads as BGR
+                #samples_batch.append(img)
+                #labels_batch.append(img_info['age'])
                 num_ids_to_resample -= 1
                 identity_data['index'] += 1
             ids_end = (ids_end+1%num_identities)
             
-        return samples_batch, labels_batch
+        # cannot return numpy arrays since images in batch have different sizes
+        #return samples_batch, labels_batch
+        return batch
 
     def _yield_testing(self):
         raise NotImplementedError('Data loader for testing data is not implemented yet')
