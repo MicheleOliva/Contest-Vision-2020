@@ -1,0 +1,1 @@
+Seguire [questa](https://stackoverflow.com/questions/62240721/keras-evaluate-the-validation-data-before-the-epoch-ends) struttura per creare una callback custom, utilizzando [questi](https://www.tensorflow.org/tensorboard/scalars_and_keras) strumenti per scrivere i dati in formato "leggibile" da tensorboard.
