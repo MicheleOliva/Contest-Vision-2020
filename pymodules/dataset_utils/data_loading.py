@@ -171,7 +171,7 @@ class CustomDataLoader():
                 identity_data['index'] += 1
             ids_end = (ids_end+1%num_identities)
             
-        return np.array(samples_batch), np.array(labels_batch)
+        return samples_batch, labels_batch
 
     def _yield_testing(self):
         raise NotImplementedError('Data loader for testing data is not implemented yet')

@@ -1,3 +1,5 @@
+import numpy as np
+
 class CustomPreprocessor():
     def __init__(self):
         pass
@@ -50,5 +52,5 @@ class CustomPreprocessor():
     def apply_preprocessing(self, data):
         processing = []
         for datasample in data:
-            processing.append(post_augmentation(datasample))
+            processing.append(self.post_augmentation(datasample))
         return processing

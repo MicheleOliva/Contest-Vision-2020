@@ -31,7 +31,7 @@ class DataGenerator(tensorflow.keras.utils.Sequence):
     # Consider putting a lock as a class member and using it when modifying indexes (useful with multi-threading)
     # curr_batch è il numero del batch per il quale ci stanno chiedendo i sample
     def __getitem__(self, curr_batch):
-        # x_batch and y_batch are numpy arrays
+        # x_batch and y_batch cannot be numpy arrays since images do not have the same size
         x_batch,y_batch = self.data_loader.load_batch()
 
         if self.data_augmenter is not None:
