@@ -74,7 +74,7 @@ class CustomPreprocessor():
         processing = []
         for sample, roi in zip(data, rois):
             roi_list = [roi['upper_left_x'], roi['upper_left_y'], roi['width'], roi['height']]
-            processing.append(self.cut(sample.img, roi_list))
+            processing.append(self.cut(sample, roi_list))
         return processing
 
     def post_augmentation(self, data):
