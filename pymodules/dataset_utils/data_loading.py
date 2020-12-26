@@ -133,7 +133,12 @@ class CustomDataLoader():
         ids_start = (batch_index*self.batch_size)%num_identities # identities' batch start
         ids_end = ((batch_index+1)*self.batch_size)%num_identities # identities' batch end
         # Manage the indetities array in a circular manner
-        batch_identities = self.identities[ids_start:ids_end] if ids_start < ids_end else self.identities[ids_start:].append(self.identities[:ids_end])
+        #batch_identities = self.identities[ids_start:ids_end] if ids_start < ids_end else self.identities[ids_start:].append(self.identities[:ids_end])
+        if ids_start < ids_end:
+            batch_identities = self.identities[ids_start:ids_end]
+        else:
+            batch_identities = self.identities[ids_start:]
+            batch_identities.extend(self.identities[:ids_end])
         samples_batch = []
         labels_batch = []
         roi_batch = []
