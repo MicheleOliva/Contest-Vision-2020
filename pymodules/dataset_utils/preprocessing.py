@@ -10,7 +10,7 @@ class CustomPreprocessor():
             outim[:,:,i] = (inp[:,:,i] - means[i])
         return outim
     
-    def _augment_roi(self, roi, aug_factor):
+    '''def _augment_roi(self, roi, aug_factor):
         aug_roi = []
         w = roi[2]
         h = roi[3]
@@ -26,8 +26,9 @@ class CustomPreprocessor():
 
     def pre_augmentation(self, img, roi):
         aug_roi = self._augment_roi(roi, 1.3)
-        img = img[aug_roi[1]:aug_roi[1]+aug_roi[3], aug_roi[0]:aug_roi[0]+aug_roi[2]]
-        return img
+        img = img[aug_roi[1]:np.min([aug_roi[1]+aug_roi[3], img.shape[0]]),
+                  aug_roi[0]:np.min([aug_roi[0]+aug_roi[2], img.shape[1]])]
+        return img'''
     
     def post_augmentation(self, data):
         
@@ -41,10 +42,13 @@ class CustomPreprocessor():
         
         if (len(outimg.shape)<3 or outimg.shape[2]<3):
             outimg = np.repeat(np.squeeze(outimg)[:,:,None], 3, axis=2)
-        
+        np.clip(outimg, 0, 255, out = outimg)
         return outimg
 
 
     # data is an array (batch)
     def apply_preprocessing(self, data):
-        pass
+        processing = []
+        for datasample in data:
+            processing.append(post_augmentation(datasample))
+        return processing

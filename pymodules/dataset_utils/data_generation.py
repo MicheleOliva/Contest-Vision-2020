@@ -34,11 +34,11 @@ class DataGenerator(tensorflow.keras.utils.Sequence):
         # x_batch and y_batch are numpy arrays
         x_batch,y_batch = self.data_loader.load_batch()
 
-        if self.preprocessor is not None:
-            self.preprocessor.apply_preprocessing(x_batch)
-
         if self.data_augmenter is not None:
             self.data_augmenter.apply_augmentation(x_batch)
+
+        if self.preprocessor is not None:
+            x_batch = self.preprocessor.apply_preprocessing(x_batch)
 
         if self.mode != 'testing':
             if self.output_encoder is not None:

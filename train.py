@@ -10,7 +10,7 @@ from keras.utils import plot_model
 from keras.losses import MeanSquaredError
 from keras.optimizers import Adam
 from keras.metrics import MeanAbsoluteError
-from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger, ReduceLROnPlateau
+from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger, ReduceLROnPlateau, TensorBoard
 
 
 # Creazione del modello
@@ -67,9 +67,10 @@ initial_epoch = 0
 MODEL_NAME = f"MNV3L_{input_shape[0]}x{input_shape[1]}_c{classes}_a{alpha}_{weights}"
 datetime = datetime.today().strftime('%Y%m%d_%H%M%S')
 dirnm = f"{datetime}_{MODEL_NAME}"
-if not os.path.isdir(dirnm): os.mkdir(dirnm)
 path = os.path.join(".", dirnm)
-
+if not os.path.isdir(path): os.mkdir(path)
+logdir = os.path.join(path, "tensorboard")
+if not os.path.isdir(logdir): os.mkdir(logdir)
 
 ## Callbacks
 min_delta = 0.1 # Quanto deve scendere il mae per esser considerato migliorato
@@ -103,6 +104,9 @@ model_checkpoint = ModelCheckpoint(path,
                                    monitor=monitor, 
                                    mode=mode)
 
+tensorboard = keras.callbacks.TensorBoard(log_dir=logdir, 
+                                          write_graph=True, 
+                                          write_images=True)
 
 ## Actual training
 history = model.fit_generator(train_generator, 
@@ -112,7 +116,8 @@ history = model.fit_generator(train_generator,
                               callbacks=[model_checkpoint, 
                                          early_stopping, 
                                          logger, 
-                                         reduce_lr_plateau])
+                                         reduce_lr_plateau,
+                                         tensorboard])
 
 
 ## Saving history
