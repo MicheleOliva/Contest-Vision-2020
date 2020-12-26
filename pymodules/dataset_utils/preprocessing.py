@@ -1,11 +1,12 @@
 import numpy as np
+import cv2
 from data_sample import AgeEstimationSample
 
 VGGFACE2_MEANS = np.array([91.4953, 103.8827, 131.0912])
 
 class CustomPreprocessor():
-    def __init__(self):
-        pass
+    def __init__(self, desired_shape=(224, 224)):
+        self.desired_shape = desired_shape
     
     def _mean_std_normalize(self, inp, means):
         assert(len(inp.shape)>=3)
@@ -40,6 +41,33 @@ class CustomPreprocessor():
     
     def _subtract_vgg_means(self, data):
         return data - VGGFACE2_MEANS
+    
+    def _resize(self, sample):
+        # Ci prendiamo le dimensioni attuali e quelle desiderate
+        h, w = sample.shape[:2]
+        dh, dw = self.desired_shape
+        sample = sample.astype(dtype=np.uint8)
+        
+        # Scegliamo un metodo di interpolazione
+        if h > dh or w > dw: # Downscaling
+            interpolation = cv2.INTER_AREA
+        else: # Upscaling
+            interpolation = cv2.INTER_CUBIC
+        
+        # Creiamo un quadrato nero in cui applichiamo l'immagine
+        max_dim = max(h, w)
+        padded = np.zeros(shape=(max_dim, max_dim, 3), dtype=np.uint8)
+        offset_h = int((max_dim - h)/2)
+        offset_w = int((max_dim - w)/2)
+        padded[offset_h:offset_h + h, offset_w:offset_w + w, :] = sample
+
+        # Restituiamo il resize dell'immagine paddata
+        return cv2.resize(padded, dsize=self.desired_shape, interpolation=interpolation).astype(np.float32)
+
+
+    def _bgr_to_rgb(self, sample):
+        return np.flip(sample, 2)
+
 
     # data is an array (batch)
     def pre_augmentation(self, data, rois):
@@ -52,5 +80,8 @@ class CustomPreprocessor():
     def post_augmentation(self, data):
         processing = []
         for sample in data:
-            processing.append(self._subtract_vgg_means(sample))
+            sample = self._resize(sample)
+            sample = self._subtract_vgg_means(sample)
+            sample = self._bgr_to_rgb(sample)
+            processing.append(sample)
         return processing
