@@ -1,10 +1,7 @@
 import os
 import pickle
 from datetime import datetime
-import tensorflow as tf
 from tensorflow.keras.applications import MobileNetV3Large
-from tensorflow.keras.layers import Input
-from tensorflow.keras.applications.mobilenet_v3 import preprocess_input
 from keras import Model, Sequential
 from keras.utils import plot_model
 from keras.losses import MeanSquaredError
@@ -23,13 +20,7 @@ alpha = 1.0
 m1 = MobileNetV3Large(input_shape=input_shape, alpha=alpha, weights=weights, include_top=False)
 m2 = MobileNetV3Large(input_shape=input_shape, alpha=alpha, classes=classes, weights=None, classifier_activation=classifier_activation)
 
-i = Input([None, None, 3], dtype = tf.uint8)
-x = tf.cast(i, tf.float32)
-x = preprocess_input(x)
-preprocess = Model(inputs=[i], outputs=[x], name="preprocessing")
-
 model = Sequential()
-model.add(preprocess)
 model.add(m1)
 for i in range(-6, 0):
   layer = m2.get_layer(index=i)
@@ -104,9 +95,9 @@ model_checkpoint = ModelCheckpoint(path,
                                    monitor=monitor, 
                                    mode=mode)
 
-tensorboard = keras.callbacks.TensorBoard(log_dir=logdir, 
-                                          write_graph=True, 
-                                          write_images=True)
+tensorboard = TensorBoard(log_dir=logdir, 
+                          write_graph=True, 
+                          write_images=True)
 
 ## Actual training
 history = model.fit_generator(train_generator, 
