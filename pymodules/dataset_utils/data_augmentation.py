@@ -30,10 +30,10 @@ class CustomAugmenter():
             # Set severity for corruptions that require her
             severity = None
             if corruptions_list[corruption_index] == gaussian_noise:
-                severity = random.uniform(0.08, 0.30)
+                severity = random.uniform(0.08, 0.15)
 
             elif corruptions_list[corruption_index] == random_crop:
-                severity = random.uniform(0.1, 0.3)
+                severity = random.uniform(0.1, 0.4)
 
             elif corruptions_list[corruption_index] == brightness:
                 severity = random.uniform(0.1, 0.5)
@@ -47,7 +47,7 @@ class CustomAugmenter():
                     severity = random.uniform(0.1, 0.4)
 
             elif corruptions_list[corruption_index] == gaussian_blur:
-                severity = random.uniform(1.0, 4.0)
+                severity = random.uniform(1.0, 2.5)
 
             elif corruptions_list[corruption_index] == spatter:
                 severity = random.randint(1,5)
