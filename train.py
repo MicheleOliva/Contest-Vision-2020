@@ -95,11 +95,11 @@ logdir = os.path.join(path, "tensorboard")
 if not os.path.isdir(logdir): os.mkdir(logdir)
 
 ## Callbacks
-min_delta = 0.1 # Quanto deve scendere il mae per esser considerato migliorato
+min_delta = 0.01 # Quanto deve scendere il mae per esser considerato migliorato
 monitor = 'mae' # CONTROLLARE SE QUESTO NOME VA BENE!!!
 mode = 'auto' # Controllare che funzioni, ossia il mae deve scendere per essere considerato migliorato
 factor = 0.2 # lr = lr * factor
-patience_lr = 2 # Cambiare in base alla lunghezza dell'epoca
+patience_lr = 5 # Cambiare in base alla lunghezza dell'epoca
 patience_stop = 5
 
 logger = CSVLogger(os.path.join(path, "training_log.csv"), append=False)
@@ -136,17 +136,15 @@ history = model.fit_generator(train_generator,
                               initial_epoch=initial_epoch,
                               epochs=training_epochs, 
                               callbacks=[model_checkpoint, 
-                                         early_stopping, 
                                          logger, 
                                          reduce_lr_plateau,
                                          tensorboard])
 
 
-## Saving history
-with open(os.path.join(path, "training_history"), 'wb') as f:
-  print("Saving history.")
-  pickle.dump(history, f)
-
-
 ## Saving last model
 model.save(os.path.join(path, f"{dirnm}_final"))
+
+## Saving history
+with open(os.path.join(path, "training_history"), 'wb') as history_file:
+  print("Saving history.")
+  pickle.dump(history, history_file)
