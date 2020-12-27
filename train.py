@@ -1,5 +1,7 @@
 import os
 import pickle
+import sys
+sys.path.insert(0, "./pymodules/dataset_utils")
 from datetime import datetime
 from tensorflow.keras.applications import MobileNetV3Large
 from keras import Model, Sequential
@@ -8,6 +10,11 @@ from keras.losses import MeanSquaredError
 from keras.optimizers import Adam
 from keras.metrics import MeanAbsoluteError
 from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger, ReduceLROnPlateau, TensorBoard
+from data_augmentation import CustomAugmenter
+from data_generation import DataGenerator
+from data_loading import CustomDataLoader
+from output_encoding import CustomOutputEncoder
+from preprocessing import CustomPreprocessor
 
 
 # Creazione del modello
@@ -43,14 +50,39 @@ model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
 # Training
 
 ## Generatori
-train_generator = None
-eval_generator = None
-test_generator = None
+
+### Training
+train_csv_path = '' # METTI DUMP .cache
+train_dataset_root_path = ''
+train_batch_size = 32
+train_epoch_mode = 'identities' # Len del generator è il numero di identities
+corruptions_prob = 0.5
+frequent_corruptions_prob = 0.5
+
+train_preprocessor = CustomPreprocessor(desired_shape=(96, 96))
+train_augmenter = CustomAugmenter(corruptions_prob, frequent_corruptions_prob)
+train_encoder = CustomOutputEncoder()
+train_loader = CustomDataLoader(mode='training', csv_path=train_csv_path, csv_names=None, dataset_root_path=train_dataset_root_path, batch_size=train_batch_size)
+
+train_generator = DataGenerator(mode='training', preprocessor=train_preprocessor, data_augmenter=train_augmenter, output_encoder=train_encoder, data_loader=train_loader, batch_size=train_batch_size, epoch_mode=train_epoch_mode)
+
+
+### Evaluation
+eval_csv_path = '' # METTI DUMP .cache
+eval_dataset_root_path = ''
+eval_batch_size = 1
+eval_epoch_mode = 'identities' # Len del generator è il numero di identities
+
+eval_preprocessor = CustomPreprocessor(desired_shape=(96, 96))
+eval_encoder = CustomOutputEncoder()
+eval_loader = CustomDataLoader(mode='validation', csv_path=eval_csv_path, csv_names=None, dataset_root_path=eval_dataset_root_path, batch_size=eval_batch_size)
+
+eval_generator = DataGenerator(mode='validation', preprocessor=eval_preprocessor, data_augmenter=None, output_encoder=eval_encoder, data_loader=eval_loader, batch_size=eval_batch_size, epoch_mode=eval_epoch_mode)
 
 
 ## Parametri di training 
 batch_size = 24
-training_epochs = 100
+training_epochs = 10000
 initial_epoch = 0
 
 
