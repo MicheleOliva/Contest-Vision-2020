@@ -1,7 +1,7 @@
 import os
 import pickle
 import sys
-sys.path.insert(0, "./pymodules/dataset_utils")
+sys.path.insert(0, "/content/Contest-Vision-2020/pymodules/dataset_utils")
 from datetime import datetime
 from tensorflow.keras.applications import MobileNetV3Large
 from keras import Model, Sequential
@@ -52,8 +52,8 @@ model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
 ## Generatori
 
 ### Training
-train_csv_path = '' # METTI DUMP .cache
-train_dataset_root_path = ''
+train_csv_path = '/content/drive/Shareddrives/Progettone/Age Estimation/caches/train_cvs.cache' # METTI DUMP .cache
+train_dataset_root_path = '/content/train'
 train_batch_size = 32
 train_epoch_mode = 'identities' # Len del generator è il numero di identities
 corruptions_prob = 0.5
@@ -68,8 +68,8 @@ train_generator = DataGenerator(mode='training', preprocessor=train_preprocessor
 
 
 ### Evaluation
-eval_csv_path = '' # METTI DUMP .cache
-eval_dataset_root_path = ''
+eval_csv_path = '/content/drive/Shareddrives/Progettone/Age Estimation/caches/eval_csv.cache' # METTI DUMP .cache
+eval_dataset_root_path = '/content/eval'
 eval_batch_size = 1
 eval_epoch_mode = 'identities' # Len del generator è il numero di identities
 
@@ -80,8 +80,7 @@ eval_loader = CustomDataLoader(mode='validation', csv_path=eval_csv_path, csv_na
 eval_generator = DataGenerator(mode='validation', preprocessor=eval_preprocessor, data_augmenter=None, output_encoder=eval_encoder, data_loader=eval_loader, batch_size=eval_batch_size, epoch_mode=eval_epoch_mode)
 
 
-## Parametri di training 
-batch_size = 24
+## Parametri di training
 training_epochs = 10000
 initial_epoch = 0
 
