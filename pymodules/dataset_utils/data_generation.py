@@ -12,7 +12,7 @@ import numpy as np
 """
 class DataGenerator(tensorflow.keras.utils.Sequence):
 
-    def __init__(self, mode, preprocessor: CustomPreprocessor, data_augmenter: CustomAugmenter, output_encoder: CustomOutputEncoder, data_loader: CustomDataLoader, batch_size):
+    def __init__(self, mode, preprocessor: CustomPreprocessor, data_augmenter: CustomAugmenter, output_encoder: CustomOutputEncoder, data_loader: CustomDataLoader, batch_size, epoch_mode = 'full'):
         if data_loader is None or batch_size is None:
             raise TypeError('Data generator needs data loader and batch size to be specified')
 
@@ -20,7 +20,12 @@ class DataGenerator(tensorflow.keras.utils.Sequence):
         if mode is None or mode not in self.allowed_modes:
             raise TypeError("'mode' must be one of ['training', 'validation', 'testing']")
 
+        self.allowed_epoch_modes = ['full', 'identities']
+        if epoch_mode is None or epoch_mode not in self.allowed_epoch_modes:
+            raise TypeError("'epoch_mode' must be one of ['full', 'identities']")
+
         self.mode = mode
+        self.epoch_mode = epoch_mode
         self.preprocessor = preprocessor
         self.data_augmenter = data_augmenter
         self.output_encoder = output_encoder
@@ -28,7 +33,11 @@ class DataGenerator(tensorflow.keras.utils.Sequence):
         self.batch_size = batch_size
     
     def __len__(self):
-        return floor(self.data_loader.get_num_samples()/self.batch_size)
+        if self.epoch_mode == 'full':
+            return floor(self.data_loader.get_num_samples()/self.batch_size)
+        else:
+            # 'epoch_mode' is 'identities':
+            return floor(self.data_loader.get_num_identities()/self.batch_size)
 
     # Consider putting a lock as a class member and using it when modifying indexes (useful with multi-threading)
     # curr_batch è il numero del batch per il quale ci stanno chiedendo i sample
