@@ -67,7 +67,7 @@ class CustomDataLoader():
             # Assumes that the cache contains a list of all the identities, a dictionary containing metadata about those identities and the number of samples contained in the cache.
             # The dictionary must have the same format as the 'groundtruth_metadata' dictionary that is built below.
             # dati che mi servono: identities, groundtruth_metadata, num_samples
-            with open(csv_path, 'r') as cache_file:
+            with open(csv_path, 'rb') as cache_file:
                 cache = pickle.load(cache_file)
             self.identities = cache['identities']
             self.groundtruth_metadata = cache['groundtruth_metadata']
