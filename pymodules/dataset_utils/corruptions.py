@@ -80,9 +80,11 @@ def skew(img):
     """Warps the image img in the 3-dimensional space randomly."""
     s = _random_normal_crop(2, 0.1, positive=True)
     M=np.array( [ [1,s[0],1], [s[1],1,1]] )
+    img = img.astype(np.uint8)
     nimg = cv2.warpAffine(img, M, dsize=img.shape[0:2])
     if len(nimg.shape)<3:
         nimg = nimg[:,:,np.newaxis]
+    nimg = nimg.astype(np.float32)
     return nimg #.reshape(img.shape)
 
 def spatter(x, severity=1):
