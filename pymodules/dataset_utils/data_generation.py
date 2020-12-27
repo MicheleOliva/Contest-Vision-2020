@@ -37,7 +37,7 @@ class DataGenerator(tensorflow.keras.utils.Sequence):
             return floor(self.data_loader.get_num_samples()/self.batch_size)
         else:
             # 'epoch_mode' is 'identities':
-            return floor(self.data_loader.get_num_identities()/self.batch_size)
+            return floor(min(self.data_loader.get_num_identities()*50, self.data_loader.get_num_samples())/self.batch_size)
 
     # Consider putting a lock as a class member and using it when modifying indexes (useful with multi-threading)
     # curr_batch è il numero del batch per il quale ci stanno chiedendo i sample
