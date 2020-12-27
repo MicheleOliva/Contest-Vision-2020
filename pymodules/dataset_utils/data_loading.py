@@ -67,7 +67,8 @@ class CustomDataLoader():
             # Assumes that the cache contains a list of all the identities, a dictionary containing metadata about those identities and the number of samples contained in the cache.
             # The dictionary must have the same format as the 'groundtruth_metadata' dictionary that is built below.
             # dati che mi servono: identities, groundtruth_metadata, num_samples
-            cache = pickle.load(csv_path)
+            with open(csv_path, 'r') as cache_file:
+                cache = pickle.load(cache_file)
             self.identities = cache['identities']
             self.groundtruth_metadata = cache['groundtruth_metadata']
             self.num_samples = cache['num_samples']
@@ -175,7 +176,8 @@ class CustomDataLoader():
             if identity_data['index'] < len(identity_data['metadata'])-1:
                 # read the image and the necessary metadata
                 img_info = identity_data['metadata'][identity_data['index']]
-                img = cv2.imread(self.dataset_root_path+img_info['path']) # watch out for slashes (/)
+                img_path = os.path.join(self.dataset_root_path, img_info['path'])
+                img = cv2.imread(img_path) # watch out for slashes (/)
                 # if OpenCV is unable to read an image, it returns None
                 if img is None:
                     print('[DATA LOADER ERROR] cannot find image at path: ', self.dataset_root_path+img_info['path'])
@@ -205,7 +207,8 @@ class CustomDataLoader():
             if identity_data['index'] < len(identity_data['metadata'])-1:
                 # read the image and the necessary metadata
                 img_info = identity_data['metadata'][identity_data['index']]
-                img = cv2.imread(self.dataset_root_path+img_info['path']) # watch out for slashes (/)
+                img_path = os.path.join(self.dataset_root_path, img_info['path'])
+                img = cv2.imread(img_path) # watch out for slashes (/)
                 # if the path does not exist or there are problems while reading the image
                 if img is None:
                     print('[DATA LOADER ERROR] cannot find image at path: ', self.dataset_root_path+img_info['path'])
