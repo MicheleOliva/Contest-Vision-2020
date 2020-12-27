@@ -9,7 +9,7 @@ import numpy as np
 from google.colab.patches import cv2_imshow
 
 mode = 'training'
-csv_path = ''
+csv_path = '' # METTI DUMP .cache
 csv_names = ''
 dataset_root_path = ''
 batch_size = 1
@@ -20,7 +20,7 @@ augmenter = CustomAugmenter(0.5, 0.5)
 encoder = CustomOutputEncoder()
 loader = CustomDataLoader(mode=mode, csv_path=csv_path, csv_names=csv_names, dataset_root_path=dataset_root_path, batch_size=batch_size, csv_sep=csv_sep)
 
-generator = DataGenerator(mode=mode, preprocessor=preprocessor, data_augmenter=augmenter, output_encoder=encoder, data_loader=loader, batch_size=batch_size)
+generator = DataGenerator(mode=mode, preprocessor=preprocessor, data_augmenter=augmenter, output_encoder=encoder, data_loader=loader, batch_size=batch_size, epoch_mode='full')
 
 VGGFACE2_MEANS = np.array([91.4953, 103.8827, 131.0912]) #BGR
 
