@@ -3,6 +3,8 @@ import random
 import cv2
 #from data_sample import AgeEstimationSample, FaceSample
 import numpy as np
+import pickle
+import os
 
 
 """
@@ -58,35 +60,60 @@ class CustomDataLoader():
     
     def _init_train_valid(self, csv_path, csv_sep, csv_names):
         # load groundtruth
-        # Assumes for the provided csv the following structure:
-        # Path, ID, Gender, Age, x_min(roi_origin_x), y_min(roi_origin_y), width(roi_width), height(roi_height)
-        groundtruth = pd.read_csv(csv_path, sep=csv_sep, names=csv_names)
+        # last element following a dot is file's extension
         print('Loading data...')            
-        # for each groundtruth row
-        for gt_sample in groundtruth.iterrows():
-            identity = gt_sample[1]["ID"]
-            # this iteration is over all of the elements in groundtruth, so the same id can be encountered multiple times (same id associated to multiple images)
-            if identity not in self.identities:
-                self.identities.append(identity)
-            # load identity's metadata
-            id_data = {
-                'age': gt_sample[1]["Age"],
-                'roi': {
-                    'upper_left_x': gt_sample[1]["x_min"],
-                    'upper_left_y': gt_sample[1]["y_min"],
-                    'width': gt_sample[1]["width"],
-                    'height': gt_sample[1]["height"]
-                },
-                'path': gt_sample[1]["Path"]
-            }
-            if identity not in self.groundtruth_metadata.keys():
-                self.groundtruth_metadata[identity] = {
-                    'index': 0,
-                    'metadata': []
+        if csv_path.split('.')[-1] == 'cache':
+            # load cache
+            # Assumes that the cache contains a list of all the identities, a dictionary containing metadata about those identities and the number of samples contained in the cache.
+            # The dictionary must have the same format as the 'groundtruth_metadata' dictionary that is built below.
+            # dati che mi servono: identities, groundtruth_metadata, num_samples
+            cache = pickle.load(csv_path)
+            self.identities = cache['identities']
+            self.groundtruth_metadata = cache['groundtruth_metadata']
+            self.num_samples = cache['num_samples']
+        else:
+            # Assumes for the provided csv the following structure:
+            # Path, ID, Gender, Age, x_min(roi_origin_x), y_min(roi_origin_y), width(roi_width), height(roi_height)
+            groundtruth = pd.read_csv(csv_path, sep=csv_sep, names=csv_names)
+            # for each groundtruth row
+            for gt_sample in groundtruth.iterrows():
+                identity = gt_sample[1]["ID"]
+                # this iteration is over all of the elements in groundtruth, so the same id can be encountered multiple times (same id associated to multiple images)
+                if identity not in self.identities:
+                    self.identities.append(identity)
+                # load identity's metadata
+                id_data = {
+                    'age': gt_sample[1]["Age"],
+                    'roi': {
+                        'upper_left_x': gt_sample[1]["x_min"],
+                        'upper_left_y': gt_sample[1]["y_min"],
+                        'width': gt_sample[1]["width"],
+                        'height': gt_sample[1]["height"]
+                    },
+                    'path': gt_sample[1]["Path"]
                 }
-            # the other elements in the list associated to an identity are metadata 
-            self.groundtruth_metadata[identity]['metadata'].append(id_data)
-            self.num_samples += 1    
+                if identity not in self.groundtruth_metadata.keys():
+                    self.groundtruth_metadata[identity] = {
+                        'index': 0,
+                        'metadata': []
+                    }
+                # the other elements in the list associated to an identity are metadata 
+                self.groundtruth_metadata[identity]['metadata'].append(id_data)
+                self.num_samples += 1
+            # Dump loaded data to cache
+            # Split csv path in directory path and filename
+            (csv_dir, csv_name) = os.path.split(csv_path)
+            # Create a name for cache file with the same name as csv file but different extension
+            cache_name = csv_name.split('.')[0]+'.cache'
+            # Create a path pointing to the new cache file, locating it in the same directory as the csv file
+            cache_path = os.path.join(csv_dir, cache_name)
+            # Write relevant data to file
+            with open(cache_path, 'wb') as cache_out_file:
+                out_dict = {}
+                out_dict['identities'] = self.identities
+                out_dict['groundtruth_metadata'] = self.groundtruth_metadata
+                out_dict['num_samples'] = self.num_samples
+                pickle.dump(out_dict, cache_out_file)   
         print('Finished loading data!')
         if self.mode == 'training':
             self._shuffle()
@@ -205,6 +232,9 @@ class CustomDataLoader():
 
     def get_num_samples(self):
         return self.num_samples
+
+    def get_num_identities(self):
+        return len(self.identities)
 
     def epoch_ended(self):
         # if not really ended:
