@@ -180,7 +180,7 @@ class CustomDataLoader():
                 img = cv2.imread(img_path) # watch out for slashes (/)
                 # if OpenCV is unable to read an image, it returns None
                 if img is None:
-                    print('[DATA LOADER ERROR] cannot find image at path: ', self.dataset_root_path+img_info['path'])
+                    print('[DATA LOADER ERROR] cannot find image at path: ', img_path)
                     # increase the index, in order to avoid this path when building subsequent batches with this identity
                     identity_data['index'] += 1
                     # sample another image from another identity to replace this one in the batch
@@ -211,7 +211,7 @@ class CustomDataLoader():
                 img = cv2.imread(img_path) # watch out for slashes (/)
                 # if the path does not exist or there are problems while reading the image
                 if img is None:
-                    print('[DATA LOADER ERROR] cannot find image at path: ', self.dataset_root_path+img_info['path'])
+                    print('[DATA LOADER ERROR] cannot find image at path: ', img_path)
                     # increase the index, in order to avoid this path when building subsequent batches with this identity
                     identity_data['index'] += 1
                     continue
@@ -231,8 +231,38 @@ class CustomDataLoader():
         #return batch
 
     def _yield_testing(self, batch_index):
-        raise NotImplementedError('Data loader for testing data is not implemented yet')
-
+        #raise NotImplementedError('Data loader for testing data is not implemented yet')
+        samples_start = batch_index % self.num_samples
+        samples_end = (batch_index+1) % self.num_samples
+        batch_samples = self.test_data[samples_start:samples_end]
+        images = []
+        rois = []
+        for sample in batch_samples:
+            # 'sample' has this structure:
+            # {path: {
+            #    'roi_origin_x': test_sample[1]['roi_origin_x'],
+            #    'roi_origin_y': test_sample[1]['roi_origin_y'],
+            #    'roi_width': test_sample[1]['roi_width'],
+            #    'roi_height': test_sample[1]['roi_height'] 
+            #   }      
+            # }
+            img_path = os.path.join(self.dataset_root_path, sample.keys()[0])
+            img = cv2.imread(img_path) # watch out for slashes (/)
+            # if the path does not exist or there are problems while reading the image
+            if img is None:
+                print('[DATA LOADER ERROR] cannot find image at path: ', img_path)
+                continue
+            roi = {
+                'upper_left_x': sample.values()[0]['roi_origin_x'],
+                'upper_left_y': sample.values()[0]['roi_origin_y'],
+                'width': sample.values()[0]['roi_width'],
+                'height': sample.values()[0]['roi_height']
+            }
+            images.append(img)
+            rois.append(roi)
+        return images, rois
+            
+            
     def get_num_samples(self):
         return self.num_samples
 
