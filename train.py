@@ -121,7 +121,7 @@ early_stopping = EarlyStopping(patience=patience_stop,
                                mode=mode, 
                                min_delta=min_delta)
 
-model_checkpoint = ModelCheckpoint(path, 
+model_checkpoint = ModelCheckpoint(checkpoint_path, 
                                    verbose=1, 
                                    save_weights_only=False,
                                    save_best_only=True, 
