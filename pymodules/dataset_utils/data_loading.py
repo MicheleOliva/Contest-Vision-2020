@@ -291,5 +291,7 @@ class CustomDataLoader():
         print('Finished shuffling data!')
     
     def _reinit_indexes(self):
+        print('Reinitializing indexes...')
         for identity in self.groundtruth_metadata.keys():
             self.groundtruth_metadata[identity]['index'] = 0
+        print('Indexes reinitialized!')
