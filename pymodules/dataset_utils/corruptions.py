@@ -6,7 +6,11 @@ from skimage.filters import gaussian
 import random
 import skimage as sk
 import cv2
+from scipy import ndimage
 
+
+def rotation(image, degrees):
+    return ndimage.rotate(image, degrees, reshape=False) # no reshape reduces the area that is padded to zero
 
 def gaussian_noise(x, c):
     """Adds gaussian noise to the image x with scale c.
