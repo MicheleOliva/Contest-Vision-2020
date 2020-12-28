@@ -224,7 +224,7 @@ class CustomDataLoader():
                 num_ids_to_resample -= 1
                 identity_data['index'] += 1
                 
-            ids_end = (ids_end+1%num_identities)
+            ids_end = ((ids_end+1)%num_identities)
             
         # cannot return numpy arrays since images in batch have different sizes
         return samples_batch, labels_batch, roi_batch
@@ -244,6 +244,8 @@ class CustomDataLoader():
         #   return
         if self.mode == 'training':
             self._shuffle(reinit_indexes=True)
+        elif self.mode == 'validation':
+            self._reinit_indexes()
 
     def _shuffle(self, reinit_indexes = False):
         print('Shuffling data...')
@@ -257,3 +259,7 @@ class CustomDataLoader():
             if reinit_indexes:
                 self.groundtruth_metadata[identity]['index'] = 0
         print('Finished shuffling data!')
+    
+    def _reinit_indexes(self):
+        for identity in self.groundtruth_metadata.keys():
+            self.groundtruth_metadata[identity]['index'] = 0
