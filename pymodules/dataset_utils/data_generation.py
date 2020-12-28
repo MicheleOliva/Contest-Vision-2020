@@ -64,5 +64,5 @@ class DataGenerator(tensorflow.keras.utils.Sequence):
             #return x_batch
     
     def on_epoch_end(self):
-        if self.mode == 'training':
+        if self.mode == 'training' or self.mode == 'validation':
             self.data_loader.epoch_ended()
