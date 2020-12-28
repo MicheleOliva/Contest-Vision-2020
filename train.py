@@ -90,9 +90,14 @@ MODEL_NAME = f"MNV3L_{input_shape[0]}x{input_shape[1]}_c{classes}_a{alpha}_{weig
 datetime = datetime.today().strftime('%Y%m%d_%H%M%S')
 dirnm = f"{datetime}_{MODEL_NAME}"
 path = os.path.join(".", dirnm)
-if not os.path.isdir(path): os.mkdir(path)
+if not os.path.isdir(path): 
+  os.mkdir(path)
+os.chdir(path)
+path = "." 
+
 logdir = os.path.join(path, "tensorboard")
-if not os.path.isdir(logdir): os.mkdir(logdir)
+if not os.path.isdir(logdir): 
+  os.mkdir(logdir)
 
 ## Callbacks
 min_delta = 0.01 # Quanto deve scendere il mae per esser considerato migliorato
