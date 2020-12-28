@@ -57,8 +57,9 @@ if resume:
       print("ERROR: could not find any model.")
       exit(0)
 
+  print(f"Found {last_model}. Loading...")
   model = load_model(last_model, compile=True)
-  initial_epoch = last_model_epochs + 1
+  initial_epoch = last_model_epochs
 
 
 # Se non si riprende il training
