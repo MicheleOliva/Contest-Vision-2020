@@ -96,7 +96,8 @@ if not os.path.isdir(logdir): os.mkdir(logdir)
 
 ## Callbacks
 min_delta = 0.01 # Quanto deve scendere il mae per esser considerato migliorato
-monitor = 'mae' # CONTROLLARE SE QUESTO NOME VA BENE!!!
+checkpoint_monitor = 'val_mae' # Solo per il model_checkpoint
+monitor = 'val_loss'
 mode = 'auto' # Controllare che funzioni, ossia il mae deve scendere per essere considerato migliorato
 factor = 0.2 # lr = lr * factor
 patience_lr = 5 # Cambiare in base alla lunghezza dell'epoca
@@ -123,7 +124,7 @@ model_checkpoint = ModelCheckpoint(path,
                                    verbose=1, 
                                    save_weights_only=False,
                                    save_best_only=True, 
-                                   monitor=monitor, 
+                                   monitor=checkpoint_monitor, 
                                    mode=mode)
 
 tensorboard = TensorBoard(log_dir=logdir, 
@@ -142,7 +143,7 @@ history = model.fit_generator(train_generator,
 
 
 ## Saving last model
-model.save(os.path.join(path, f"{dirnm}_final"))
+model.save(os.path.join(path, f"{dirnm}_final_model"))
 
 ## Saving history
 with open(os.path.join(path, "training_history"), 'wb') as history_file:
