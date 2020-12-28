@@ -6,6 +6,7 @@ from datetime import datetime
 from tensorflow.keras.applications import MobileNetV3Large
 from keras import Model, Sequential
 from keras.utils import plot_model
+from keras.models import load_model
 from keras.losses import MeanSquaredError
 from keras.optimizers import Adam
 from keras.metrics import MeanAbsoluteError
@@ -15,37 +16,80 @@ from data_generation import DataGenerator
 from data_loading import CustomDataLoader
 from output_encoding import CustomOutputEncoder
 from preprocessing import CustomPreprocessor
+import argparse
+import re
+
+# Argomenti da riga di comando
+argparser = argparse.ArgumentParser(description='Starts training in a generated directory. With --resume resumes training from the last saved model in the current working directory.')
+argparser.add_argument('--resume', action='store_true')
+resume = argparser.parse_args().resume
+
+datetime = datetime.today().strftime('%Y%m%d_%H%M%S')
+
+# Modello
+
+# Se si riprende il training
+if resume:
+  print("Resuming training from latest model...")
+  # Cerchiamo il modello più recente in termini di epoche
+  dir = os.listdir()
+
+  regex = re.compile(r"epoch(\d+).*[.]model") 
+
+  last_model = None
+  last_model_epochs = 0
+
+  for fname in dir:
+      match = regex.match(fname)
+      if match is not None and int(match[1]) >= last_model_epochs:
+          last_model = fname
+          last_model_epochs = int(match[1])
+
+  if last_model is None:
+      print("ERROR: could not find any model.")
+      exit(0)
+
+  model = load_model(last_model, compile=True)
+  initial_epoch = last_model_epochs + 1
 
 
-# Creazione del modello
-classifier_activation = 'relu'
-weights = 'imagenet'
-classes = 1
-input_shape = (96, 96, 3)
-alpha = 1.0
+else:
+  ## Creazione del modello
+  print("Creating new model...")
+  classifier_activation = 'relu'
+  weights = 'imagenet'
+  classes = 1
+  input_shape = (96, 96, 3)
+  alpha = 1.0
 
-m1 = MobileNetV3Large(input_shape=input_shape, alpha=alpha, weights=weights, include_top=False)
-m2 = MobileNetV3Large(input_shape=input_shape, alpha=alpha, classes=classes, weights=None, classifier_activation=classifier_activation)
+  m1 = MobileNetV3Large(input_shape=input_shape, alpha=alpha, weights=weights, include_top=False)
+  m2 = MobileNetV3Large(input_shape=input_shape, alpha=alpha, classes=classes, weights=None, classifier_activation=classifier_activation)
 
-model = Sequential()
-model.add(m1)
-for i in range(-6, 0):
-  layer = m2.get_layer(index=i)
-  model.add(layer)
+  model = Sequential()
+  model.add(m1)
+  for i in range(-6, 0):
+    layer = m2.get_layer(index=i)
+    model.add(layer)
 
+  m1 = None
+  m2 = None
+
+  MODEL_NAME = f"MNV3L_{input_shape[0]}x{input_shape[1]}_c{classes}_a{alpha}_{weights}"
+  dirnm = f"{datetime}_{MODEL_NAME}"
+  if not os.path.isdir(dirnm): 
+    os.mkdir(dirnm)
+  os.chdir(dirnm)
+
+  ## Compilazione del modello
+  optimizer = Adam()
+  loss = MeanSquaredError()
+  metrics = [ MeanAbsoluteError(name='mae') ]
+
+  model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
+  initial_epoch = 0
+
+  
 model.summary()
-
-m1 = None
-m2 = None
-
-
-# Compilazione del modello
-optimizer = Adam()
-loss = MeanSquaredError()
-metrics = [ MeanAbsoluteError(name='mae') ]
-
-model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
-
 
 # Training
 
@@ -80,26 +124,13 @@ eval_loader = CustomDataLoader(mode='validation', csv_path=eval_csv_path, csv_na
 eval_generator = DataGenerator(mode='validation', preprocessor=eval_preprocessor, data_augmenter=None, output_encoder=eval_encoder, data_loader=eval_loader, batch_size=eval_batch_size, epoch_mode=eval_epoch_mode)
 
 
-## Parametri di training
-training_epochs = 10000
-initial_epoch = 0
+## Callbacks
 
-
-## Creazione di una cartella
-MODEL_NAME = f"MNV3L_{input_shape[0]}x{input_shape[1]}_c{classes}_a{alpha}_{weights}"
-datetime = datetime.today().strftime('%Y%m%d_%H%M%S')
-dirnm = f"{datetime}_{MODEL_NAME}"
-path = os.path.join(".", dirnm)
-if not os.path.isdir(path): 
-  os.mkdir(path)
-os.chdir(path)
-path = "." 
-
+path = "."
 logdir = os.path.join(path, "tensorboard")
 if not os.path.isdir(logdir): 
   os.mkdir(logdir)
 
-## Callbacks
 min_delta = 0.01 # Quanto deve scendere il mae per esser considerato migliorato
 checkpoint_monitor = 'val_mae' # Solo per il model_checkpoint
 monitor = 'val_loss'
@@ -109,7 +140,13 @@ patience_lr = 5 # Cambiare in base alla lunghezza dell'epoca
 patience_stop = 5
 checkpoint_path = os.path.join(path, "epoch{epoch:02d}_mae{val_mae:.2f}.model")
 
-logger = CSVLogger(os.path.join(path, "training_log.csv"), append=False)
+if os.path.exists("training_log.csv"):
+  append = True
+else:
+  append = False
+
+
+logger = CSVLogger(os.path.join(path, "training_log.csv"), append=append)
 
 reduce_lr_plateau= ReduceLROnPlateau(monitor=monitor, 
                                      factor=factor, 
@@ -138,6 +175,10 @@ tensorboard = TensorBoard(log_dir=logdir,
                           write_images=True)
 
 ## Actual training
+
+## Parametri di training
+training_epochs = 10000
+
 history = model.fit_generator(train_generator, 
                               validation_data=eval_generator, 
                               initial_epoch=initial_epoch,
@@ -149,9 +190,9 @@ history = model.fit_generator(train_generator,
 
 
 ## Saving last model
-model.save(os.path.join(path, f"final.model"))
+model.save(os.path.join(path, f"{datetime}_final.model"))
 
 ## Saving history
-with open(os.path.join(path, "training_history"), 'wb') as history_file:
+with open(os.path.join(path, f"{datetime}_training_history"), 'wb') as history_file:
   print("Saving history.")
   pickle.dump(history, history_file)
