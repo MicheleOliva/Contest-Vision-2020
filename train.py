@@ -102,6 +102,7 @@ mode = 'auto' # Controllare che funzioni, ossia il mae deve scendere per essere 
 factor = 0.2 # lr = lr * factor
 patience_lr = 5 # Cambiare in base alla lunghezza dell'epoca
 patience_stop = 5
+checkpoint_path = os.path.join(path, "epoch{epoch:02d}_mae{val_mae:.2f}.model")
 
 logger = CSVLogger(os.path.join(path, "training_log.csv"), append=False)
 
@@ -143,7 +144,7 @@ history = model.fit_generator(train_generator,
 
 
 ## Saving last model
-model.save(os.path.join(path, f"{dirnm}_final_model"))
+model.save(os.path.join(path, f"final.model"))
 
 ## Saving history
 with open(os.path.join(path, "training_history"), 'wb') as history_file:
