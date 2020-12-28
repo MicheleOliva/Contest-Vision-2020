@@ -7,7 +7,7 @@ class CustomAugmenter():
             corruptions_prob is the probability of an image to be corrupted. Must be in [0,1].
             frequent_corruptions_prob is the probability of a frequent corruption to happen. Must be in [0,1].
         """
-        self.frequent_corruptions = [gaussian_noise, random_crop, brightness, contrast, horizontal_flip]
+        self.frequent_corruptions = [gaussian_noise, random_crop, brightness, contrast, horizontal_flip, rotation]
         self.other_corruptions = [gaussian_blur, skew, spatter]
         self.corruptions_prob = corruptions_prob
         self.frequent_corruptions_prob = frequent_corruptions_prob
@@ -51,6 +51,11 @@ class CustomAugmenter():
 
             elif corruptions_list[corruption_index] == spatter:
                 severity = random.randint(1,5)
+            
+            elif corruptions_list[corruption_index] == rotation:
+                severity = random.uniform(1,10)
+                if random.uniform(0, 1) < 0.5:
+                    severity = 0 - severity
             # call chosen corruption on our sample
             if severity is not None:
                 data[i] = corruptions_list[corruption_index](data[i], severity)
