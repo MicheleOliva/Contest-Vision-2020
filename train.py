@@ -1,7 +1,11 @@
 import os
 import pickle
 import sys
+
+#### PATH LIBRERIE #######################################################################
 sys.path.insert(0, "/content/Contest-Vision-2020/pymodules/dataset_utils")
+##########################################################################################
+
 from datetime import datetime
 from tensorflow.keras.applications import MobileNetV3Large
 from keras import Model, Sequential
@@ -26,6 +30,7 @@ resume = argparser.parse_args().resume
 
 datetime = datetime.today().strftime('%Y%m%d_%H%M%S')
 
+
 # Modello
 
 # Se si riprende il training
@@ -34,11 +39,14 @@ if resume:
   # Cerchiamo il modello più recente in termini di epoche
   dir = os.listdir()
 
+  # Cerchiamo l'ultima epoca nel nome
   regex = re.compile(r"epoch(\d+).*[.]model") 
 
   last_model = None
   last_model_epochs = 0
 
+  # Dai file che corrispondono alla regex estraiamo il numero delle epoche
+  # e scegliamo il modello con più epoche 
   for fname in dir:
       match = regex.match(fname)
       if match is not None and int(match[1]) >= last_model_epochs:
@@ -53,18 +61,24 @@ if resume:
   initial_epoch = last_model_epochs + 1
 
 
+# Se non si riprende il training
 else:
-  ## Creazione del modello
+  # Creazione del modello
   print("Creating new model...")
+
+  #### Parametri modello ###################################################################
   classifier_activation = 'relu'
   weights = 'imagenet'
   classes = 1
   input_shape = (96, 96, 3)
   alpha = 1.0
+  ##########################################################################################
 
+  # Utilizziamo la rete preallenata su imagenet, ma gli ultimi livelli vengono generati ad-hoc dalla versione senza pesi
   m1 = MobileNetV3Large(input_shape=input_shape, alpha=alpha, weights=weights, include_top=False)
   m2 = MobileNetV3Large(input_shape=input_shape, alpha=alpha, classes=classes, weights=None, classifier_activation=classifier_activation)
 
+  # Per cui prendiamo il top del modello non preallenato e lo mettiamo come top del modello preallenato
   model = Sequential()
   model.add(m1)
   for i in range(-6, 0):
@@ -74,13 +88,14 @@ else:
   m1 = None
   m2 = None
 
+  # Creiamo una cartella per il training di questo modello e facciamo cd 
   MODEL_NAME = f"MNV3L_{input_shape[0]}x{input_shape[1]}_c{classes}_a{alpha}_{weights}"
   dirnm = f"{datetime}_{MODEL_NAME}"
   if not os.path.isdir(dirnm): 
     os.mkdir(dirnm)
   os.chdir(dirnm)
 
-  ## Compilazione del modello
+  # Compiliamo il modello
   optimizer = Adam()
   loss = MeanSquaredError()
   metrics = [ MeanAbsoluteError(name='mae') ]
@@ -90,34 +105,38 @@ else:
 
   
 model.summary()
+input_shape = tuple(model.get_layer(index=0).inputs[0].shape[1:])
 
 # Training
 
-## Generatori
+# Generatore del training set
 
-### Training
+#### Parametri generatore ################################################################
 train_csv_path = '/content/drive/Shareddrives/Progettone/Age Estimation/caches/train_cvs.cache' # METTI DUMP .cache
 train_dataset_root_path = '/content/train'
 train_batch_size = 32
 train_epoch_mode = 'identities' # Len del generator è il numero di identities
 corruptions_prob = 0.5
 frequent_corruptions_prob = 0.5
+##########################################################################################
 
-train_preprocessor = CustomPreprocessor(desired_shape=(96, 96))
+train_preprocessor = CustomPreprocessor(desired_shape=input_shape[:2])
 train_augmenter = CustomAugmenter(corruptions_prob, frequent_corruptions_prob)
 train_encoder = CustomOutputEncoder()
 train_loader = CustomDataLoader(mode='training', csv_path=train_csv_path, csv_names=None, dataset_root_path=train_dataset_root_path, batch_size=train_batch_size)
 
 train_generator = DataGenerator(mode='training', preprocessor=train_preprocessor, data_augmenter=train_augmenter, output_encoder=train_encoder, data_loader=train_loader, batch_size=train_batch_size, epoch_mode=train_epoch_mode)
 
+# Generatori per l'evaluation
 
-### Evaluation
+#### Parametri generatore #################################################################
 eval_csv_path = '/content/drive/Shareddrives/Progettone/Age Estimation/caches/eval_csv.cache' # METTI DUMP .cache
 eval_dataset_root_path = '/content/eval'
 eval_batch_size = 1
 eval_epoch_mode = 'identities' # Len del generator è il numero di identities
+###########################################################################################
 
-eval_preprocessor = CustomPreprocessor(desired_shape=(96, 96))
+eval_preprocessor = CustomPreprocessor(desired_shape=input_shape[:2])
 eval_encoder = CustomOutputEncoder()
 eval_loader = CustomDataLoader(mode='validation', csv_path=eval_csv_path, csv_names=None, dataset_root_path=eval_dataset_root_path, batch_size=eval_batch_size)
 
@@ -126,11 +145,8 @@ eval_generator = DataGenerator(mode='validation', preprocessor=eval_preprocessor
 
 ## Callbacks
 
+#### Parametri per le callback ###########################################################
 path = "."
-logdir = os.path.join(path, "tensorboard")
-if not os.path.isdir(logdir): 
-  os.mkdir(logdir)
-
 min_delta = 0.01 # Quanto deve scendere il mae per esser considerato migliorato
 checkpoint_monitor = 'val_mae' # Solo per il model_checkpoint
 monitor = 'val_loss'
@@ -139,6 +155,11 @@ factor = 0.2 # lr = lr * factor
 patience_lr = 5 # Cambiare in base alla lunghezza dell'epoca
 patience_stop = 5
 checkpoint_path = os.path.join(path, "epoch{epoch:02d}_mae{val_mae:.2f}.model")
+logdir = os.path.join(path, "tensorboard")
+##########################################################################################
+
+if not os.path.isdir(logdir): 
+  os.mkdir(logdir)
 
 if os.path.exists("training_log.csv"):
   append = True
@@ -174,10 +195,12 @@ tensorboard = TensorBoard(log_dir=logdir,
                           write_graph=True, 
                           write_images=True)
 
-## Actual training
 
-## Parametri di training
+# Fit del modello
+
+#### Parametri di training ###############################################################
 training_epochs = 10000
+##########################################################################################
 
 history = model.fit_generator(train_generator, 
                               validation_data=eval_generator, 
@@ -189,10 +212,10 @@ history = model.fit_generator(train_generator,
                                          tensorboard])
 
 
-## Saving last model
+# Saving last model
 model.save(os.path.join(path, f"{datetime}_final.model"))
 
-## Saving history
+# Saving history
 with open(os.path.join(path, f"{datetime}_training_history"), 'wb') as history_file:
   print("Saving history.")
   pickle.dump(history, history_file)
