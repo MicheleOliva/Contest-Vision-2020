@@ -128,11 +128,11 @@ class CustomDataLoader():
         print('Loading test data...')
         for test_sample in test_data.iterrows():
             data = {
-                test_sample[1]['path']: {
-                    'roi_origin_x': test_sample[1]['roi_origin_x'],
-                    'roi_origin_y': test_sample[1]['roi_origin_y'],
-                    'roi_width': test_sample[1]['roi_width'],
-                    'roi_height': test_sample[1]['roi_height']
+                test_sample[1]['Path']: {
+                    'roi_origin_x': test_sample[1]['x_min'],
+                    'roi_origin_y': test_sample[1]['y_min'],
+                    'roi_width': test_sample[1]['width'],
+                    'roi_height': test_sample[1]['height']
                 }
             }
             self.test_data.append(data)
@@ -146,8 +146,9 @@ class CustomDataLoader():
         # TODO:
         # GESTIRE BENE situazioni del tipo non ho batch_size identità diverse, ma con quelle che ho apparo comunque a 64 immagini (farò qualche batch con più immagini
         # provenienti dalla stessa identità, ma pazienza)
-        if len(self.identities) < self.batch_size:
-            raise ValueError('The number of identities is smaller than the batch size')
+        if self.mode != 'testing':
+            if len(self.identities) < self.batch_size:
+                raise ValueError('The number of identities is smaller than the batch size')
 
         if self.mode != 'testing':
             return self._yield_training_validation(batch_index)
@@ -234,7 +235,11 @@ class CustomDataLoader():
         #raise NotImplementedError('Data loader for testing data is not implemented yet')
         samples_start = batch_index % self.num_samples
         samples_end = (batch_index+1) % self.num_samples
-        batch_samples = self.test_data[samples_start:samples_end]
+        if samples_start < samples_end:
+            batch_samples = self.test_data[samples_start:samples_end]
+        else:
+            batch_samples = self.test_data[samples_start:]
+            batch_samples.extend(self.test_data[:samples_end])
         images = []
         rois = []
         for sample in batch_samples:
@@ -246,17 +251,18 @@ class CustomDataLoader():
             #    'roi_height': test_sample[1]['roi_height'] 
             #   }      
             # }
-            img_path = os.path.join(self.dataset_root_path, sample.keys()[0])
+            img_path = os.path.join(self.dataset_root_path, list(sample.keys())[0])
             img = cv2.imread(img_path) # watch out for slashes (/)
             # if the path does not exist or there are problems while reading the image
             if img is None:
                 print('[DATA LOADER ERROR] cannot find image at path: ', img_path)
                 continue
+            roi_data = list(sample.values())[0]
             roi = {
-                'upper_left_x': sample.values()[0]['roi_origin_x'],
-                'upper_left_y': sample.values()[0]['roi_origin_y'],
-                'width': sample.values()[0]['roi_width'],
-                'height': sample.values()[0]['roi_height']
+                'upper_left_x': roi_data['roi_origin_x'],
+                'upper_left_y': roi_data['roi_origin_y'],
+                'width': roi_data['roi_width'],
+                'height': roi_data['roi_height']
             }
             images.append(img)
             rois.append(roi)
@@ -270,6 +276,7 @@ class CustomDataLoader():
         return len(self.identities)
 
     def epoch_ended(self):
+        print('epoch ended')
         # if not really ended:
         #   return
         if self.mode == 'training':
