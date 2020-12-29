@@ -174,7 +174,7 @@ class CustomDataLoader():
         for identity in batch_identities:
             identity_data = self.groundtruth_metadata[identity]
             # if there are images available for that identity
-            if identity_data['index'] < len(identity_data['metadata'])-1:
+            if identity_data['index'] < len(identity_data['metadata']):
                 # read the image and the necessary metadata
                 img_info = identity_data['metadata'][identity_data['index']]
                 img_path = os.path.join(self.dataset_root_path, img_info['path'])
@@ -202,10 +202,14 @@ class CustomDataLoader():
         # picking multiple images from the available entities
         # the __len__ method in the data generator associated to this data loader is responsible for avoiding that this
         # method is called when less than batch_size "fresh" images are available
+        last_taken_identity_index = ids_end 
+        num_samples_when_last_taken = num_ids_to_resample
         while(num_ids_to_resample > 0):
             identity = self.identities[ids_end] # remeber that slicing at previous step excludes upper limit
             identity_data = self.groundtruth_metadata[identity]
-            if identity_data['index'] < len(identity_data['metadata'])-1:
+            if identity_data['index'] < len(identity_data['metadata']):
+                last_taken_identity_index = ids_end
+                num_samples_when_last_taken = num_ids_to_resample
                 # read the image and the necessary metadata
                 img_info = identity_data['metadata'][identity_data['index']]
                 img_path = os.path.join(self.dataset_root_path, img_info['path'])
@@ -226,7 +230,9 @@ class CustomDataLoader():
                 identity_data['index'] += 1
                 
             ids_end = ((ids_end+1)%num_identities)
-            
+            if ids_end == last_taken_identity_index and num_ids_to_resample == num_samples_when_last_taken and identity_data['index'] == len(identity_data['metadata']):
+                raise Exception('No more images available!')
+
         # cannot return numpy arrays since images in batch have different sizes
         return samples_batch, labels_batch, roi_batch
         #return batch
