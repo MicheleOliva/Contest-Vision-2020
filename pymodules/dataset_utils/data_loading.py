@@ -156,6 +156,7 @@ class CustomDataLoader():
             return self._yield_testing(batch_index)
         
     def _yield_training_validation(self, batch_index):
+        print(f'requested batch with index: {batch_index}') # DEBUG
         num_identities = len(self.identities)
         num_ids_to_resample = 0
         # manage identities in a circular way 
