@@ -215,6 +215,7 @@ class CustomDataLoader():
                     print('[DATA LOADER ERROR] cannot find image at path: ', img_path)
                     # increase the index, in order to avoid this path when building subsequent batches with this identity
                     identity_data['index'] += 1
+                    ids_end = ((ids_end+1)%num_identities)
                     continue
                 #batch.append(AgeEstimationSample(img, img_info['roi'], img_info['age'], 'BGR')) # cv2 reads as BGR
                 img = img.astype('float32')
@@ -232,6 +233,9 @@ class CustomDataLoader():
         #return batch
 
     def _yield_testing(self, batch_index):
+        """
+            Testing mode doesn't work by identities, but works by samples.
+        """
         #raise NotImplementedError('Data loader for testing data is not implemented yet')
         samples_start = batch_index % self.num_samples
         samples_end = (batch_index+1) % self.num_samples
@@ -264,6 +268,7 @@ class CustomDataLoader():
                 'width': roi_data['roi_width'],
                 'height': roi_data['roi_height']
             }
+            img = img.astype('float32')
             images.append(img)
             rois.append(roi)
         return images, rois
