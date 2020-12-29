@@ -128,11 +128,11 @@ class CustomDataLoader():
         print('Loading test data...')
         for test_sample in test_data.iterrows():
             data = {
-                test_sample[1]['path']: {
-                    'roi_origin_x': test_sample[1]['roi_origin_x'],
-                    'roi_origin_y': test_sample[1]['roi_origin_y'],
-                    'roi_width': test_sample[1]['roi_width'],
-                    'roi_height': test_sample[1]['roi_height']
+                test_sample[1]['Path']: {
+                    'roi_origin_x': test_sample[1]['x_min'],
+                    'roi_origin_y': test_sample[1]['y_min'],
+                    'roi_width': test_sample[1]['width'],
+                    'roi_height': test_sample[1]['height']
                 }
             }
             self.test_data.append(data)
@@ -146,8 +146,9 @@ class CustomDataLoader():
         # TODO:
         # GESTIRE BENE situazioni del tipo non ho batch_size identità diverse, ma con quelle che ho apparo comunque a 64 immagini (farò qualche batch con più immagini
         # provenienti dalla stessa identità, ma pazienza)
-        if len(self.identities) < self.batch_size:
-            raise ValueError('The number of identities is smaller than the batch size')
+        if self.mode != 'testing':
+            if len(self.identities) < self.batch_size:
+                raise ValueError('The number of identities is smaller than the batch size')
 
         if self.mode != 'testing':
             return self._yield_training_validation(batch_index)
@@ -155,6 +156,7 @@ class CustomDataLoader():
             return self._yield_testing(batch_index)
         
     def _yield_training_validation(self, batch_index):
+        print(f'requested batch with index: {batch_index}') # DEBUG
         num_identities = len(self.identities)
         num_ids_to_resample = 0
         # manage identities in a circular way 
@@ -173,14 +175,14 @@ class CustomDataLoader():
         for identity in batch_identities:
             identity_data = self.groundtruth_metadata[identity]
             # if there are images available for that identity
-            if identity_data['index'] < len(identity_data['metadata'])-1:
+            if identity_data['index'] < len(identity_data['metadata']):
                 # read the image and the necessary metadata
                 img_info = identity_data['metadata'][identity_data['index']]
                 img_path = os.path.join(self.dataset_root_path, img_info['path'])
                 img = cv2.imread(img_path) # watch out for slashes (/)
                 # if OpenCV is unable to read an image, it returns None
                 if img is None:
-                    print('[DATA LOADER ERROR] cannot find image at path: ', self.dataset_root_path+img_info['path'])
+                    print('[DATA LOADER ERROR] cannot find image at path: ', img_path)
                     # increase the index, in order to avoid this path when building subsequent batches with this identity
                     identity_data['index'] += 1
                     # sample another image from another identity to replace this one in the batch
@@ -201,17 +203,21 @@ class CustomDataLoader():
         # picking multiple images from the available entities
         # the __len__ method in the data generator associated to this data loader is responsible for avoiding that this
         # method is called when less than batch_size "fresh" images are available
+        last_taken_identity_index = ids_end 
+        num_samples_when_last_taken = num_ids_to_resample
         while(num_ids_to_resample > 0):
             identity = self.identities[ids_end] # remeber that slicing at previous step excludes upper limit
             identity_data = self.groundtruth_metadata[identity]
-            if identity_data['index'] < len(identity_data['metadata'])-1:
+            if identity_data['index'] < len(identity_data['metadata']):
+                last_taken_identity_index = ids_end
+                num_samples_when_last_taken = num_ids_to_resample
                 # read the image and the necessary metadata
                 img_info = identity_data['metadata'][identity_data['index']]
                 img_path = os.path.join(self.dataset_root_path, img_info['path'])
                 img = cv2.imread(img_path) # watch out for slashes (/)
                 # if the path does not exist or there are problems while reading the image
                 if img is None:
-                    print('[DATA LOADER ERROR] cannot find image at path: ', self.dataset_root_path+img_info['path'])
+                    print('[DATA LOADER ERROR] cannot find image at path: ', img_path)
                     # increase the index, in order to avoid this path when building subsequent batches with this identity
                     identity_data['index'] += 1
                     continue
@@ -225,14 +231,55 @@ class CustomDataLoader():
                 identity_data['index'] += 1
                 
             ids_end = ((ids_end+1)%num_identities)
-            
+            if ids_end == last_taken_identity_index and num_ids_to_resample == num_samples_when_last_taken and identity_data['index'] == len(identity_data['metadata']):
+                raise Exception('No more images available!')
+
         # cannot return numpy arrays since images in batch have different sizes
         return samples_batch, labels_batch, roi_batch
         #return batch
 
     def _yield_testing(self, batch_index):
-        raise NotImplementedError('Data loader for testing data is not implemented yet')
-
+        """
+            Testing mode doesn't work by identities, but works by samples.
+        """
+        #raise NotImplementedError('Data loader for testing data is not implemented yet')
+        samples_start = batch_index % self.num_samples
+        samples_end = (batch_index+1) % self.num_samples
+        if samples_start < samples_end:
+            batch_samples = self.test_data[samples_start:samples_end]
+        else:
+            batch_samples = self.test_data[samples_start:]
+            batch_samples.extend(self.test_data[:samples_end])
+        images = []
+        rois = []
+        for sample in batch_samples:
+            # 'sample' has this structure:
+            # {path: {
+            #    'roi_origin_x': test_sample[1]['roi_origin_x'],
+            #    'roi_origin_y': test_sample[1]['roi_origin_y'],
+            #    'roi_width': test_sample[1]['roi_width'],
+            #    'roi_height': test_sample[1]['roi_height'] 
+            #   }      
+            # }
+            img_path = os.path.join(self.dataset_root_path, list(sample.keys())[0])
+            img = cv2.imread(img_path) # watch out for slashes (/)
+            # if the path does not exist or there are problems while reading the image
+            if img is None:
+                print('[DATA LOADER ERROR] cannot find image at path: ', img_path)
+                continue
+            roi_data = list(sample.values())[0]
+            roi = {
+                'upper_left_x': roi_data['roi_origin_x'],
+                'upper_left_y': roi_data['roi_origin_y'],
+                'width': roi_data['roi_width'],
+                'height': roi_data['roi_height']
+            }
+            img = img.astype('float32')
+            images.append(img)
+            rois.append(roi)
+        return images, rois
+            
+            
     def get_num_samples(self):
         return self.num_samples
 
@@ -240,6 +287,7 @@ class CustomDataLoader():
         return len(self.identities)
 
     def epoch_ended(self):
+        print('epoch ended')
         # if not really ended:
         #   return
         if self.mode == 'training':
@@ -261,5 +309,7 @@ class CustomDataLoader():
         print('Finished shuffling data!')
     
     def _reinit_indexes(self):
+        print('Reinitializing indexes...')
         for identity in self.groundtruth_metadata.keys():
             self.groundtruth_metadata[identity]['index'] = 0
+        print('Indexes reinitialized!')

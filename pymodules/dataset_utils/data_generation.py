@@ -24,6 +24,9 @@ class DataGenerator(tensorflow.keras.utils.Sequence):
         if epoch_mode is None or epoch_mode not in self.allowed_epoch_modes:
             raise TypeError("'epoch_mode' must be one of ['full', 'identities']")
 
+        if mode == 'testing' and epoch_mode != 'full':
+            raise TypeError("Can't use 'testing' mode with epoch mode different from 'full'")
+
         self.mode = mode
         self.epoch_mode = epoch_mode
         self.preprocessor = preprocessor
@@ -42,8 +45,11 @@ class DataGenerator(tensorflow.keras.utils.Sequence):
     # Consider putting a lock as a class member and using it when modifying indexes (useful with multi-threading)
     # curr_batch è il numero del batch per il quale ci stanno chiedendo i sample
     def __getitem__(self, curr_batch):
-        # x_batch and y_batch cannot be numpy arrays since images do not have the same size
-        x_batch, y_batch, roi_batch = self.data_loader.load_batch(curr_batch)
+        if self.mode != 'testing':
+            # x_batch and y_batch cannot be numpy arrays since images do not have the same size
+            x_batch, y_batch, roi_batch = self.data_loader.load_batch(curr_batch)
+        else:
+            x_batch, roi_batch = self.data_loader.load_batch(curr_batch)
 
         if self.preprocessor is not None:
             x_batch = self.preprocessor.pre_augmentation(x_batch, roi_batch)
@@ -60,8 +66,8 @@ class DataGenerator(tensorflow.keras.utils.Sequence):
             # watch out when you create numpy arrays, 'cause Keras requires the batch dimension to be the first one
             return np.array(x_batch), np.array(y_batch) # automatically sets batch dimension as the first one
         else:
-            raise NotImplementedError('Testing mode is not implemented yet')
-            #return x_batch
+            #raise NotImplementedError('Testing mode is not implemented yet')
+            return np.array(x_batch)
     
     def on_epoch_end(self):
         if self.mode == 'training' or self.mode == 'validation':
