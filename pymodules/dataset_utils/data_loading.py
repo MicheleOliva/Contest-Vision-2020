@@ -232,7 +232,7 @@ class CustomDataLoader():
                 
             ids_end = ((ids_end+1)%num_identities)
             if ids_end == last_taken_identity_index and num_ids_to_resample == num_samples_when_last_taken and identity_data['index'] == len(identity_data['metadata']):
-                raise Exception('No more images available!')
+                raise Exception(f'No more images available, missing {num_ids_to_resample} images!')
 
         # cannot return numpy arrays since images in batch have different sizes
         return samples_batch, labels_batch, roi_batch
