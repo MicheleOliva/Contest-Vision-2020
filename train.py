@@ -154,8 +154,9 @@ monitor = 'val_loss'
 mode = 'auto' # Controllare che funzioni, ossia il mae deve scendere per essere considerato migliorato
 factor = 0.2 # lr = lr * factor
 patience_lr = 5 # Cambiare in base alla lunghezza dell'epoca
-patience_stop = 5
+# patience_stop = 5
 checkpoint_path = os.path.join(path, "epoch{epoch:02d}_mae{val_mae:.2f}.model")
+save_best_only = False
 logdir = os.path.join(path, "tensorboard")
 ##########################################################################################
 
@@ -178,17 +179,17 @@ reduce_lr_plateau= ReduceLROnPlateau(monitor=monitor,
                                      cooldown=1, 
                                      min_delta=min_delta)
 
-early_stopping = EarlyStopping(patience=patience_stop, 
-                               verbose=1, 
-                               restore_best_weights=True, 
-                               monitor=monitor, 
-                               mode=mode, 
-                               min_delta=min_delta)
+#early_stopping = EarlyStopping(patience=patience_stop, 
+#                               verbose=1, 
+#                               restore_best_weights=True, 
+#                               monitor=monitor, 
+#                               mode=mode, 
+#                               min_delta=min_delta)
 
 model_checkpoint = ModelCheckpoint(checkpoint_path, 
                                    verbose=1, 
                                    save_weights_only=False,
-                                   save_best_only=True, 
+                                   save_best_only=save_best_only, 
                                    monitor=checkpoint_monitor, 
                                    mode=mode)
 
