@@ -215,7 +215,6 @@ class CustomDataLoader():
                     print('[DATA LOADER ERROR] cannot find image at path: ', img_path)
                     # increase the index, in order to avoid this path when building subsequent batches with this identity
                     identity_data['index'] += 1
-                    ids_end = ((ids_end+1)%num_identities)
                     continue
                 #batch.append(AgeEstimationSample(img, img_info['roi'], img_info['age'], 'BGR')) # cv2 reads as BGR
                 img = img.astype('float32')
