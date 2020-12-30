@@ -7,7 +7,7 @@ from keras.metrics import MeanAbsoluteError
 from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger, ReduceLROnPlateau, TensorBoard
 from data_augmentation import CustomAugmenter
 from data_generation import DataGenerator
-from data_loading import CustomDataLoader
+from vgg_data_loader import VggDataLoader
 from preprocessing import CustomPreprocessor
 
 import os 
@@ -51,7 +51,7 @@ frequent_corruptions_prob = 0.85
 
 train_preprocessor = CustomPreprocessor(desired_shape=input_shape[:2])
 train_augmenter = CustomAugmenter(corruptions_prob, frequent_corruptions_prob)
-train_loader = CustomDataLoader(mode='training', csv_path=train_csv_path, csv_names=None, dataset_root_path=train_dataset_root_path, batch_size=train_batch_size)
+train_loader = VggDataLoader(mode='training', csv_path=train_csv_path, csv_names=None, dataset_root_path=train_dataset_root_path, batch_size=train_batch_size)
 
 train_generator = DataGenerator(mode='training', preprocessor=train_preprocessor, data_augmenter=train_augmenter, output_encoder=None, data_loader=train_loader, batch_size=train_batch_size, epoch_mode=train_epoch_mode)
 
@@ -61,7 +61,7 @@ eval_batch_size = 1
 eval_epoch_mode = 'full' # Len del generator è il numero di identities
 
 eval_preprocessor = CustomPreprocessor(desired_shape=input_shape[:2])
-eval_loader = CustomDataLoader(mode='validation', csv_path=eval_csv_path, csv_names=None, dataset_root_path=eval_dataset_root_path, batch_size=eval_batch_size)
+eval_loader = VggDataLoader(mode='validation', csv_path=eval_csv_path, csv_names=None, dataset_root_path=eval_dataset_root_path, batch_size=eval_batch_size)
 
 eval_generator = DataGenerator(mode='validation', preprocessor=eval_preprocessor, data_augmenter=None, output_encoder=None, data_loader=eval_loader, batch_size=eval_batch_size, epoch_mode=eval_epoch_mode)
 

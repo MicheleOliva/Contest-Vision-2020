@@ -16,8 +16,8 @@ class VggDataLoader():
         if mode is None or mode not in self.allowed_modes:
             raise TypeError("'mode' must be one of ['training', 'validation', 'testing']")
 
-        if csv_path is None and mode != 'testing':
-            raise TypeError('Please provide groundtruth for training/validation data')
+        if csv_path is None:
+            raise TypeError('Please provide a .csv annotations file!')
 
         if dataset_root_path is None or batch_size is None or csv_sep is None:
             raise TypeError("'dataset_root_path', 'batch_size' and 'csv_sep' cannot be None")
@@ -27,6 +27,7 @@ class VggDataLoader():
         self.dataset_root_path = dataset_root_path
 
         self.identities = [] # list to hold all of the ids, in order to be able to build balanced batches
+        self.identities_persistent = []
 
         self.groundtruth_metadata = {} 
 
@@ -53,6 +54,7 @@ class VggDataLoader():
             with open(csv_path, 'rb') as cache_file:
                 cache = pickle.load(cache_file)
             self.identities = cache['identities']
+            self.identities_persistent = self.identities.copy()
             self.groundtruth_metadata = cache['groundtruth_metadata']
             self.num_samples = cache['num_samples']
         else:
@@ -97,7 +99,8 @@ class VggDataLoader():
                 out_dict['identities'] = self.identities
                 out_dict['groundtruth_metadata'] = self.groundtruth_metadata
                 out_dict['num_samples'] = self.num_samples
-                pickle.dump(out_dict, cache_out_file)   
+                pickle.dump(out_dict, cache_out_file)
+            self.identities_persistent = self.identities.copy()   
         print('Finished loading training/validation data!')
         if self.mode == 'training':
             self._shuffle()
@@ -107,10 +110,14 @@ class VggDataLoader():
 
     def _build_training_data_container(self):
         print('Building training data batches')
+        self.images = []
+        self.labels = []
+        self.rois = []
         num_identities = len(self.identities)
         num_ids_to_resample = 0
         reached_end = False
         multiplier = 0
+        num_samples_processed = 0
         while not reached_end:
             # manage identities in a circular way 
             ids_start = (multiplier*self.batch_size)%num_identities # identities' batch start
@@ -124,6 +131,7 @@ class VggDataLoader():
                 batch_identities.extend(self.identities[:ids_end])
 
             for identity in batch_identities:
+                print(f'Processed {num_samples_processed} samples', end='\r')
                 identity_data = self.groundtruth_metadata[identity]
                 # if there are images available for that identity
                 if identity_data['index'] < len(identity_data['metadata']):
@@ -135,22 +143,28 @@ class VggDataLoader():
                     self.rois.append(img_info['roi'])
                     # increase the index, because another sample for that identity has been used
                     identity_data['index'] += 1
+                    num_samples_processed += 1
                 else:
                     num_ids_to_resample += 1
+                    removed_index = self.identities.index(identity)
+                    self.identities.remove(identity)
+                    # ids_end adjustement is needed by subsequent while loop
+                    if removed_index < ids_end:
+                        ids_end -= 1
+                    elif removed_index == ids_end and ids_end == num_identities-1:
+                        ids_end = 0
+                    num_identities -= 1
 
             # if for some identities there weren't available images, take them from other identities
             # note that this mechanism solves also the problems arising when less than batch_size identities are available, by
             # picking multiple images from the available entities
             # the __len__ method in the data generator associated to this data loader is responsible for avoiding that this
             # method is called when less than batch_size "fresh" images are available
-            last_taken_identity_index = ids_end 
-            num_samples_when_last_taken = num_ids_to_resample
-            while(num_ids_to_resample > 0):
+            while(num_ids_to_resample > 0 and num_identities > 0):
+                print(f'Processed {num_samples_processed} samples', end='\r')
                 identity = self.identities[ids_end] # remeber that slicing at previous step excludes upper limit
                 identity_data = self.groundtruth_metadata[identity]
                 if identity_data['index'] < len(identity_data['metadata']):
-                    last_taken_identity_index = ids_end
-                    num_samples_when_last_taken = num_ids_to_resample
                     # read the image and the necessary metadata
                     img_info = identity_data['metadata'][identity_data['index']]
                     img_path = os.path.join(self.dataset_root_path, img_info['path'])
@@ -160,21 +174,27 @@ class VggDataLoader():
 
                     num_ids_to_resample -= 1
                     identity_data['index'] += 1
+                    num_samples_processed += 1
+                else:
+                    self.identities.remove(identity)
+                    num_identities -= 1
                     
                 ids_end = ((ids_end+1)%num_identities)
-                if ids_end == last_taken_identity_index and num_ids_to_resample == num_samples_when_last_taken and identity_data['index'] == len(identity_data['metadata']):
-                    reached_end = True
+            if num_identities == 0:
+                reached_end = True
             multiplier += 1
-        print('Finished building training data batches')
+        print('\nFinished building training data batches')
     
     def _build_validation_data_container(self):
         for identity in self.identities:
             for data_sample in self.groundtruth_metadata[identity]['metadata']:
-                self.images.append(data_sample['path'])
+                img_path = os.path.join(self.dataset_root_path, data_sample['path'])
+                self.images.append(img_path)
                 self.labels.append(data_sample['age'])
                 self.rois.append(data_sample['roi'])
         
     def _init_testing(self, csv_path, csv_sep, csv_names):
+        self.test_data = []
         # mode is surely 'testing'
         # load metadata from csv (need for face bounding boxes)
         # Assumes for the provided csv the following structure:
@@ -199,9 +219,9 @@ class VggDataLoader():
             raise ValueError('The number of samples is smaller than the batch size')
         
         if self.mode != 'testing':
-            self._yield_training_validation(batch_index)
+            return self._yield_training_validation(batch_index)
         else:
-            self._yield_testing(batch_index)
+            return self._yield_testing(batch_index)
         
     def _yield_training_validation(self, batch_index):
         images_to_yield_paths = self.images[batch_index*self.batch_size:(batch_index+1)*self.batch_size]
@@ -263,6 +283,7 @@ class VggDataLoader():
     def epoch_ended(self):
         print('epoch ended')
         if self.mode == 'training':
+            self.identities = self.identities_persistent.copy()
             self._shuffle(reinit_indexes=True)
             self._build_training_data_container()
         

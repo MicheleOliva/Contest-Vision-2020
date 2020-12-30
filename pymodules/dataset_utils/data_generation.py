@@ -12,7 +12,7 @@ import numpy as np
 """
 class DataGenerator(tensorflow.keras.utils.Sequence):
 
-    def __init__(self, mode, preprocessor: CustomPreprocessor, data_augmenter: CustomAugmenter, output_encoder: CustomOutputEncoder, data_loader: CustomDataLoader, batch_size, epoch_mode = 'full', epoch_multiplier=50):
+    def __init__(self, mode, preprocessor: CustomPreprocessor, data_augmenter: CustomAugmenter, output_encoder: CustomOutputEncoder, data_loader, batch_size, epoch_mode = 'full', epoch_multiplier=50):
         if data_loader is None or batch_size is None:
             raise TypeError('Data generator needs data loader and batch size to be specified')
 
@@ -38,14 +38,17 @@ class DataGenerator(tensorflow.keras.utils.Sequence):
     
     def __len__(self):
         if self.epoch_mode == 'full':
-            return floor(self.data_loader.get_num_samples()/self.batch_size)-1
+            return floor(self.data_loader.get_num_samples()/self.batch_size)
         else:
             # 'epoch_mode' is 'identities':
-            return floor(min(self.data_loader.get_num_identities()*self.epoch_multiplier, self.data_loader.get_num_samples())/self.batch_size)-1
+            return floor(min(self.data_loader.get_num_identities()*50, self.data_loader.get_num_samples())/self.batch_size)
 
     # Consider putting a lock as a class member and using it when modifying indexes (useful with multi-threading)
     # curr_batch è il numero del batch per il quale ci stanno chiedendo i sample
     def __getitem__(self, curr_batch):
+        if curr_batch >= self.__len__():
+            raise IndexError(f'Batch {curr_batch} is not available')
+
         if self.mode != 'testing':
             # x_batch and y_batch cannot be numpy arrays since images do not have the same size
             x_batch, y_batch, roi_batch = self.data_loader.load_batch(curr_batch)
