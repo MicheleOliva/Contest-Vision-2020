@@ -12,7 +12,7 @@ import numpy as np
 """
 class DataGenerator(tensorflow.keras.utils.Sequence):
 
-    def __init__(self, mode, preprocessor: CustomPreprocessor, data_augmenter: CustomAugmenter, output_encoder: CustomOutputEncoder, data_loader, batch_size, epoch_mode = 'full'):
+    def __init__(self, mode, preprocessor: CustomPreprocessor, data_augmenter: CustomAugmenter, output_encoder: CustomOutputEncoder, data_loader, batch_size, epoch_mode = 'full', epoch_multiplier=50):
         if data_loader is None or batch_size is None:
             raise TypeError('Data generator needs data loader and batch size to be specified')
 
@@ -34,6 +34,7 @@ class DataGenerator(tensorflow.keras.utils.Sequence):
         self.output_encoder = output_encoder
         self.data_loader = data_loader
         self.batch_size = batch_size
+        self.epoch_multiplier = epoch_multiplier
     
     def __len__(self):
         if self.epoch_mode == 'full':

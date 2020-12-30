@@ -204,14 +204,16 @@ tensorboard = TensorBoard(log_dir=logdir,
 training_epochs = 10000
 ##########################################################################################
 
-history = model.fit_generator(train_generator, 
-                              validation_data=eval_generator, 
-                              initial_epoch=initial_epoch,
-                              epochs=training_epochs, 
-                              callbacks=[model_checkpoint, 
-                                         logger, 
-                                         reduce_lr_plateau,
-                                         tensorboard])
+history = model.fit(train_generator, 
+                    validation_data=eval_generator, 
+                    initial_epoch=initial_epoch,
+                    epochs=training_epochs, 
+                    callbacks=[model_checkpoint, 
+                               logger, 
+                               reduce_lr_plateau,
+                               tensorboard],
+                    use_multiprocessing=False,
+                    shuffle=False)
 
 
 # Saving last model
