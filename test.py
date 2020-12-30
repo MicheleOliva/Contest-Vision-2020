@@ -31,7 +31,7 @@ def test_generator(csv_path, desired_shape):
         for row in annotations:
             img = cv2.imread(row[2])
             img = np.array(img)
-            roi = row[4:]
+            roi = np.array(row[4:], dtype='int')
             img = preprocessor.cut(img, roi)
             img = preprocessor.post_augmentation([img])
             yield np.array(img)
@@ -44,7 +44,7 @@ if not os.path.isdir(args.model):
 
 model = load_model(args.model, compile=True)
 model.summary()
-input_shape = tuple(model.get_layer(index=0).inputs[0].shape[1:])
+input_shape = tuple(model.get_layer(index=0).inputs[0].shape[1:])[:2]
 
 pred = model.predict(test_generator(args.csv, input_shape), verbose=1)
 pred = np.array(pred).reshape(-1) # Diventa un array lineare
