@@ -48,7 +48,7 @@ if args.model is None:
     model = load_model(last_model, compile=True)
 
 else:
-    if not os.path.isdir(model):
+    if not os.path.isdir(args.model):
         print("ERROR: model argument is not a directory")
         exit(0)
     model = load_model(args.model, compile=True)
