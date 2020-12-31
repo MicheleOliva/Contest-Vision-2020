@@ -5,10 +5,10 @@ from keras.losses import MeanSquaredError
 from keras.optimizers import Adam
 from keras.metrics import MeanAbsoluteError
 from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger, ReduceLROnPlateau, TensorBoard
-from data_augmentation import CustomAugmenter
-from data_generation import DataGenerator
-from vgg_data_loader import VggDataLoader
-from preprocessing import CustomPreprocessor
+from dataset_utils.data_augmentation import CustomAugmenter
+from dataset_utils.data_generation import DataGenerator
+from dataset_utils.vgg_data_loader import VggDataLoader
+from dataset_utils.preprocessing import CustomPreprocessor
 
 import os 
 

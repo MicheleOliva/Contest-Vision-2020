@@ -6,14 +6,14 @@ model = load_model('G:/Drive condivisi/Progettone/Age Estimation/train_francesco
 print('Loaded model!')
 
 
-from data_loading import CustomDataLoader
-from data_generation import DataGenerator
+from dataset_utils.data_loading import CustomDataLoader
+from dataset_utils.data_generation import DataGenerator
 
 
 BATCH_SIZE = 1
 data_loader = CustomDataLoader(mode='testing', csv_names=None, csv_path='C:/Users/Francesco/Desktop/python_test_environment/eval_csv.csv', dataset_root_path='C:/Users/Francesco/Documents/Uni/Magistrale/Secondo anno/Artificial Vision/Progetto finale age estimation/Dataset/train', batch_size=BATCH_SIZE)
 
-from preprocessing import CustomPreprocessor
+from dataset_utils.preprocessing import CustomPreprocessor
 preprocessor = CustomPreprocessor(desired_shape=(96,96))
 data_generator = DataGenerator(preprocessor=preprocessor, data_augmenter=None, output_encoder=None, mode='testing', data_loader=data_loader, batch_size=BATCH_SIZE)
 

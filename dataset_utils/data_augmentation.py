@@ -1,4 +1,4 @@
-from corruptions import *
+from dataset_utils.corruptions import *
 import random
 
 class CustomAugmenter():

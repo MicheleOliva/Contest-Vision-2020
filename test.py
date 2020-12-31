@@ -2,13 +2,13 @@ import os
 import sys
 
 #### PATH LIBRERIE #######################################################################
-sys.path.insert(0, "/content/Contest-Vision-2020/pymodules/dataset_utils")
+#sys.path.insert(0, "/content/Contest-Vision-2020/pymodules/dataset_utils")
 ##########################################################################################
 
 from keras.models import load_model
 import argparse
 import re
-from preprocessing import CustomPreprocessor
+from dataset_utils.preprocessing import CustomPreprocessor
 import cv2
 import numpy as np
 import csv
