@@ -9,7 +9,7 @@ numero reale da 0 a 100 che rappresenta l’età, da approssimare all’intero p
 vicino) o come classificatore (output: una delle 101 classi da 0 a 100) e fornire dettagli e motivazioni sulla funzione di costo scelta.}
 
 L'architettura scelta è MobileNetV3.\todo{citazione del MIVIA?} Le reti MobileNet sono conosciute per essere progettate pensando all'efficienza computazionale e alla latenza delle predizioni, senza però sacrificare le prestazioni. MobileNetV3 migliora MobileNetV2 sia in termini di accuracy che di latenza, diminuendo il numero di pesi ed il numero di operazioni totali. Questo ci ha permesso di allenare la rete e di testarla in tempi ragionevoli rapportati al tempo disponibile, e quindi ha permesso una scelta migliore dei parametri.
-La rete è stata progettata come un regressore. Abbiamo sostituito il layer di classificazione con un layer di dimensione unitaria con attivazione lineare (ReLU). Questo ci ha permesso di astrarci dalla rappresentazione dell'età, che non è per forza definita nell'intervallo \([0, 100]\), e l'utilizzo della ben nota in letteratura Mean Squared Error (MSE) loss function, che tiene conto della
+La rete è stata progettata come un regressore. Abbiamo sostituito il layer di classificazione con un layer di dimensione unitaria con attivazione lineare (ReLU). Questo ci ha permesso di astrarci dalla rappresentazione dell'età, che non è per forza definita nell'intervallo \([0, 100]\), e l'utilizzo della ben nota in letteratura Mean Squared Error (MSE) loss function, che tiene anche conto della differenza tra la stima dell'età e la \emph{ground truth}.
 
 \subsection{Procedura di addestramento}
 \subsubsection{Dataset}
