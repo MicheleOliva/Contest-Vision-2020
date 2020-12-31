@@ -9,7 +9,7 @@ from keras.models import load_model
 import argparse
 import re
 from data_generation import DataGenerator
-from data_loading import CustomDataLoader
+from vgg_data_loader import VggDataLoader
 from output_encoding import CustomOutputEncoder
 from preprocessing import CustomPreprocessor
 
@@ -66,7 +66,7 @@ eval_epoch_mode = 'full' # Len del generator è il numero di identities
 
 eval_preprocessor = CustomPreprocessor(desired_shape=input_shape[:2])
 eval_encoder = CustomOutputEncoder()
-eval_loader = CustomDataLoader(mode='validation', csv_path=eval_csv_path, csv_names=None, dataset_root_path=eval_dataset_root_path, batch_size=eval_batch_size)
+eval_loader = VggDataLoader(mode='validation', csv_path=eval_csv_path, csv_names=None, dataset_root_path=eval_dataset_root_path, batch_size=eval_batch_size)
 
 eval_generator = DataGenerator(mode='validation', preprocessor=eval_preprocessor, data_augmenter=None, output_encoder=eval_encoder, data_loader=eval_loader, batch_size=eval_batch_size, epoch_mode=eval_epoch_mode)
 
