@@ -161,13 +161,7 @@ logdir = os.path.join(path, "tensorboard")
 if not os.path.isdir(logdir): 
   os.mkdir(logdir)
 
-if os.path.exists("training_log.csv"):
-  append = True
-else:
-  append = False
-
-
-logger = CSVLogger(os.path.join(path, "training_log.csv"), append=append)
+logger = CSVLogger(os.path.join(path, f"{datetime}_training_log.csv"), append=False)
 
 reduce_lr_plateau= ReduceLROnPlateau(monitor=monitor, 
                                      factor=factor, 
