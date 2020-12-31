@@ -58,7 +58,8 @@ if resume:
       exit(0)
 
   print(f"Found {last_model}. Loading...")
-  model = load_model(last_model, compile=True)
+  model = load_model(last_model)
+  model.compile(optimizer=Adam(learning_rate=0.0001), loss=MeanSquaredError(), metrics=[ MeanAbsoluteError(name='mae') ])
   initial_epoch = last_model_epochs
 
 
@@ -146,13 +147,13 @@ eval_generator = DataGenerator(mode='validation', preprocessor=eval_preprocessor
 
 #### Parametri per le callback ###########################################################
 path = "."
-min_delta = 0.01 # Quanto deve scendere il mae per esser considerato migliorato
+min_delta = 0.1 # Quanto deve scendere la val_loss per esser considerato migliorato
 checkpoint_monitor = 'val_mae' # Solo per il model_checkpoint
 monitor = 'val_loss'
 mode = 'auto' # Controllare che funzioni, ossia il mae deve scendere per essere considerato migliorato
 factor = 0.2 # lr = lr * factor
-patience_lr = 3 # Cambiare in base alla lunghezza dell'epoca
-patience_stop = 5
+patience_lr = 2 # Cambiare in base alla lunghezza dell'epoca
+patience_stop = 3
 checkpoint_path = os.path.join(path, "epoch{epoch:02d}_mae{val_mae:.2f}.model")
 save_best_only = False
 logdir = os.path.join(path, "tensorboard")
