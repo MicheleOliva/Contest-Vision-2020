@@ -1,0 +1,30 @@
+Tale descrizione deve contemplare almeno gli elementi riportati nelle seguenti
+sottosezioni.
+
+\subsection{Convolutional neural network}
+Descrivere in questa sezione l’architettura della convolutional neural network
+sviluppata nell’ambito del progetto. Se si utilizza un’architettura nota, si riportino gli elementi fondamentali della rete e le eventuali modifiche effettuate ma, soprattutto, si motivi la scelta.
+
+Definire in ogni caso se la rete `e stata progettata come regressore (output:
+numero reale da 0 a 100 che rappresenta l’età, da approssimare all’intero più
+vicino) o come classificatore (output: una delle 101 classi da 0 a 100) e fornire dettagli e motivazioni sulla funzione di costo scelta.
+
+\subsection{Procedura di addestramento}
+\subsubsection{Dataset}
+Dettagliare e motivare le scelte relative alla preparazione del dataset, ovvero alla composizione del training e del validation set. Se si sceglie di utilizzare un sottoinsieme del training set per ridurre i tempi di addestramento (soluzione consigliata), si motivi la scelta del numero e del tipo di campioni utilizzati per l’addestramento. Descrivere e motivare il protocollo sperimentale utilizzato per valutare le performance sul validation set (es. cross-validation).
+
+\subsubsection{Face detection} 
+Descrivere il metodo utilizzato per effettuare il rilevamento del volto. Se si utilizza un approccio noto o i volti già estratti con framework esistenti, si specifichi questa informazione.
+
+\subsubsection{Face pre-processing} 
+Descrivere e motivare tutte le tecniche di pre-processing applicate sulle immagini del volto.
+
+\subsubsection{Data augmentation}
+Descrivere e motivare tutte le policy di augmentation
+implementate per estendere il dataset o per aumentarne la rappresentativit`a.
+Training from scratch o fine tuning Specificare se la rete viene addestrata
+con inizializzazione random o partendo da pesi pre-addestrati, motivando la
+scelta e fornendo dettagli sulla strategia di inizializzazione.
+
+\subsubsection{Procedura di training}
+Dettagliare e motivare almeno le seguenti scelte: numero di epoche di addestramento, tipo di ottimizzatore, learning rate scheduling (tecnica di riduzione, learning rate iniziale, fattore di riduzione). Fornire dettagli su eventuali elementi aggiuntivi: batch normalization, weight decay, early stopping etc. Per ognuna delle scelte, riportare i valori esatti dei parametri utilizzati, per rendere l’esperimento riproducibile. Motivare la scelta di tali valori.
