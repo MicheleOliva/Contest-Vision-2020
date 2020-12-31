@@ -17,8 +17,9 @@ from keras.metrics import MeanAbsoluteError
 from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger, ReduceLROnPlateau, TensorBoard
 from dataset_utils.data_augmentation import CustomAugmenter
 from dataset_utils.data_generation import DataGenerator
-from dataset_utils.vgg_data_loader import VggDataLoader
+from dataset_utils.data_loading import CustomDataLoader
 from dataset_utils.preprocessing import CustomPreprocessor
+from dataset_utils.output_encoding import CustomOutputEncoder
 import argparse
 import re
 

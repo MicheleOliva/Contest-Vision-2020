@@ -11,6 +11,14 @@ vicino) o come classificatore (output: una delle 101 classi da 0 a 100) e fornir
 
 \subsection{Procedura di addestramento}
 \subsubsection{Dataset}
+
+Il dataset utilizzato per allenare la nostra rete a compiere il task assegnato è il dataset chiamato \emph{VGG-Face2 Mivia Age}.
+
+Quest'ultimo dataset contiene $3.31$ milioni di immagini di 9131 soggetti, con una media di $362.6$ immagini per ogni soggetto. Le immagini sono scaricate da Google Image Search e si diversificano molto per posa, età, illuminazione, etnia e professione del soggetto catturato. Ad ogni immagine è associata l'età del soggetto, tale valore è il risultato di un ensemble di $14$ modelli CNN.\\
+Il dataset ci è stato fornito già diviso in training set, che include $8631$ identità, e test set, che include le rimanenti 500.
+
+\todo{Non mi piace la seguente frase, aiuto} Le risorse che \textit{Google Colab} mette a disposizione 
+
 Dettagliare e motivare le scelte relative alla preparazione del dataset, ovvero alla composizione del training e del validation set. Se si sceglie di utilizzare un sottoinsieme del training set per ridurre i tempi di addestramento (soluzione consigliata), si motivi la scelta del numero e del tipo di campioni utilizzati per l’addestramento. Descrivere e motivare il protocollo sperimentale utilizzato per valutare le performance sul validation set (es. cross-validation).
 
 \subsubsection{Face detection} 
