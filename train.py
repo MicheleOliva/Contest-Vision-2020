@@ -118,7 +118,8 @@ train_dataset_root_path = '/content/train'
 train_batch_size = 32
 train_epoch_mode = 'identities' # Len del generator è il numero di identities
 corruptions_prob = 0.5
-frequent_corruptions_prob = 0.5
+frequent_corruptions_prob = 0.85
+epoch_multiplier = 50
 ##########################################################################################
 
 train_preprocessor = CustomPreprocessor(desired_shape=input_shape[:2])
@@ -126,7 +127,7 @@ train_augmenter = CustomAugmenter(corruptions_prob, frequent_corruptions_prob)
 train_encoder = CustomOutputEncoder()
 train_loader = CustomDataLoader(mode='training', csv_path=train_csv_path, csv_names=None, dataset_root_path=train_dataset_root_path, batch_size=train_batch_size)
 
-train_generator = DataGenerator(mode='training', preprocessor=train_preprocessor, data_augmenter=train_augmenter, output_encoder=train_encoder, data_loader=train_loader, batch_size=train_batch_size, epoch_mode=train_epoch_mode)
+train_generator = DataGenerator(mode='training', preprocessor=train_preprocessor, data_augmenter=train_augmenter, output_encoder=train_encoder, data_loader=train_loader, batch_size=train_batch_size, epoch_mode=train_epoch_mode, epoch_multiplier=epoch_multiplier)
 
 # Generatori per l'evaluation
 
@@ -141,7 +142,7 @@ eval_preprocessor = CustomPreprocessor(desired_shape=input_shape[:2])
 eval_encoder = CustomOutputEncoder()
 eval_loader = CustomDataLoader(mode='validation', csv_path=eval_csv_path, csv_names=None, dataset_root_path=eval_dataset_root_path, batch_size=eval_batch_size)
 
-eval_generator = DataGenerator(mode='validation', preprocessor=eval_preprocessor, data_augmenter=None, output_encoder=eval_encoder, data_loader=eval_loader, batch_size=eval_batch_size, epoch_mode=eval_epoch_mode)
+eval_generator = DataGenerator(mode='validation', preprocessor=eval_preprocessor, data_augmenter=None, output_encoder=eval_encoder, data_loader=eval_loader, batch_size=eval_batch_size, epoch_mode=eval_epoch_mode, epoch_multiplier=epoch_multiplier)
 
 
 ## Callbacks
