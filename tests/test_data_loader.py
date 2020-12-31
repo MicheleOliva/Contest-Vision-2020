@@ -1,10 +1,10 @@
 import sys
-sys.path.insert(0, "./pymodules/dataset_utils")
-from data_augmentation import CustomAugmenter
-from data_generation import DataGenerator
-from data_loading import CustomDataLoader
-from output_encoding import CustomOutputEncoder
-from preprocessing import CustomPreprocessor
+#sys.path.insert(0, "./pymodules/dataset_utils")
+from dataset_utils.data_augmentation import CustomAugmenter
+from dataset_utils.data_generation import DataGenerator
+from dataset_utils.data_loading import CustomDataLoader
+from dataset_utils.output_encoding import CustomOutputEncoder
+from dataset_utils.preprocessing import CustomPreprocessor
 import numpy as np
 from google.colab.patches import cv2_imshow
 

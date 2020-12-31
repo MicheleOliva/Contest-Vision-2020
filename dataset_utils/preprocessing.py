@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-from data_sample import AgeEstimationSample
+from dataset_utils.data_sample import AgeEstimationSample
 
 VGGFACE2_MEANS = np.array([91.4953, 103.8827, 131.0912])
 

@@ -1,8 +1,8 @@
 import tensorflow
-from data_loading import CustomDataLoader
-from preprocessing import CustomPreprocessor
-from data_augmentation import CustomAugmenter
-from output_encoding import CustomOutputEncoder
+from dataset_utils.data_loading import CustomDataLoader
+from dataset_utils.preprocessing import CustomPreprocessor
+from dataset_utils.data_augmentation import CustomAugmenter
+from dataset_utils.output_encoding import CustomOutputEncoder
 from math import floor
 import numpy as np
 

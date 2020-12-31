@@ -3,7 +3,7 @@ import pickle
 import sys
 
 #### PATH LIBRERIE #######################################################################
-sys.path.insert(0, "/content/Contest-Vision-2020/pymodules/dataset_utils")
+#sys.path.insert(0, "/content/Contest-Vision-2020/pymodules/dataset_utils")
 ##########################################################################################
 
 from datetime import datetime
@@ -15,11 +15,10 @@ from keras.losses import MeanSquaredError
 from keras.optimizers import Adam
 from keras.metrics import MeanAbsoluteError
 from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger, ReduceLROnPlateau, TensorBoard
-from data_augmentation import CustomAugmenter
-from data_generation import DataGenerator
-from vgg_data_loader import VggDataLoader
-from output_encoding import CustomOutputEncoder
-from preprocessing import CustomPreprocessor
+from dataset_utils.data_augmentation import CustomAugmenter
+from dataset_utils.data_generation import DataGenerator
+from dataset_utils.vgg_data_loader import VggDataLoader
+from dataset_utils.preprocessing import CustomPreprocessor
 import argparse
 import re
 

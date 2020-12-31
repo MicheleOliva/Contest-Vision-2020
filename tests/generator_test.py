@@ -1,6 +1,7 @@
-from data_loading import CustomDataLoader
-from data_generation import DataGenerator
-from vgg_data_loader import VggDataLoader
+from dataset_utils.data_loading import CustomDataLoader
+from dataset_utils.data_generation import DataGenerator
+from dataset_utils.vgg_data_loader import VggDataLoader
+from dataset_utils.preprocessing import CustomPreprocessor
 import os
 import numpy as np
 import cv2
@@ -12,7 +13,6 @@ CSV_PATH = os.path.abspath('')
 DATASET_ROOT_PATH = os.path.abspath('')
 data_loader = VggDataLoader(mode=MODE, csv_names=None, csv_path=CSV_PATH, dataset_root_path=DATASET_ROOT_PATH, batch_size=BATCH_SIZE)
 
-from preprocessing import CustomPreprocessor
 preprocessor = CustomPreprocessor(desired_shape=(96,96))
 data_generator = DataGenerator(preprocessor=preprocessor, data_augmenter=None, output_encoder=None, mode=MODE, data_loader=data_loader, batch_size=BATCH_SIZE)
 

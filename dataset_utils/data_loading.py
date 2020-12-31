@@ -1,7 +1,6 @@
 import pandas as pd
 import random
 import cv2
-#from data_sample import AgeEstimationSample, FaceSample
 import numpy as np
 import pickle
 import os
