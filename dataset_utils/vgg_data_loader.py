@@ -131,7 +131,7 @@ class VggDataLoader():
                 batch_identities.extend(self.identities[:ids_end])
 
             for identity in batch_identities:
-                print(f'Processed {num_samples_processed} samples', end='\r')
+                #print(f'Processed {num_samples_processed} samples', end='\r')
                 identity_data = self.groundtruth_metadata[identity]
                 # if there are images available for that identity
                 if identity_data['index'] < len(identity_data['metadata']):
@@ -161,7 +161,7 @@ class VggDataLoader():
             # the __len__ method in the data generator associated to this data loader is responsible for avoiding that this
             # method is called when less than batch_size "fresh" images are available
             while(num_ids_to_resample > 0 and num_identities > 0):
-                print(f'Processed {num_samples_processed} samples', end='\r')
+                #print(f'Processed {num_samples_processed} samples', end='\r')
                 identity = self.identities[ids_end] # remeber that slicing at previous step excludes upper limit
                 identity_data = self.groundtruth_metadata[identity]
                 if identity_data['index'] < len(identity_data['metadata']):
@@ -183,7 +183,7 @@ class VggDataLoader():
             if num_identities == 0:
                 reached_end = True
             multiplier += 1
-        print('\nFinished building training data batches')
+        print(f'Finished building training data batches, processed {num_samples_processed} samples')
     
     def _build_validation_data_container(self):
         for identity in self.identities:
