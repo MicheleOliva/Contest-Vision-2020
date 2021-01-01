@@ -13,6 +13,7 @@ La rete è stata progettata come un regressore. Abbiamo sostituito il layer di c
 
 \subsection{Procedura di addestramento}
 \subsubsection{Dataset}
+\label{subsubsec:dataset}
 
 Il dataset utilizzato per allenare la nostra rete a compiere il task assegnato è il dataset chiamato \emph{VGG-Face2 Mivia Age}.
 
@@ -63,9 +64,9 @@ L'analisi si è successivamente concentrata sulla \emph{media e deviazione stand
 \label{fig:gender_age_division}
 \end{figure}
 
-Come si evince dai grafici in \ref{sfig:Ids per gender and mean age} e in \ref{sfig:Images per gender and mean age}, ci sono delle fasce d'età sovrarappresentate rispetto alle altre, in particolare le fasce d'età $[25,34]$ e $[35,44]$.
+Come si evince dai grafici in figura~\ref{sfig:Ids per gender and mean age} e in figura~\ref{sfig:Images per gender and mean age}, ci sono delle fasce d'età sovrarappresentate rispetto alle altre, in particolare le fasce d'età $[25,34]$ e $[35,44]$.
 
-Con lo scopo di avere un training set quanto più bilanciato possibile, abbiamo scelto di escludere dal set gli uomini nelle fasce: $[25,34]$, $[35,44]$, $[45,54]$; e le donne nella fascia $[25,34]$; la cui deviazione standard dell'età risulta inferiore a $5.5$. Il risultato di tale operazione è visibile in \cref{fig:Ids per gender and mean age after the drop}.
+Con lo scopo di avere un training set quanto più bilanciato possibile, abbiamo scelto di escludere dal set gli uomini nelle fasce: $[25,34]$ e $[35,44]$; e le donne nella fascia $[25,34]$; la cui deviazione standard dell'età risulta inferiore a $5.5$. Il risultato di tale operazione è visibile in figura~\ref{fig:Ids per gender and mean age after the drop}.
 
 \begin{figure}[H]
 \centering
@@ -77,11 +78,20 @@ Con lo scopo di avere un training set quanto più bilanciato possibile, abbiamo 
 
 Successivamente a tale operazione, al training set sono state sottratte ulteriori $500$ identità, scelte casualmente, che hanno formato il \emph{validation set}.
 
-\subsubsection{Face detection} 
-Descrivere il metodo utilizzato per effettuare il rilevamento del volto. Se si utilizza un approccio noto o i volti già estratti con framework esistenti, si specifichi questa informazione.
+\subsubsection{Face detection}
+\label{subsubsec:face_detection}
+
+\emph{Descrivere il metodo utilizzato per effettuare il rilevamento del volto. Se si utilizza un approccio noto o i volti già estratti con framework esistenti, si specifichi questa informazione.}
+
+Non è stato effettuato alcun rilevamento del volto. Nelle annotazioni del dataset VGGFAce2, già citate nella sezione~\ref{subsubsec:dataset}, sono riportate sia per il training set che per il test set, informazioni inerenti alle bounding boxes relative ai volti dei soggetti catturati. Tali informazioni definiscono quindi la \textbf{region of interest (\textbf{roi})} di ogni immagine.
 
 \subsubsection{Face pre-processing} 
-Descrivere e motivare tutte le tecniche di pre-processing applicate sulle immagini del volto.
+
+\emph{Descrivere e motivare tutte le tecniche di pre-processing applicate sulle immagini del volto.}
+
+Si distinguono due fasi del pre-processing delle immagini, la prima fase viene effettuata a monte della data augmentation mentre la seconda a valle di quest'ultima.
+Durante la prima fase viene ritagliato il volto del soggetto. Il ritaglio non viene effettuato però sulla roi (sezione~\ref{subsubsec:face_detection}), infatti la region of interest viene allargata di un fattore $0.3$, ovviamente non andando oltre i limiti dettati dalla risoluzione dell'immagine, tale operazione permette di ritagliare oltre al volto del soggetto l'intera testa.
+Nella seconda fase ogni immagine viene prima ridimensionata alla risoluzione \todo{Attenzione alla risoluzione} $96 \times 96$ mantenendo le proporzioni, nel caso in cui l'immagine non fosse quadrata viene \todo{in che senso riempita?} riempita con delle bande nere. Successivamente il valore medio di ogni canale è sottratto da ogni pixel, ed infine viene convertita da BGR ad RGB.
 
 \subsubsection{Data augmentation}
 Descrivere e motivare tutte le policy di augmentation

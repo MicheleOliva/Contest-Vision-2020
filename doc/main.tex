@@ -37,18 +37,6 @@
 \usepackage{subcaption}
 \usepackage{calc}
 
-\usepackage{caption,subcaption,graphicx}
-\usepackage[nameinlink]{cleveref}
-\makeatletter
-\renewcommand\p@subfigure{Figura \thefigure\,}
-\renewcommand\thesubfigure{\alph{subfigure}}
-% If desired for table as well:
-% \renewcommand\p@subtable{\thetable\,}
-% \renewcommand\thesubtable{\alph{subtable})}
-\DeclareCaptionLabelFormat{mysublabelfmt}{\alph{sub\@captype}}
-\makeatother
-
-
 % Bibliografia
 \usepackage[
 backend=biber,
