@@ -19,9 +19,63 @@ Il dataset utilizzato per allenare la nostra rete a compiere il task assegnato �
 Quest'ultimo dataset contiene $3.31$ milioni di immagini di 9131 soggetti, con una media di $362.6$ immagini per ogni soggetto. Le immagini sono scaricate da Google Image Search e si diversificano molto per posa, età, illuminazione, etnia e professione del soggetto catturato. Ad ogni immagine è associata l'età del soggetto, tale valore è il risultato di un ensemble di $14$ modelli CNN.\\
 Il dataset ci è stato fornito già diviso in training set, che include $8631$ identità, e test set, che include le rimanenti 500.
 
-\todo{Non mi piace la seguente frase, aiuto} Le risorse che \textit{Google Colab} mette a disposizione 
+\todo{Non mi piace la seguente frase, aiuto} Le risorse che \textit{Google Colab} mette a disposizione sono risultate insufficienti per allenare la rete sull'intero training set. È risultato necessario ridurre la grandezza di quest'ultimo, a tale scopo è stata svolta un analisi del training set e sono stati scelte le identità su cui svolgere l'addestramento della rete. Tale analisi è stata svolta anche con il supporto delle annotazioni per VGGFace2, reperibili \href{https://github.com/MiviaLab/GenderRecognitionFramework/releases/tag/0}{qui}.
 
-Dettagliare e motivare le scelte relative alla preparazione del dataset, ovvero alla composizione del training e del validation set. Se si sceglie di utilizzare un sottoinsieme del training set per ridurre i tempi di addestramento (soluzione consigliata), si motivi la scelta del numero e del tipo di campioni utilizzati per l’addestramento. Descrivere e motivare il protocollo sperimentale utilizzato per valutare le performance sul validation set (es. cross-validation).
+Con lo scopo di svolgere l'allenamento su un training set più bilanciato possibile, abbiamo svolto una prima analisi sul genere delle identità presenti.
+
+\begin{figure}[H]
+
+\begin{subfigure}{0.5\textwidth}
+\def\svgscale{0.5}
+\input{./Images/gender_ids.pdf_tex}
+\caption{Identità divise per genere}
+\label{sfig:Ids per gender}
+\end{subfigure}
+\begin{subfigure}{0.5\textwidth}
+\def\svgscale{0.5}
+\input{./Images/gender_images.pdf_tex}
+\caption{Immagini divise per genere}
+\label{sfig:Images per gender}
+\end{subfigure}
+\caption{Divisione per genere di identità e immagini}
+\label{fig:gender_division}
+\end{figure}
+
+Come possiamo vedere in \ref{sfig:Ids per gender} e in \ref{sfig:Images per gender}, il training set risulta sbilanciato per quanto riguarda il genere dei soggetti.
+
+L'analisi si è successivamente concentrata sulla \emph{media e deviazione standard} dell'età di ogni soggetto presente nel training set.
+
+\begin{figure}[H]
+
+\begin{subfigure}{0.5\textwidth}
+\def\svgscale{0.42}
+\input{./Images/n_ids_by_age_and_gender.pdf_tex}
+\caption{Identità divise per genere ed età media}
+\label{sfig:Ids per gender and mean age}
+\end{subfigure}
+\begin{subfigure}{0.5\textwidth}
+\def\svgscale{0.42}
+\input{./Images/n_images_by_age_and_gender.pdf_tex}
+\caption{Immagini divise per genere ed età media}
+\label{sfig:Images per gender and mean age}
+\end{subfigure}
+\caption{Divisione per genere di identità e immagini}
+\label{fig:gender_age_division}
+\end{figure}
+
+Come si evince dai grafici in \ref{sfig:Ids per gender and mean age} e in \ref{sfig:Images per gender and mean age}, ci sono delle fasce d'età sovrarappresentate rispetto alle altre, in particolare le fasce d'età $[25,34]$ e $[35,44]$.
+
+Con lo scopo di avere un training set quanto più bilanciato possibile, abbiamo scelto di escludere dal set gli uomini nelle fasce: $[25,34]$, $[35,44]$, $[45,54]$; e le donne nella fascia $[25,34]$; la cui deviazione standard dell'età risulta inferiore a $5.5$. Il risultato di tale operazione è visibile in \cref{fig:Ids per gender and mean age after the drop}.
+
+\begin{figure}[H]
+\centering
+\def\svgscale{0.7}
+\input{./Images/n_ids_by_age_and_gender_after_drop.pdf_tex}
+\caption{Identità divise per genere ed età media dopo il taglio}
+\label{fig:Ids per gender and mean age after the drop}
+\end{figure}
+
+Successivamente a tale operazione, al training set sono state sottratte ulteriori $500$ identità, scelte casualmente, che hanno formato il \emph{validation set}.
 
 \subsubsection{Face detection} 
 Descrivere il metodo utilizzato per effettuare il rilevamento del volto. Se si utilizza un approccio noto o i volti già estratti con framework esistenti, si specifichi questa informazione.

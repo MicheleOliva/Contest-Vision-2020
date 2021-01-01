@@ -27,10 +27,27 @@
 \usepackage{scrextend}
 %liste inline
 \usepackage[inline]{enumitem}
-%autori
+%autor
 \usepackage{authblk}
 % TO DO
 \usepackage{todonotes}
+
+\graphicspath{{Images/}}
+\usepackage{wrapfig}
+\usepackage{subcaption}
+\usepackage{calc}
+
+\usepackage{caption,subcaption,graphicx}
+\usepackage[nameinlink]{cleveref}
+\makeatletter
+\renewcommand\p@subfigure{Figura \thefigure\,}
+\renewcommand\thesubfigure{\alph{subfigure}}
+% If desired for table as well:
+% \renewcommand\p@subtable{\thetable\,}
+% \renewcommand\thesubtable{\alph{subtable})}
+\DeclareCaptionLabelFormat{mysublabelfmt}{\alph{sub\@captype}}
+\makeatother
+
 
 % Bibliografia
 \usepackage[
@@ -67,6 +84,7 @@ sorting=ynt
 
 \maketitle
 \tableofcontents
+\listoffigures
 
 \section{Introduzione}
 \input{intro.tex}
