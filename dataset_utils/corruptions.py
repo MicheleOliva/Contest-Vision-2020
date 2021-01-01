@@ -1,5 +1,7 @@
 """
-    Some of the functions here used are taken from https://github.com/MiviaLab/GenderRecognitionFramework .
+This module contains functions implementing corruptions that can be used to augment the dataset.
+ 
+Some of the functions used here are taken from https://github.com/MiviaLab/GenderRecognitionFramework .
 """
 import numpy as np
 from skimage.filters import gaussian

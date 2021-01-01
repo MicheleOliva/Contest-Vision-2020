@@ -6,11 +6,34 @@ import pickle
 import os
 
 class VggDataLoader():
+    """
+    Takes care of loading data samples, groudntruth and eventual additional information from file.
+    Is thought to be used as member of a DataGenerator.
+    Assumes (meta)data regarding samples to build batch from is stored in a csv file.
+    It builds an array containing all the image paths in the dataset, organized in a way that batches
+    can be built by simply slicing this array. Moreover, batches contain images coming from different
+    identities, until this is possible with the number of images available.
+    Image files are loaded as soon as the batch is requested, in order to minimize RAM usage.
+    This is not a "stateful" implementation, so asking several times the batch 0 always produces the
+    same data.
+    Together with the images array, two other arrays, one containing labels and one containing rois,
+    are built. The association between paths and labels and rois is positional, i.e the image in position 0 is
+    associated to the label in position 0 and to the roi in position 0.
+    """
     def __init__(self, mode, csv_path, csv_names, dataset_root_path, batch_size, csv_sep=','):
         """
-            mode is one of 'training', 'validation', 'testing'
+        Parameters
+        ----------
+        mode : String 
+            One of 'training', 'validation', 'testing'
 
-            Just pass None as csv_names if you don't need to load custom header names. The same holds for csv_sep.
+        csv_names : String[]
+            An array of strings to be used as column names when reading data from the given csv file.
+            Just pass None if you don't need to load custom header names. 
+        
+        csv_sep : String
+            Character(s) used to separate data in given csv file.
+            Just pass None if you don't need to load custom header names. 
         """
         self.allowed_modes = ['training', 'validation', 'testing']
         if mode is None or mode not in self.allowed_modes:
@@ -27,17 +50,33 @@ class VggDataLoader():
         self.dataset_root_path = dataset_root_path
 
         self.identities = [] # list to hold all of the ids, in order to be able to build balanced batches
+        # since when all the samples from an identity have been used the corresponding identity is dropped
+        # from self.identities list, another list is needed to persistently store identites through epochs.
         self.identities_persistent = []
 
+        # dictionary to hold metadata about data samples associated to an identity, with the following structure:
+        # {identity_id: {
+        #   'index': index, 
+        #   'metadata': [{},{},{}]
+        # }}
+        # where 'index' is the index of the next image (whose path will be taken from the 'metadata' list) related to indentity_id that must be included in a subsequent batch, and 'metadata'
+        # is a list of dictionaries that contain each metadata regarding a specific data sample associated to the identity.
         self.groundtruth_metadata = {} 
 
+        # List of dictionaries with the following structure:
+        # {path: {
+        #   'roi_origin_x': value,
+        #   'roi_origin_y': value,
+        #   'roi_width': value,
+        #   'roi_height': value,
+        # }}
         self.test_data = []
 
         self.num_samples = 0
 
-        self.images = []
-        self.labels = []
-        self.rois = []
+        self.images = [] # list of image paths to be used to load images for each batch
+        self.labels = [] # list of labels to be used with images for each batch
+        self.rois = [] # list of rois to be used with images for each batch
         
         if self.mode != 'testing':
             self._init_training_validation(csv_path, csv_sep, csv_names)
@@ -45,6 +84,9 @@ class VggDataLoader():
             self._init_testing(csv_path, csv_sep, csv_names)
     
     def _init_training_validation(self, csv_path, csv_sep, csv_names):
+        """
+        Build data structure used to build training/validation batches using information contained in given csv file.
+        """
         print('Loading training/validation data...')            
         if csv_path.split('.')[-1] == 'cache':
             # load cache
@@ -109,6 +151,9 @@ class VggDataLoader():
             self._build_validation_data_container()
 
     def _build_training_data_container(self):
+        """
+        Build images, rois and labels arrays used to build training batches.
+        """
         print('Building training data batches')
         self.images = []
         self.labels = []
@@ -194,6 +239,9 @@ class VggDataLoader():
                 self.rois.append(data_sample['roi'])
         
     def _init_testing(self, csv_path, csv_sep, csv_names):
+        """
+        Build data structure used to build test batches using information contained in given csv file.
+        """
         self.test_data = []
         # mode is surely 'testing'
         # load metadata from csv (need for face bounding boxes)
@@ -215,6 +263,9 @@ class VggDataLoader():
         print('Done loading test data!')
 
     def load_batch(self, batch_index):
+        """
+        Call the appropriate functions to create the batch_index-th batch.
+        """
         if self.num_samples < self.batch_size:
             raise ValueError('The number of samples is smaller than the batch size')
         
@@ -224,6 +275,12 @@ class VggDataLoader():
             return self._yield_testing(batch_index)
         
     def _yield_training_validation(self, batch_index):
+        """
+        Actually creates the batch_index-th batch of training/validation data. 
+        The batch is composed of three arrays: one for images, one for labels and one for rois.
+        The relation between paths and labels and rois is positional, i.e the image in position 0 is
+        associated to the label in position 0 and to the roi in position 0.
+        """
         images_to_yield_paths = self.images[batch_index*self.batch_size:(batch_index+1)*self.batch_size]
         images_to_yield = []
         labels_to_yield = self.labels[batch_index*self.batch_size:(batch_index+1)*self.batch_size]
@@ -244,6 +301,11 @@ class VggDataLoader():
         return images_to_yield, labels_to_yield, rois_to_yield
 
     def _yield_testing(self, batch_index):
+        """
+        Actually creates the batch_index-th batch of test data.
+        Testing mode doesn't work by identities, but works by samples.
+        The batch is composed of two arrays: one for images and one for rois. 
+        """
         images_to_yield = []
         rois_to_yield = []
         data_to_yield = self.test_data[batch_index*self.batch_size:(batch_index+1)*self.batch_size]
@@ -288,6 +350,10 @@ class VggDataLoader():
             self._build_training_data_container()
         
     def _shuffle(self, reinit_indexes = False):
+        """
+        Shuffles identities and data samples associated to each identity,
+        so that the batches of the next epoch are different from the ones of the current epoch.
+        """
         print('Shuffling data...')
         # shuffle identities
         random.shuffle(self.identities)
@@ -299,6 +365,10 @@ class VggDataLoader():
         print('Finished shuffling data!')
     
     def _reinit_indexes(self):
+        """
+        Reinitializes indexes used to keep track of which images have already been included in a batch,
+        for each sample.
+        """
         print('Reinitializing indexes...')
         for identity in self.groundtruth_metadata.keys():
             self.groundtruth_metadata[identity]['index'] = 0

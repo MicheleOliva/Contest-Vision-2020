@@ -1,7 +1,11 @@
+"""
+Codice per convertire i dizionari nel formato fatto da Michele nella divisione del dataset
+nel formato richiesto dai data loader.
+"""
 
 # n000003/0001_01.jpg {'ID': 'n000003', 'Gender': 'm', 'Age': 46.03625477357375, 'x_min': 80, 'y_min': 19, 'width': 250, 'height': 250}
 
-dictionary = {}#DIZIONARIO DA COPIARE
+dictionary = {} # DIZIONARIO DA CONVERTIRE
 
 francesco_dict = {}
 francesco_list = []

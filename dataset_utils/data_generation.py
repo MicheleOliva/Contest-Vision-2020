@@ -7,12 +7,34 @@ from math import floor
 import numpy as np
 
 
-"""
-    Strategy design pattern w.r.t. pre-processing, data augmentation, output enconding and file loading
-"""
 class DataGenerator(tensorflow.keras.utils.Sequence):
+    """
+    Implements a generator for the data to submit to the model during training/validation/testing process.
+    
+    Adopts a strategy design pattern w.r.t. pre-processing, data augmentation, output enconding and file loading,
+    so that it's independent of the way such operations are performed.
 
+    Supports two way to implement the concept of epoch completion:
+    1) Full epoch: an epoch is considered completed when all the samples the data loader has access to have been
+    explored.
+    2) Epoch by identities: an epoch is considered completed when a sample for each of the identities of the dataset
+    the data loader has access to has been explored. It's also possible to specify a multiplier so that the number of
+    identities that have to be visited for the epoch to be considered completed it's equal to the number of the identities
+    in the dataset multiplied by this multiplier.
+    """
     def __init__(self, mode, preprocessor: CustomPreprocessor, data_augmenter: CustomAugmenter, output_encoder: CustomOutputEncoder, data_loader, batch_size, epoch_mode = 'full', epoch_multiplier=50):
+        """
+        Parameters
+        ----------
+        mode : String
+            The mode data has to be produced. Must be one of 'training', 'validation' or 'testing'.
+
+        epoch_mode : String
+            Which definition of epoch completion must be used. Must be one of 'full' or 'identities'.
+        
+        epoch_multiplier : Integer
+            The multiplier to use with the number of identities in the dataset to consider an epoch completed.
+        """
         if data_loader is None or batch_size is None:
             raise TypeError('Data generator needs data loader and batch size to be specified')
 
@@ -26,6 +48,9 @@ class DataGenerator(tensorflow.keras.utils.Sequence):
 
         if mode == 'testing' and epoch_mode != 'full':
             raise TypeError("Can't use 'testing' mode with epoch mode different from 'full'")
+        
+        if epoch_mode == 'identities' and epoch_multiplier <= 0:
+            raise TypeError("When epoch_mode is 'identities' an integer epoch_multiplier >= 1 must be specified")
 
         self.mode = mode
         self.epoch_mode = epoch_mode
@@ -74,5 +99,4 @@ class DataGenerator(tensorflow.keras.utils.Sequence):
             return np.array(x_batch)
     
     def on_epoch_end(self):
-        if self.mode == 'training' or self.mode == 'validation':
-            self.data_loader.epoch_ended()
+        self.data_loader.epoch_ended()

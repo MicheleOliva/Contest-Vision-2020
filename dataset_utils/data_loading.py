@@ -8,14 +8,36 @@ import os
 
 """
     keras.preprocessing.image_data_from_directory
-
 """
 class CustomDataLoader():
+    """
+    Takes care of loading data samples, groudntruth and eventual additional information from file.
+    Is thought to be used as member of a DataGenerator.
+    Assumes (meta)data regarding samples to build batch from is stored in a csv file.
+    It build batches by loading image files as soon as the batch is requested, in order to minimize
+    RAM usage.
+    Batches contain images coming from different identities, until this is possible with the number 
+    of images available.
+    Note that this is a "stateful" implementation, so if for example the batch 0 has been requested, if it's requested
+    again a different set of images is returned.
+    Together with the images array, two other arrays, one containing labels and one containing rois,
+    are built. The association between paths and labels and rois is positional, i.e the image in position 0 is
+    associated to the label in position 0 and to the roi in position 0.
+    """
     def __init__(self, mode, csv_path, csv_names, dataset_root_path, batch_size, csv_sep=','):
         """
-            mode is one of 'training', 'validation', 'testing'
+        Parameters
+        ----------
+        mode : String 
+            One of 'training', 'validation', 'testing'
 
-            Just pass None as csv_names if you don't need to load custom header names. The same holds for csv_sep.
+        csv_names : String[]
+            An array of strings to be used as column names when reading data from the given csv file.
+            Just pass None if you don't need to load custom header names. 
+        
+        csv_sep : String
+            Character(s) used to separate data in given csv file.
+            Just pass None if you don't need to load custom header names. 
         """
         self.allowed_modes = ['training', 'validation', 'testing']
         if mode is None or mode not in self.allowed_modes:
@@ -58,6 +80,9 @@ class CustomDataLoader():
             self._init_test(csv_path, csv_sep, csv_names)
     
     def _init_train_valid(self, csv_path, csv_sep, csv_names):
+        """
+        Build data structure used to build training/validation batches using information contained in given csv file.
+        """
         # load groundtruth
         # last element following a dot is file's extension
         print('Loading data...')            
@@ -119,6 +144,9 @@ class CustomDataLoader():
             self._shuffle()
     
     def _init_test(self, csv_path, csv_sep, csv_names):
+        """
+        Build data structure used to build test batches using information contained in given csv file.
+        """
         # mode is surely 'testing'
         # load metadata from csv (need for face bounding boxes)
         # Assumes for the provided csv the following structure:
@@ -139,6 +167,9 @@ class CustomDataLoader():
         print('Done loading test data!')
 
     def load_batch(self, batch_index):
+        """
+        Call the appropriate functions to create the batch_index-th batch.
+        """
         if self.num_samples < self.batch_size:
             raise ValueError('The number of samples is smaller than the batch size')
         
@@ -155,6 +186,12 @@ class CustomDataLoader():
             return self._yield_testing(batch_index)
         
     def _yield_training_validation(self, batch_index):
+        """
+        Actually creates the batch_index-th batch of training/validation data. 
+        The batch is composed of three arrays: one for images, one for labels and one for rois.
+        The relation between paths and labels and rois is positional, i.e the image in position 0 is
+        associated to the label in position 0 and to the roi in position 0.
+        """
         # print(f'requested batch with index: {batch_index}') # DEBUG
         num_identities = len(self.identities)
         num_ids_to_resample = 0
@@ -239,9 +276,10 @@ class CustomDataLoader():
 
     def _yield_testing(self, batch_index):
         """
-            Testing mode doesn't work by identities, but works by samples.
+        Actually creates the batch_index-th batch of test data.
+        Testing mode doesn't work by identities, but works by samples.
+        The batch is composed of two arrays: one for images and one for rois. 
         """
-        #raise NotImplementedError('Data loader for testing data is not implemented yet')
         samples_start = batch_index % self.num_samples
         samples_end = (batch_index+1) % self.num_samples
         if samples_start < samples_end:
@@ -295,6 +333,10 @@ class CustomDataLoader():
             self._reinit_indexes()
 
     def _shuffle(self, reinit_indexes = False):
+        """
+        Shuffles identities and data samples associated to each identity.
+        so that the batches of the next epoch are different from the ones of the current epoch.
+        """
         print('Shuffling data...')
         # set seed for reproducibility
         #random.seed()
@@ -308,6 +350,10 @@ class CustomDataLoader():
         print('Finished shuffling data!')
     
     def _reinit_indexes(self):
+        """
+        Reinitializes indexes used to keep track of which images have already been included in a batch,
+        for each sample.
+        """
         print('Reinitializing indexes...')
         for identity in self.groundtruth_metadata.keys():
             self.groundtruth_metadata[identity]['index'] = 0

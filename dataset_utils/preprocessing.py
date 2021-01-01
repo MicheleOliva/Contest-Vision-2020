@@ -5,6 +5,9 @@ from dataset_utils.data_sample import AgeEstimationSample
 VGGFACE2_MEANS = np.array([91.4953, 103.8827, 131.0912])
 
 class CustomPreprocessor():
+    """
+    Implements pre-augmentation and post-augmentation operations.
+    """
     def __init__(self, desired_shape=(224, 224)):
         self.desired_shape = desired_shape
     
@@ -17,6 +20,9 @@ class CustomPreprocessor():
         return outim
     
     def _augment_roi(self, roi, aug_factor):
+        """
+        Expands an image's roi of a given factor.
+        """
         aug_roi = []
         w = roi[2]
         h = roi[3]
@@ -31,6 +37,9 @@ class CustomPreprocessor():
         return aug_roi        
 
     def cut(self, img, roi):
+        """
+        Extract face region from image according to roi information.
+        """
         real_img = img
         aug_roi = self._augment_roi(roi, 1.3)
         img = img[aug_roi[1]:np.min([aug_roi[1]+aug_roi[3], img.shape[0]]),
@@ -43,6 +52,9 @@ class CustomPreprocessor():
         return data - VGGFACE2_MEANS
     
     def _resize(self, sample):
+        """
+        Resizes images to match model's input size.
+        """
         # Ci prendiamo le dimensioni attuali e quelle desiderate
         h, w = sample.shape[:2]
         dh, dw = self.desired_shape

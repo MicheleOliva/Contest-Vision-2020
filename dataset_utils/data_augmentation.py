@@ -2,10 +2,23 @@ from dataset_utils.corruptions import *
 import random
 
 class CustomAugmenter():
+    """
+    Applies augmentation techniques chosen for the age estimation problem, according to the defined policy
+    (that is implicit in the code, it is not managed explicitly). 
+    In particular, with the policy implemented two kind of corruptions are identified, frequent and non-frequent ones, and a probability
+    is associated to each kind of corruption, so that, given that a corruption must occur, these probabilities
+    are used to choose which kind of corruption must be applied. To choose wheter an image must be corrupted,
+    another probability is used.
+    """
     def __init__(self, corruptions_prob, frequent_corruptions_prob):
         """
-            corruptions_prob is the probability of an image to be corrupted. Must be in [0,1].
-            frequent_corruptions_prob is the probability of a frequent corruption to happen. Must be in [0,1].
+        Parameters
+        ----------
+        corruptions_prob : float 
+            The probability of an image being corrupted. Must be in [0,1].
+
+        frequent_corruptions_prob : float 
+            The probability of a frequent corruption to happen. Must be in [0,1].
         """
         self.frequent_corruptions = [gaussian_noise, random_crop, brightness, contrast, horizontal_flip, rotation]
         self.other_corruptions = [gaussian_blur, skew, spatter]
@@ -14,6 +27,9 @@ class CustomAugmenter():
 
     # data is an array (batch)
     def apply_augmentation(self, data):
+        """
+        Applies one of the augmentations encapsulated by the class, with the policy encapsulated by the class.
+        """
         # can't use foreach-like syntax because it create a reference that is local to the for loop scope, while I need to modify
         # the actual object in the list
         for i in range(0, len(data)):
