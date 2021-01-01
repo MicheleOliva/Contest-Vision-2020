@@ -57,8 +57,8 @@ if resume:
       exit(0)
 
   print(f"Found {last_model}. Loading...")
-  model = load_model(last_model)
-  model.compile(optimizer=Adam(learning_rate=0.0001), loss=MeanSquaredError(), metrics=[ MeanAbsoluteError(name='mae') ])
+  model = load_model(last_model, compile=True)
+  #model.compile(optimizer=Adam(learning_rate=0.0001), loss=MeanSquaredError(), metrics=[ MeanAbsoluteError(name='mae') ])
   initial_epoch = last_model_epochs
 
 
