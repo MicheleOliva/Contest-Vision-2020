@@ -20,6 +20,7 @@ from dataset_utils.data_generation import DataGenerator
 from dataset_utils.data_loading import CustomDataLoader
 from dataset_utils.preprocessing import CustomPreprocessor
 from dataset_utils.output_encoding import CustomOutputEncoder
+from age_estimation_utils.custom_metrics import rounded_mae
 import argparse
 import re
 
@@ -99,7 +100,8 @@ else:
   # Compiliamo il modello
   optimizer = Adam()
   loss = MeanSquaredError()
-  metrics = [ MeanAbsoluteError(name='mae') ]
+  metrics = [MeanAbsoluteError(name='mae'),
+             rounded_mae]
 
   model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
   initial_epoch = 0
