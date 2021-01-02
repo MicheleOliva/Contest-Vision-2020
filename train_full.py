@@ -232,6 +232,7 @@ if override_lr:
 
 print('Starting model training...')
 
+# Print output to stdout in addition to console: command | tee -a /path/to/file ('command' is the command you use to run this script)
 history = model.fit(train_generator, 
                     validation_data=eval_generator, 
                     initial_epoch=initial_epoch,
