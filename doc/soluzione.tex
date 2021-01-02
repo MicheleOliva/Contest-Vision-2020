@@ -89,7 +89,7 @@ Non è stato effettuato alcun rilevamento del volto. Nelle annotazioni del datas
 \emph{Descrivere e motivare tutte le tecniche di pre-processing applicate sulle immagini del volto.}
 
 Si distinguono due fasi del pre-processing delle immagini, la prima fase viene effettuata a monte della data augmentation mentre la seconda a valle di quest'ultima.
-Durante la prima fase viene ritagliato il volto del soggetto. Il ritaglio non viene effettuato però sulla ROI(sezione~\ref{subsubsec:face_detection}), infatti la region of interest viene allargata di un fattore $0.3$, ovviamente non andando oltre i limiti dettati dalla risoluzione dell'immagine, tale operazione permette di ritagliare oltre al volto del soggetto l'intera testa.
+Durante la prima fase viene ritagliato il volto del soggetto. Il ritaglio non viene effettuato però sulla ROI(sezione~\ref{subsubsec:face_detection}), infatti la region of interest viene allargata di un fattore $0.3$, ovviamente non andando oltre i limiti dettati dalla risoluzione dell'immagine. Tale operazione permette di ritagliare oltre al volto del soggetto l'intera testa.
 Nella seconda fase ogni immagine viene ridimensionata alla risoluzione $224 \times 224$, nel caso in cui l'immagine dovesse essere ingrandita verrà utilizzata un interpolazione cubica, nel caso in cui, invece, l'immagine dovesse essere rimpicciolita verrà utilizzata un interpolazione area-based. Nonostante l'interpolazione cubica risulti più complessa e lenta dell'interpolazione lineare, è stata preferita a quest'ultima perché la qualità dell'immagine risultante sarà più alta. Il ridimensionamento viene effettuato mantenendo le proporzioni originali dell'immagine, nel caso in cui l'immagine non fosse quadrata vengono aggiunte delle bande nere che la rendono tale. Successivamente il valore medio di ogni canale è sottratto da ogni pixel\todo{specificare che la media è di VGGFace2}.
 
 \begin{figure}[H]
@@ -102,9 +102,11 @@ Nella seconda fase ogni immagine viene ridimensionata alla risoluzione $224 \tim
 \hspace{0.1\textwidth}
 \begin{subfigure}{0.3\textwidth}
 \includegraphics[width=\textwidth]{./Images/preprocessed.jpg}
-\caption{L'immagine a monte della data augmentation}
+\caption{Il risultato del ritaglio}
 \label{sfig:preprocessed}
 \end{subfigure}
+\caption{Preprocessing a monte della data augmentation}
+\label{fig:preprocessing}
 \end{figure}
 
 \subsubsection{Data augmentation}
@@ -168,6 +170,8 @@ Gli intervalli sono stati scelti sulla base delle implementazioni del Mivia Gend
 \caption{Rotazione di $7.0 \degree$}
 \label{sfig:corruption_rotation}
 \end{subfigure}\hfill
+\caption{Possibili applicazioni dei filtri}
+\label{sfig:data_augmentation}
 \end{figure}
 
 \subsection{Training from scratch o fine tuning}
