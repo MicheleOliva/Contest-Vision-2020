@@ -167,7 +167,7 @@ mode = 'auto' # Controllare che funzioni, ossia il mae deve scendere per essere 
 factor = 0.2 # lr = lr * factor
 patience_lr = 2 # Cambiare in base alla lunghezza dell'epoca
 patience_stop = 3
-checkpoint_path = os.path.join(path, "epoch{epoch:02d}_mae{val_mae:.2f}.model")
+checkpoint_path = os.path.join(path, "epoch{epoch:02d}_loss{val_loss:.2f}.model")
 save_best_only = False
 logdir = os.path.join(path, "tensorboard")
 ##########################################################################################
@@ -223,7 +223,7 @@ if warmup:
   print('Performing warmup...')
   lr_increase = warmup_params['target_lr']/warmup_params['n_warmup_steps']
   K.set_value(model.optimizer.lr, 0)
-  for i in range(0, int(warmup_params['n_warmup_steps'])):
+  for i in range(0, min(int(warmup_params['n_warmup_steps']), len(train_generator))):
     batch = train_generator[i]
     model.train_on_batch(batch[0], batch[1])
     K.set_value(model.optimizer.lr, lr_increase*(i+1))

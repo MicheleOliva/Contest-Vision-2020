@@ -218,7 +218,7 @@ print('Performing warmup...')
 if warmup:
   lr_increase = warmup_params['target_lr']/warmup_params['n_warmup_steps']
   K.set_value(model.optimizer.lr, 0)
-  for i in range(0, int(warmup_params['n_warmup_steps'])):
+  for i in range(0, min(int(warmup_params['n_warmup_steps']), len(train_generator))):
     batch = train_generator[i]
     model.train_on_batch(batch[0], batch[1])
     K.set_value(model.optimizer.lr, lr_increase*(i+1))
