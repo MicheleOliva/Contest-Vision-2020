@@ -22,7 +22,7 @@ class DataGenerator(tensorflow.keras.utils.Sequence):
     identities that have to be visited for the epoch to be considered completed it's equal to the number of the identities
     in the dataset multiplied by this multiplier.
     """
-    def __init__(self, mode, preprocessor: CustomPreprocessor, data_augmenter: CustomAugmenter, output_encoder: CustomOutputEncoder, data_loader, batch_size, epoch_mode = 'full', epoch_multiplier=50):
+    def __init__(self, mode, preprocessor: CustomPreprocessor, data_augmenter: CustomAugmenter, output_encoder: CustomOutputEncoder, data_loader, batch_size, gt_encoder=None, epoch_mode='full', epoch_multiplier=50):
         """
         Parameters
         ----------
@@ -59,6 +59,7 @@ class DataGenerator(tensorflow.keras.utils.Sequence):
         self.output_encoder = output_encoder
         self.data_loader = data_loader
         self.batch_size = batch_size
+        self.gt_encoder = gt_encoder
         self.epoch_multiplier = epoch_multiplier
     
     def __len__(self):
@@ -79,6 +80,9 @@ class DataGenerator(tensorflow.keras.utils.Sequence):
             x_batch, y_batch, roi_batch = self.data_loader.load_batch(curr_batch)
         else:
             x_batch, roi_batch = self.data_loader.load_batch(curr_batch)
+        
+        if self.gt_encoder is not None:
+            y_batch = self.gt_encoder.encode(y_batch)
 
         if self.preprocessor is not None:
             x_batch = self.preprocessor.pre_augmentation(x_batch, roi_batch)
