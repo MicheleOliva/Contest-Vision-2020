@@ -19,7 +19,7 @@ Il dataset utilizzato per allenare la nostra rete a compiere il task assegnato �
 Quest'ultimo dataset contiene $3.31$ milioni di immagini di 9131 soggetti, con una media di $362.6$ immagini per ogni soggetto. Le immagini sono scaricate da Google Image Search e si diversificano molto per posa, età, illuminazione, etnia e professione del soggetto catturato. Ad ogni immagine è associata l'età del soggetto, tale valore è il risultato di un ensemble di $14$ modelli CNN.\\
 Il dataset ci è stato fornito già diviso in training set, che include $8631$ identità, e test set, che include le rimanenti 500.
 
-\todo{Non mi piace la seguente frase, aiuto} Le risorse che \textit{Google Colab} mette a disposizione sono risultate insufficienti per allenare la rete sull'intero training set. È risultato necessario ridurre la grandezza di quest'ultimo, a tale scopo è stata svolta un analisi del training set e sono stati scelte le identità su cui svolgere l'addestramento della rete. Tale analisi è stata svolta anche con il supporto delle annotazioni per VGGFace2, reperibili \href{https://github.com/MiviaLab/GenderRecognitionFramework/releases/tag/0}{qui}\todo{I link conviene metterli per intero in footnote}.
+\todo{Non mi piace la seguente frase, aiuto} Le risorse che \textit{Google Colab} mette a disposizione sono risultate insufficienti per allenare la rete sull'intero training set. È risultato necessario ridurre la grandezza di quest'ultimo, a tale scopo è stata svolta un analisi del training set e sono stati scelte le identità su cui svolgere l'addestramento della rete. Tale analisi è stata svolta anche con il supporto delle annotazioni per VGGFace2 \footnote{Le annotazioni sono reperibili: \url{https://github.com/MiviaLab/GenderRecognitionFramework/releases/tag/0}}.
 
 Con lo scopo di svolgere l'allenamento su un training set più bilanciato possibile, abbiamo svolto una prima analisi sul genere delle identità presenti.
 
@@ -82,15 +82,30 @@ Successivamente a tale operazione, al training set sono state sottratte ulterior
 
 \emph{Descrivere il metodo utilizzato per effettuare il rilevamento del volto. Se si utilizza un approccio noto o i volti già estratti con framework esistenti, si specifichi questa informazione.}
 
-Non è stato effettuato alcun rilevamento del volto. Nelle annotazioni del dataset VGGFAce2, già citate nella sezione~\ref{subsubsec:dataset}, sono riportate sia per il training set che per il test set, informazioni inerenti alle bounding boxes relative ai volti dei soggetti catturati. Tali informazioni definiscono quindi la \textbf{region of interest (\textbf{roi})} di ogni immagine.
+Non è stato effettuato alcun rilevamento del volto. Nelle annotazioni del dataset VGGFAce2, già citate nella sezione~\ref{subsubsec:dataset}, sono riportate sia per il training set che per il test set, informazioni inerenti alle bounding boxes relative ai volti dei soggetti catturati. Tali informazioni definiscono quindi la \textbf{region of interest (\textbf{ROI})} di ogni immagine.
 
 \subsubsection{Face pre-processing} 
 
 \emph{Descrivere e motivare tutte le tecniche di pre-processing applicate sulle immagini del volto.}
 
 Si distinguono due fasi del pre-processing delle immagini, la prima fase viene effettuata a monte della data augmentation mentre la seconda a valle di quest'ultima.
-Durante la prima fase viene ritagliato il volto del soggetto. Il ritaglio non viene effettuato però sulla roi\todo{definire un acronimo prima di usarlo, e scriverlo maiuscolo} (sezione~\ref{subsubsec:face_detection}), infatti la region of interest viene allargata di un fattore $0.3$, ovviamente non andando oltre i limiti dettati dalla risoluzione dell'immagine, tale operazione permette di ritagliare oltre al volto del soggetto l'intera testa.
-Nella seconda fase ogni immagine viene prima ridimensionata \todo{parla dei filtri cubico e area} alla risoluzione \todo{Attenzione alla risoluzione} $96 \times 96$ mantenendo le proporzioni, nel caso in cui l'immagine non fosse quadrata viene \todo{in che senso riempita?} riempita con delle bande nere. Successivamente il valore medio di ogni canale è sottratto da ogni pixel\todo{specificare che la media è di VGGFace2}, ed infine viene convertita da BGR ad RGB\todo{si può evitare di parlare di RGB o BGR}.
+Durante la prima fase viene ritagliato il volto del soggetto. Il ritaglio non viene effettuato però sulla ROI(sezione~\ref{subsubsec:face_detection}), infatti la region of interest viene allargata di un fattore $0.3$, ovviamente non andando oltre i limiti dettati dalla risoluzione dell'immagine, tale operazione permette di ritagliare oltre al volto del soggetto l'intera testa.
+Nella seconda fase ogni immagine viene ridimensionata alla risoluzione $224 \times 224$, nel caso in cui l'immagine dovesse essere ingrandita verrà utilizzata un interpolazione cubica, nel caso in cui, invece, l'immagine dovesse essere rimpicciolita verrà utilizzata un interpolazione area-based. Nonostante l'interpolazione cubica risulti più complessa e lenta dell'interpolazione lineare, è stata preferita a quest'ultima perché la qualità dell'immagine risultante sarà più alta. Il ridimensionamento viene effettuato mantenendo le proporzioni originali dell'immagine, nel caso in cui l'immagine non fosse quadrata vengono aggiunte delle bande nere che la rendono tale. Successivamente il valore medio di ogni canale è sottratto da ogni pixel\todo{specificare che la media è di VGGFace2}.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.3\textwidth}
+\includegraphics[width=\textwidth]{./Images/detection.jpg}
+\caption{ROI evidenziata per quest'immagine}
+\label{sfig:detection}
+\end{subfigure}
+\hspace{0.1\textwidth}
+\begin{subfigure}{0.3\textwidth}
+\includegraphics[width=\textwidth]{./Images/preprocessed.jpg}
+\caption{L'immagine a monte della data augmentation}
+\label{sfig:preprocessed}
+\end{subfigure}
+\end{figure}
 
 \subsubsection{Data augmentation}
 \emph{Descrivere e motivare tutte le policy di augmentation implementate per estendere il dataset o per aumentarne la rappresentatività.}
@@ -101,7 +116,7 @@ I filtri applicati sono:
 \item \emph{rumore gaussiano additivo} con media 0 e deviazione standard nell'intervallo $[0.08, 0.30]$, come prevenzione ad attacchi semplici che sfruttano questo effetto;
 \item \emph{blur gaussiano} con deviazione standard nell'intervallo $[1, 4]$, presente soprattutto in immagini di cui si fa un upscale tramite filtro bicubico;
 \item \emph{ritaglio} \cite{miviagender}, per cui l'immagine viene tagliata ulteriormente per simulare facce coperte o fotografie in cui la faccia non è ripresa completamente;
-\item \emph{rotazione} nell'intervallo $[-10^\circ, 10^\circ]$, per rendere la rete invariante rispetto a facce non perfettamente allineate al frame;
+\item \emph{rotazione} nell'intervallo $[-10 \degree, 10 \degree ]$, per rendere la rete invariante rispetto a facce non perfettamente allineate al frame;
 \item \emph{rovesciamento} rispetto all'asse verticale;
 \item \emph{inclinazione} \cite{miviagender} nello spazio tridimensionale;
 \item \emph{spatter} \cite{miviagender}, ossia schizzi e macchie per rendere la rete invariante a possibili coperture del viso, sia digitali che volontarie da parte del soggetto inquadrato;
@@ -111,6 +126,49 @@ Per ogni immagine, viene scelto casualmente se applicare o meno un filtro. In ca
 
 Gli intervalli sono stati scelti sulla base delle implementazioni del Mivia Gender Recognition Framework \cite{miviagender}, eventualmente personalizzati sulla base di alcune prove effettuate manualmente, tali per cui l'effetto non sia completamente distruttivo e il risultato sia ancora riconoscibile all'occhio umano rispetto all'immagine originale.
 
+\begin{figure}[h]
+\begin{subfigure}{0.2\textwidth}
+\includegraphics[width=\textwidth]{./Images/contrast_severity_0.2.jpg}
+\caption{Contrasto aumentato di $0.2$}
+\label{sfig:corruption_contrast}
+\end{subfigure}\hfill
+\begin{subfigure}{0.2\textwidth}
+\includegraphics[width=\textwidth]{./Images/brightness_severity_-0.3.jpg}
+\caption{Luminosità ridotta del $30\%$}
+\label{sfig:corruption_brightness}
+\end{subfigure}\hfill
+\begin{subfigure}{0.2\textwidth}
+\includegraphics[width=\textwidth]{./Images/gaussian_blur_severity_2.0.jpg}
+\caption{Blur gaussiana con deviazione standard $0.2$}
+\label{sfig:corruption_gaussian_blur}
+\end{subfigure}\hfill
+\begin{subfigure}{0.2\textwidth}
+\includegraphics[width=\textwidth]{./Images/gaussian_noise_severity_0.1.jpg}
+\caption{Rumore gaussiano con deviazione standard $0.1$}
+\label{sfig:corruption_gaussian_noise}
+\end{subfigure}\hfill
+
+\begin{subfigure}{0.2\textwidth}
+\includegraphics[width=\textwidth]{./Images/skew.jpg}
+\caption{inclinazione nello spazio tridimensionale}
+\label{sfig:corruption_skew}
+\end{subfigure}\hfill
+\begin{subfigure}{0.2\textwidth}
+\includegraphics[width=\textwidth]{./Images/spatter_severity_3.jpg}
+\caption{Spatter con severità $3.0$}
+\label{sfig:corruption_spatter}
+\end{subfigure}\hfill
+\begin{subfigure}{0.2\textwidth}
+\includegraphics[width=\textwidth]{./Images/random_crop_severity_0.3.jpg}
+\caption{Ritaglio del $30\%$}
+\label{sfig:corruption_random_crop}
+\end{subfigure}\hfill
+\begin{subfigure}{0.2\textwidth}
+\includegraphics[width=\textwidth]{./Images/rotation_severity_7.0.jpg}
+\caption{Rotazione di $7.0 \degree$}
+\label{sfig:corruption_rotation}
+\end{subfigure}\hfill
+\end{figure}
 
 \subsection{Training from scratch o fine tuning}
 \emph{Specificare se la rete viene addestrata con inizializzazione random o partendo da pesi pre-addestrati, motivando la scelta e fornendo dettagli sulla strategia di inizializzazione.}
