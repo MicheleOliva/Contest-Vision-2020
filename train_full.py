@@ -22,6 +22,7 @@ from dataset_utils.preprocessing import CustomPreprocessor
 from age_estimation_utils.custom_metrics import rounded_mae
 import argparse
 import re
+from keras import backend as K
 
 # Argomenti da riga di comando
 argparser = argparse.ArgumentParser(description='Starts training in a generated directory. With --resume resumes training from the last saved model in the current working directory.')
@@ -36,6 +37,9 @@ datetime = datetime.today().strftime('%Y%m%d_%H%M%S')
 # Se si riprende il training
 if resume:
   print("Resuming training from latest model...")
+  # Disabilitiamo warmup
+  warmup = False
+
   # Cerchiamo il modello più recente in termini di epoche
   dir = os.listdir()
 
@@ -59,7 +63,6 @@ if resume:
 
   print(f"Found {last_model}. Loading...")
   model = load_model(last_model, compile=True)
-  #model.compile(optimizer=Adam(learning_rate=0.0001), loss=MeanSquaredError(), metrics=[ MeanAbsoluteError(name='mae') ])
   initial_epoch = last_model_epochs
 
 
@@ -72,7 +75,7 @@ else:
   classifier_activation = 'relu'
   weights = 'imagenet'
   classes = 1
-  input_shape = (96, 96, 3)
+  input_shape = (224, 224, 3)
   alpha = 1.0
   ##########################################################################################
 
@@ -105,6 +108,9 @@ else:
 
   model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
   initial_epoch = 0
+
+  # abilitiamo warmup
+  warmup = True
 
   
 model.summary()
@@ -196,7 +202,29 @@ tensorboard = TensorBoard(log_dir=logdir,
 
 #### Parametri di training ###############################################################
 training_epochs = 10000
+# Change this if you want to override warmup policy
+# warmup = True
+warmup_params = {
+  'target_lr': 0.001, # Adam's default
+  'n_warmup_steps': 2/(1-0.999), # 2/(1-beta2), like in https://arxiv.org/pdf/1910.04209.pdf
+}
+# Settare a true se si vuole cambiare learning rate
+override_lr = False
+new_lr_value = None # settare al nuovo valore desiderato del learning rate
 ##########################################################################################
+
+if warmup:
+  lr_increase = warmup_params['target_lr']/warmup_params['n_warmup_steps']
+  K.set_value(model.optimizer.lr, 0)
+  for i in range(0, warmup_params['n_warmup_steps']):
+    batch = train_generator[i]
+    model.train_on_batch(batch[0], batch[1])
+    K.set_value(model.optimizer.lr, lr_increase*(i+1))
+  # Re-shuffle identities and do some good stuff
+  train_generator.on_epoch_end()
+
+if override_lr:
+    K.set_value(model.optimizer.lr, new_lr_value)
 
 history = model.fit(train_generator, 
                     validation_data=eval_generator, 
@@ -204,8 +232,8 @@ history = model.fit(train_generator,
                     epochs=training_epochs, 
                     callbacks=[model_checkpoint, 
                                logger, 
-                               reduce_lr_plateau,
-                               early_stopping,
+                               # reduce_lr_plateau,
+                               # early_stopping,
                                tensorboard],
                     use_multiprocessing=False,
                     shuffle=False) # lo shuffe ce lo gestiamo nel data loader
