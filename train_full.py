@@ -213,6 +213,8 @@ override_lr = False
 new_lr_value = None # settare al nuovo valore desiderato del learning rate
 ##########################################################################################
 
+print('Performing warmup...')
+
 if warmup:
   lr_increase = warmup_params['target_lr']/warmup_params['n_warmup_steps']
   K.set_value(model.optimizer.lr, 0)
@@ -223,8 +225,12 @@ if warmup:
   # Re-shuffle identities and do some good stuff
   train_generator.on_epoch_end()
 
+print('Warmup done!')
+
 if override_lr:
     K.set_value(model.optimizer.lr, new_lr_value)
+
+print('Starting model training...')
 
 history = model.fit(train_generator, 
                     validation_data=eval_generator, 
