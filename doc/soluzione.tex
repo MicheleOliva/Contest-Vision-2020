@@ -20,7 +20,7 @@ Il dataset utilizzato per allenare la nostra rete a compiere il task assegnato �
 Quest'ultimo dataset contiene $3.31$ milioni di immagini di 9131 soggetti, con una media di $362.6$ immagini per ogni soggetto. Le immagini sono scaricate da Google Image Search e si diversificano molto per posa, età, illuminazione, etnia e professione del soggetto catturato. Ad ogni immagine è associata l'età del soggetto, tale valore è il risultato di un ensemble di $14$ modelli CNN.\\
 Il dataset ci è stato fornito già diviso in training set, che include $8631$ identità, e test set, che include le rimanenti 500.
 
-\todo{Non mi piace la seguente frase, aiuto} Le risorse che \textit{Google Colab} mette a disposizione sono risultate insufficienti per allenare la rete sull'intero training set. È risultato necessario ridurre la grandezza di quest'ultimo, a tale scopo è stata svolta un analisi del training set e sono stati scelte le identità su cui svolgere l'addestramento della rete. Tale analisi è stata svolta anche con il supporto delle annotazioni per VGGFace2, reperibili \href{https://github.com/MiviaLab/GenderRecognitionFramework/releases/tag/0}{qui}.
+\todo{Non mi piace la seguente frase, aiuto} Le risorse che \textit{Google Colab} mette a disposizione sono risultate insufficienti per allenare la rete sull'intero training set. È risultato necessario ridurre la grandezza di quest'ultimo, a tale scopo è stata svolta un analisi del training set e sono stati scelte le identità su cui svolgere l'addestramento della rete. Tale analisi è stata svolta anche con il supporto delle annotazioni per VGGFace2, reperibili \href{https://github.com/MiviaLab/GenderRecognitionFramework/releases/tag/0}{qui}\todo{I link conviene metterli per intero in footnote}.
 
 Con lo scopo di svolgere l'allenamento su un training set più bilanciato possibile, abbiamo svolto una prima analisi sul genere delle identità presenti.
 
@@ -90,7 +90,7 @@ Non è stato effettuato alcun rilevamento del volto. Nelle annotazioni del datas
 \emph{Descrivere e motivare tutte le tecniche di pre-processing applicate sulle immagini del volto.}
 
 Si distinguono due fasi del pre-processing delle immagini, la prima fase viene effettuata a monte della data augmentation mentre la seconda a valle di quest'ultima.
-Durante la prima fase viene ritagliato il volto del soggetto. Il ritaglio non viene effettuato però sulla roi (sezione~\ref{subsubsec:face_detection}), infatti la region of interest viene allargata di un fattore $0.3$, ovviamente non andando oltre i limiti dettati dalla risoluzione dell'immagine, tale operazione permette di ritagliare oltre al volto del soggetto l'intera testa.
+Durante la prima fase viene ritagliato il volto del soggetto. Il ritaglio non viene effettuato però sulla roi\todo{definire un acronimo prima di usarlo, e scriverlo maiuscolo} (sezione~\ref{subsubsec:face_detection}), infatti la region of interest viene allargata di un fattore $0.3$, ovviamente non andando oltre i limiti dettati dalla risoluzione dell'immagine, tale operazione permette di ritagliare oltre al volto del soggetto l'intera testa.
 Nella seconda fase ogni immagine viene prima ridimensionata alla risoluzione \todo{Attenzione alla risoluzione} $96 \times 96$ mantenendo le proporzioni, nel caso in cui l'immagine non fosse quadrata viene \todo{in che senso riempita?} riempita con delle bande nere. Successivamente il valore medio di ogni canale è sottratto da ogni pixel, ed infine viene convertita da BGR ad RGB.
 
 \subsubsection{Data augmentation}
