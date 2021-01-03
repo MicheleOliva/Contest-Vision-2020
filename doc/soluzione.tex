@@ -17,9 +17,9 @@ La rete è stata progettata come un regressore. Abbiamo sostituito il layer di c
 \subsubsection{Dataset}
 \label{subsubsec:dataset}
 
-Il dataset utilizzato per allenare la nostra rete a compiere il task assegnato è il dataset chiamato \emph{VGG-Face2 Mivia Age} \cite{miviaage}.
+Il dataset utilizzato per addestrare la nostra rete a compiere il task assegnato è il dataset chiamato \emph{VGG-Face2 Mivia Age} \cite{miviaage}.
 
-Quest'ultimo dataset contiene $3.31$ milioni di immagini di 9131 soggetti, con una media di $362.6$ immagini per ogni soggetto. Le immagini sono scaricate da Google Image Search e si diversificano molto per posa, età, illuminazione, etnia e professione del soggetto catturato. Ad ogni immagine è associata l'età del soggetto, tale valore è il risultato di un ensemble di $14$ modelli CNN.\\
+Quest'ultimo dataset contiene $3.31$ milioni di immagini di 9131 soggetti. Ad ogni immagine è associata l'età del soggetto, tale valore è una stima dell'età apparente del soggetto catturato.
 Il dataset ci è stato fornito già diviso in training set, che include $8631$ identità, e test set, che include le rimanenti 500.
 
 \todo{Non mi piace la seguente frase, aiuto} Le risorse che \textit{Google Colab} mette a disposizione sono risultate insufficienti per allenare la rete sull'intero training set. È risultato necessario ridurre la grandezza di quest'ultimo, a tale scopo è stata svolta un analisi del training set e sono stati scelte le identità su cui svolgere l'addestramento della rete. Tale analisi è stata svolta anche con il supporto delle annotazioni per VGGFace2\footnote{Le annotazioni sono reperibili: \url{https://github.com/MiviaLab/GenderRecognitionFramework/releases/tag/0}}.
