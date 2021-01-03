@@ -7,19 +7,26 @@ Definire in ogni caso se la rete è stata progettata come regressore (output:
 numero reale da 0 a 100 che rappresenta l’età, da approssimare all’intero più
 vicino) o come classificatore (output: una delle 101 classi da 0 a 100) e fornire dettagli e motivazioni sulla funzione di costo scelta.}
 
-L'architettura scelta è MobileNetV3.\todo{citazione del MIVIA?} Le reti MobileNet sono conosciute per essere progettate pensando all'efficienza computazionale e alla latenza delle predizioni, senza però sacrificare le prestazioni. MobileNetV3 migliora MobileNetV2 sia in termini di accuracy che di latenza, diminuendo il numero di pesi ed il numero di operazioni totali. Questo ci ha permesso di allenare la rete e di testarla in tempi ragionevoli rapportati al tempo disponibile, e quindi ha permesso una scelta migliore dei parametri.
-La rete è stata progettata come un regressore. Abbiamo sostituito il layer di classificazione con un layer di dimensione unitaria con attivazione lineare (ReLU). Questo ci ha permesso di astrarci dalla rappresentazione dell'età, che non è per forza definita nell'intervallo \([0, 100]\), e l'utilizzo della ben nota in letteratura Mean Squared Error (MSE) loss function, che tiene anche conto della differenza tra la stima dell'età e la \emph{ground truth}.
+L'architettura scelta è MobileNetV3 Large \cite{mobilenetv3}. Le reti neurali convoluzionali (CNNs) MobileNet sono conosciute per essere progettate pensando all'applicazione su sistemi mobili e/o embedded, cercando un trade-off tra prestazioni e risorse computazionali richieste. Hanno introdotto tecniche che migliorano l'efficienza, come la \emph{depthwise separable convolution} (MobileNetV1), i \emph{linear bottleneck} e la \emph{inverted residual structure} (MobileNetV2), la \emph{squeeze and excitation} (ResNet) e le funzioni di attivazione \emph{swish}. MobileNetV3, nelle sue versioni Small e Large, è il risultato di una combinazione di questi blocchi, ottimizzata tramite \emph{platform-aware NAS} e l'algoritmo \emph{NetAdapt} \cite{mobilenetv3}. 
+
+Per essere efficiente, MobileNetV3 presenta un numero ridotto di pesi da addestrare rispetto ad altre architetture della letteratura, e ciò l'ha resa un ottimo candidato per l'addestramento con le risorse limitate di Google Colab (VRAM e 12 ore di tempo macchina). A parità di tempo, ci è possibile addestrare la rete su più immagini, quindi è possibile utilizzare un dataset estremamente ricco di campioni che, secondo i risultati di \cite{miviaage}, garantisce ottime prestazioni anche a reti più leggere.
+
+Il nostro modello è una versione personalizzata dell'implementazione di MobileNetV3 Large sul framework Keras\footnote{\url{https://keras.io/api/applications/}}. Il modello viene adattato per diventare un regressore sostituendo il layer di classificazione con un layer di dimensione unitaria con attivazione lineare (ReLU). Questo ci ha permesso di astrarci dalla rappresentazione dell'età, in modo da lasciarla definita nell'intervallo \([0, +\infty)\), e di utilizzare la ben nota in letteratura Mean Squared Error (MSE) loss function
+\begin{displaymath}
+\text{MSE} = \frac{1}{n} \sum_{i=1}^{n} \left(Y_i - \hat{Y}_i\right),
+\end{displaymath}
+che tiene conto anche dell'entità della differenza tra la stima dell'età e la \emph{ground truth}.
 
 \subsection{Procedura di addestramento}
 \subsubsection{Dataset}
 \label{subsubsec:dataset}
 
-Il dataset utilizzato per allenare la nostra rete a compiere il task assegnato è il dataset chiamato \emph{VGG-Face2 Mivia Age}.
+Il dataset utilizzato per addestrare la nostra rete a compiere il task assegnato è il dataset chiamato \emph{VGG-Face2 Mivia Age}\todo{anche detto VMAGE} \cite{miviaage}.
 
-Quest'ultimo dataset contiene $3.31$ milioni di immagini di 9131 soggetti, con una media di $362.6$ immagini per ogni soggetto. Le immagini sono scaricate da Google Image Search e si diversificano molto per posa, età, illuminazione, etnia e professione del soggetto catturato. Ad ogni immagine è associata l'età del soggetto, tale valore è il risultato di un ensemble di $14$ modelli CNN.\\
+Quest'ultimo dataset contiene $3.31$ milioni di immagini di 9131 soggetti. Ad ogni immagine è associata l'età del soggetto, tale valore è una stima dell'età apparente del soggetto catturato.
 Il dataset ci è stato fornito già diviso in training set, che include $8631$ identità, e test set, che include le rimanenti 500.
 
-\todo{Non mi piace la seguente frase, aiuto} Le risorse che \textit{Google Colab} mette a disposizione sono risultate insufficienti per allenare la rete sull'intero training set. È risultato necessario ridurre la grandezza di quest'ultimo, a tale scopo è stata svolta un analisi del training set e sono stati scelte le identità su cui svolgere l'addestramento della rete. Tale analisi è stata svolta anche con il supporto delle annotazioni per VGGFace2 \footnote{Le annotazioni sono reperibili: \url{https://github.com/MiviaLab/GenderRecognitionFramework/releases/tag/0}}.
+\todo{Non mi piace la seguente frase, aiuto} Le risorse che \textit{Google Colab} mette a disposizione sono risultate insufficienti per allenare la rete sull'intero training set. È risultato necessario ridurre la grandezza di quest'ultimo, a tale scopo è stata svolta un analisi del training set e sono stati scelte le identità su cui svolgere l'addestramento della rete. Tale analisi è stata svolta anche con il supporto delle annotazioni per VGGFace2\footnote{Le annotazioni sono reperibili: \url{https://github.com/MiviaLab/GenderRecognitionFramework/releases/tag/0}}.
 
 Con lo scopo di svolgere l'allenamento su un training set più bilanciato possibile, abbiamo svolto una prima analisi sul genere delle identità presenti.
 
@@ -82,7 +89,7 @@ Successivamente a tale operazione, al training set sono state sottratte ulterior
 
 \emph{Descrivere il metodo utilizzato per effettuare il rilevamento del volto. Se si utilizza un approccio noto o i volti già estratti con framework esistenti, si specifichi questa informazione.}
 
-Non è stato effettuato alcun rilevamento del volto. Nelle annotazioni del dataset VGGFAce2, già citate nella sezione~\ref{subsubsec:dataset}, sono riportate sia per il training set che per il test set, informazioni inerenti alle bounding boxes relative ai volti dei soggetti catturati. Tali informazioni definiscono quindi la \textbf{region of interest (\textbf{ROI})} di ogni immagine.
+Non è stato effettuato alcun rilevamento del volto. Nelle annotazioni del dataset VGGFAce2, già citate nella sezione~\ref{subsubsec:dataset}, sono riportate sia per il training set che per il test set, informazioni inerenti alle bounding boxes relative ai volti dei soggetti catturati. Tali informazioni definiscono quindi la \textbf{region of interest (\textbf{ROI})}\todo{non in grassetto, ma con le maiuscole} di ogni immagine.
 
 \subsubsection{Face pre-processing} 
 
@@ -174,7 +181,7 @@ Gli intervalli sono stati scelti sulla base delle implementazioni del Mivia Gend
 \label{sfig:data_augmentation}
 \end{figure}
 
-\subsection{Training from scratch o fine tuning}
+\subsubsection{Training from scratch o fine tuning}
 \emph{Specificare se la rete viene addestrata con inizializzazione random o partendo da pesi pre-addestrati, motivando la scelta e fornendo dettagli sulla strategia di inizializzazione.}
 
 \subsubsection{Procedura di training}
