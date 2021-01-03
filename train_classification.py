@@ -234,6 +234,8 @@ if warmup:
 if override_lr:
     K.set_value(model.optimizer.lr, new_lr_value)
 
+print(f'Learning rate: {K.get_value(model.optimizer.lr)}')
+
 print('Starting model training...')
 
 # Print output to stdout in addition to console: command | tee -a /path/to/file ('command' is the command you use to run this script)
