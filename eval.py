@@ -1,5 +1,4 @@
 import os
-import sys
 from keras.models import load_model
 import argparse
 import re

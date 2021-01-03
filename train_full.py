@@ -19,7 +19,7 @@ from dataset_utils.data_augmentation import CustomAugmenter
 from dataset_utils.data_generation import DataGenerator
 from dataset_utils.vgg_data_loader import VggDataLoader
 from dataset_utils.preprocessing import CustomPreprocessor
-from age_estimation_utils.custom_metrics import rounded_mae
+from age_estimation_utils.custom_metrics import RoundedMae
 import argparse
 import re
 from keras import backend as K
@@ -62,7 +62,8 @@ if resume:
       exit(0)
 
   print(f"Found {last_model}. Loading...")
-  model = load_model(last_model, compile=True)
+  rounded_mae = RoundedMae()
+  model = load_model(last_model, custom_objects={'rounded_mae':rounded_mae}, compile=True)
   initial_epoch = last_model_epochs
 
 
@@ -103,6 +104,7 @@ else:
   # Compiliamo il modello
   optimizer = Adam()
   loss = MeanSquaredError()
+  rounded_mae = RoundedMae()
   metrics = [MeanAbsoluteError(name='mae'),
              rounded_mae]
 
