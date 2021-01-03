@@ -23,6 +23,7 @@ from dataset_utils.output_encoding import CustomOutputEncoder
 from age_estimation_utils.custom_metrics import rounded_mae
 import argparse
 import re
+from keras import backend as K
 
 # Argomenti da riga di comando
 argparser = argparse.ArgumentParser(description='Starts training in a generated directory. With --resume resumes training from the last saved model in the current working directory.')
@@ -200,7 +201,13 @@ tensorboard = TensorBoard(log_dir=logdir,
 
 #### Parametri di training ###############################################################
 training_epochs = 10000
+# Settare a true se si vuole cambiare learning rate
+override_lr = False
+new_lr_value = None # settare al nuovo valore desiderato del learning rate
 ##########################################################################################
+
+if override_lr:
+    K.set_value(model.optimizer.lr, new_lr_value)
 
 print(f'Learning rate: {K.get_value(model.optimizer.lr)}')
 
