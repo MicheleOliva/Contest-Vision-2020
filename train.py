@@ -202,6 +202,8 @@ tensorboard = TensorBoard(log_dir=logdir,
 training_epochs = 10000
 ##########################################################################################
 
+print(f'Learning rate: {K.get_value(model.optimizer.lr)}')
+
 # Print output to stdout in addition to console: command | tee -a /path/to/file ('command' is the command you use to run this script)
 history = model.fit(train_generator, 
                     validation_data=eval_generator, 
