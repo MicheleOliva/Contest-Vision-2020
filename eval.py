@@ -1,17 +1,12 @@
 import os
 import sys
-
-#### PATH LIBRERIE #######################################################################
-sys.path.insert(0, "/content/Contest-Vision-2020/pymodules/dataset_utils")
-##########################################################################################
-
 from keras.models import load_model
 import argparse
 import re
-from data_generation import DataGenerator
-from vgg_data_loader import VggDataLoader
-from output_encoding import CustomOutputEncoder
-from preprocessing import CustomPreprocessor
+from dataset_utils.data_generation import DataGenerator
+from dataset_utils.vgg_data_loader import VggDataLoader
+from dataset_utils.output_encoding import CustomOutputEncoder
+from dataset_utils.preprocessing import CustomPreprocessor
 
 
 # Argomenti da riga di comando
