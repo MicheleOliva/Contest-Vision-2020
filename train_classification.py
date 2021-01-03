@@ -21,8 +21,8 @@ from dataset_utils.data_generation import DataGenerator
 from dataset_utils.vgg_data_loader import VggDataLoader
 from dataset_utils.preprocessing import CustomPreprocessor
 from dataset_utils.groundtruth_encoding import OrdinalRegressionEncoder
-from age_estimation_utils.custom_metrics import rounded_mae
-from age_estimation_utils.custom_metrics import ordinal_rounded_mae
+# from age_estimation_utils.custom_metrics import rounded_mae
+# from age_estimation_utils.custom_metrics import ordinal_rounded_mae
 import argparse
 import re
 from keras import backend as K
@@ -108,7 +108,7 @@ else:
   loss = BinaryCrossentropy()
   # metrics = [MeanAbsoluteError(name='mae'),
   #            rounded_mae]
-  metrics = [ordinal_rounded_mae]
+  metrics = None
 
   model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
   initial_epoch = 0
