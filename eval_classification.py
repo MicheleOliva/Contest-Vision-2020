@@ -73,8 +73,8 @@ for i in range(0, len(data_generator)):
 
     prediction = model.predict(x)
 
-    gt_array.append(y)
-    prediction_array.append(prediction)
+    gt_array.append(y[0]) # [0] removes batch dimension
+    prediction_array.append(prediction[0]) # [0] removes batch dimension
 
 print('\n')
 
