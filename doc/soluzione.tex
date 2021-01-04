@@ -21,7 +21,7 @@ che tiene conto anche dell'entità della differenza tra la stima dell'età e la 
 \subsubsection{Dataset}
 \label{subsubsec:dataset}
 
-Il dataset utilizzato per addestrare la nostra rete a compiere il task assegnato è il dataset chiamato \emph{VGG-Face2 Mivia Age}\todo{anche detto VMAGE} \cite{miviaage}.
+Il dataset utilizzato per addestrare la nostra rete a compiere il task assegnato è il dataset chiamato \emph{VGG-Face2 Mivia Age}, anche detto \emph{VMAGE}\cite{miviaage}.
 
 Quest'ultimo dataset contiene $3.31$ milioni di immagini di 9131 soggetti. Ad ogni immagine è associata l'età del soggetto, tale valore è una stima dell'età apparente del soggetto catturato.
 Il dataset ci è stato fornito già diviso in training set, che include $8631$ identità, e test set, che include le rimanenti 500.
@@ -89,7 +89,7 @@ Successivamente a tale operazione, al training set sono state sottratte ulterior
 
 \emph{Descrivere il metodo utilizzato per effettuare il rilevamento del volto. Se si utilizza un approccio noto o i volti già estratti con framework esistenti, si specifichi questa informazione.}
 
-Non è stato effettuato alcun rilevamento del volto. Nelle annotazioni del dataset VGGFAce2, già citate nella sezione~\ref{subsubsec:dataset}, sono riportate sia per il training set che per il test set, informazioni inerenti alle bounding boxes relative ai volti dei soggetti catturati. Tali informazioni definiscono quindi la \textbf{region of interest (\textbf{ROI})}\todo{non in grassetto, ma con le maiuscole} di ogni immagine.
+Non è stato effettuato alcun rilevamento del volto. Nelle annotazioni del dataset VGGFAce2, già citate nella sezione~\ref{subsubsec:dataset}, sono riportate sia per il training set che per il test set, informazioni inerenti alle bounding boxes relative ai volti dei soggetti catturati. Tali informazioni definiscono quindi la \textbf{region of interest} (ROI) di ogni immagine.
 
 \subsubsection{Face pre-processing} 
 
