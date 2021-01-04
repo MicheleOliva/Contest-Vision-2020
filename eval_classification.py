@@ -46,9 +46,8 @@ last_model = None
 # e scegliamo il modello con più epoche 
 for fname in dir:
     match = regex.match(fname)
-    if match is not None and int(match[1]) >= last_model_epochs:
+    if match is not None:
         last_model = fname
-        last_model_epochs = int(match[1])
 
 if last_model is None:
     print("ERROR: could not find any model.")
@@ -63,15 +62,21 @@ gt_encoder = OrdinalRegressionEncoder(NUM_CLASSES)
 
 data_generator = DataGenerator(MODE, preprocessor, None, None, data_loader, BATCH_SIZE, gt_encoder, EPOCH_MODE)
 
+print('Performing validation...')
 gt_array = []
 prediction_array = []
 for i in range(0, len(data_generator)):
+    if i % 1000 == 0:
+      print(f'Processed {i} samples')
+
     x, y = data_generator[i]
 
     prediction = model.predict(x)
 
     gt_array.append(y)
     prediction_array.append(prediction)
+
+print('\n')
 
 rounded_mae = compute_classification_mae(gt_array, prediction_array)
 
