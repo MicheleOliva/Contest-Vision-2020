@@ -3,7 +3,7 @@ In particolare, lo scopo che ci prefiggiamo è quello di addestrare una rete neu
 
 \begin{itemize}
 	\item non richieda, per quanto possibile, risorse computazionali eccessive, dal momento che per l'addestramento sarà utilizzata la piattaforma Google Colab\footnote{\url{https://colab.research.google.com/}}, che offre potenza computazionale limitata e permette l'accesso alle sue risorse per un massimo di 12 ore consecutive, per poi sottoporre l'utente ad un ban temporaneo; \todo{Attenzione ai bullet point all'italiana}
-	\item sia robusta rispetto a corruzioni che possono verificarsi su immagini acquisite con un'intenzione simile a quella con la quale sono state acquisite le immagini presenti nel dataset.
+	\item \label{sec:intro.intention}sia robusta rispetto a corruzioni che possono verificarsi su immagini acquisite con un'intenzione simile a quella con la quale sono state acquisite le immagini presenti nel dataset.
 Essendo le immagini nel dataset immagini di celebrità recuperate su Google Immagini \cite{vggface2dataset}, si assumerà come intenzione quella di un fotografo che vuole realizzare uno scatto di un soggetto più o meno collaborativo.
 	\item (possibilmente) sia implementata con il framework Keras.\todo{aggiungere motivazioni}
 \end{itemize}
