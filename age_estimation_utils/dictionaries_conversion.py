@@ -5,7 +5,16 @@ nel formato richiesto dai data loader.
 
 # n000003/0001_01.jpg {'ID': 'n000003', 'Gender': 'm', 'Age': 46.03625477357375, 'x_min': 80, 'y_min': 19, 'width': 250, 'height': 250}
 
-dictionary = {} # DIZIONARIO DA CONVERTIRE
+import pickle
+
+eval_dict_path = '' # path
+
+print('Reading eval dict dump...')
+with open(eval_dict_path, 'rb') as eval_dict_in:
+    eval_dict_dump = pickle.load(eval_dict_in)
+    print('Eval dict dump read!')
+
+dictionary = eval_dict_dump # DIZIONARIO DA CONVERTIRE
 
 francesco_dict = {}
 francesco_list = []
@@ -32,4 +41,6 @@ for path in dictionary.keys():
         francesco_list.append(identity_id)
     num_samples += 1
     
-    
+print(f'Num samples: {num_samples}')
+print(f'Num ids: {len(francesco_list)}')
+print(f'Num dictionary keys: {len(francesco_dict.keys())}')
