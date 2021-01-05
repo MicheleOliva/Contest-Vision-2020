@@ -31,7 +31,7 @@ def compute_classification_mae(y_true, y_pred):
 EVAL_CSV_PATH = '/content/drive/Shareddrives/Progettone/Age Estimation/caches/eval_csv.cache'
 EVAL_SET_PATH = '/content/eval'
 MODE = 'validation'
-BATCH_SIZE = 1
+BATCH_SIZE = 128
 NUM_CLASSES = 101
 EPOCH_MODE = 'full'
 
@@ -69,8 +69,8 @@ prediction_array = []
 generator_len = len(data_generator)
 print(f'Num. batches: {generator_len}')
 for i in range(0, generator_len):
-    if i % 1000 == 0:
-      print(f'Processed {i} samples')
+    if i % 10 == 0:
+      print(f'Processed {i*BATCH_SIZE} samples')
 
     x, y = data_generator[i]
 
