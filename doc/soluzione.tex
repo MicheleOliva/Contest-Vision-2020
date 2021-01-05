@@ -11,7 +11,7 @@ L'architettura scelta è MobileNetV3 Large \cite{mobilenetv3}. Le reti neurali c
 
 Per essere efficiente, MobileNetV3 presenta un numero ridotto di pesi da addestrare rispetto ad altre architetture della letteratura, e ciò l'ha resa un ottimo candidato per l'addestramento con le risorse limitate di Google Colab (VRAM e 12 ore di tempo macchina). A parità di tempo, ci è possibile addestrare la rete su più immagini, quindi è possibile utilizzare un dataset estremamente ricco di campioni che, secondo i risultati di \cite{miviaage}, garantisce ottime prestazioni anche a reti più leggere.
 
-Il nostro modello è una versione personalizzata dell'implementazione di MobileNetV3 Large sul framework Keras\footnote{\url{https://keras.io/api/applications/}}. Il modello viene adattato per diventare un regressore sostituendo il layer di classificazione con un layer di dimensione unitaria con attivazione lineare (ReLU). Questo ci ha permesso di astrarci dalla rappresentazione dell'età, in modo da lasciarla definita nell'intervallo \([0, +\infty)\), e di utilizzare la ben nota in letteratura Mean Squared Error (MSE) loss function
+Il nostro modello è una versione personalizzata dell'implementazione di MobileNetV3 Large sul framework Keras\footnote{\url{https://keras.io/api/applications/}}. Il modello viene adattato per diventare un regressore sostituendo il layer di classificazione con un layer di dimensione unitaria con attivazione lineare (ReLU) \label{sec:ccn_relu}. Questo ci ha permesso di astrarci dalla rappresentazione dell'età, in modo da lasciarla definita nell'intervallo \([0, +\infty)\), e di utilizzare la ben nota in letteratura Mean Squared Error (MSE) loss function
 \begin{displaymath}
 \text{MSE} = \frac{1}{n} \sum_{i=1}^{n} \left(Y_i - \hat{Y}_i\right),
 \end{displaymath}
@@ -26,7 +26,7 @@ Il dataset utilizzato per addestrare la nostra rete a compiere il task assegnato
 Quest'ultimo dataset contiene $3.31$ milioni di immagini di 9131 soggetti. Ad ogni immagine è associata l'età del soggetto, tale valore è una stima dell'età apparente del soggetto catturato.
 Il dataset ci è stato fornito già diviso in training set, che include $8631$ identità, e test set, che include le rimanenti 500.
 
-Le risorse che \textit{Google Colab} mette a disposizione sono risultate insufficienti per allenare la rete sull'intero training set, pertanto è stato necessario ridurre la grandezza di quest'ultimo. A tale scopo è stata svolta un analisi del training set e sono stati scelte le identità sulle quali svolgere l'addestramento della rete. Tale analisi è stata svolta combinando le annotazioni per VMAGE riguardanti la sola età con annotazioniper VGGFace2\footnote{\url{https://github.com/MiviaLab/GenderRecognitionFramework/releases/tag/0}}\todo{aggiungere scritta "Le annotazioni sono reperibili al seguente link:" se l'url non esce più bello senza}contenenti, tra le altre, informazioni riguardanti il genere e il numero di sample per ogni identità e, per ogni immagine, la regione dell'immagine contenente il volto del soggetto ivi rappresentato, che è stata utilizzata per svolgere operazioni dettagliate più avanti.
+Le risorse che \textit{Google Colab} mette a disposizione sono risultate insufficienti per allenare la rete sull'intero training set, pertanto è stato necessario ridurre la grandezza di quest'ultimo. A tale scopo è stata svolta un analisi del training set e sono stati scelte le identità sulle quali svolgere l'addestramento della rete. Tale analisi è stata svolta combinando le annotazioni per VMAGE riguardanti la sola età con annotazioniper VGGFace2\footnote{Tali annotazioni sono reperibili al seguente link: \url{https://github.com/MiviaLab/GenderRecognitionFramework/releases/tag/0}} contenenti, tra le altre, informazioni riguardanti il genere e il numero di sample per ogni identità e, per ogni immagine, la regione dell'immagine contenente il volto del soggetto ivi rappresentato, che è stata utilizzata per svolgere operazioni dettagliate più avanti.
 
 Appurato quindi che era necessario ridurre il numero di campioni, ci siamo chiesti se vi fosse qualche sbilanciamento all'interno del dataset che potevamo mitigare durante il nostro processo di eliminazione di dati. Abbiamo pertanto svolto una prima analisi sul genere delle identità presenti.
 
@@ -72,7 +72,7 @@ Successivamente abbiamo analizzato, per ogni identità, la \emph{media} e la \em
 
 Come si evince dai grafici in figura~\ref{sfig:Ids per gender and mean age} e in figura~\ref{sfig:Images per gender and mean age}, ci sono delle fasce d'età sovrarappresentate rispetto alle altre, in particolare le fasce d'età $[25,34]$ e $[35,44]$.
 
-Abbiamo quindi scelto di escludere dal set le identità relative a uomini nelle fasce $[25,34]$ e $[35,44]$, e quelle relative a donne nella fascia $[25,34]$. In entrambi i casi abbiamo rimosso soltanto identità per le quali la deviazione standard dell'età risulta inferiore a $5.5$. Il risultato di tale operazione è visibile in figura~\ref{fig:Ids per gender and mean age after the drop}.
+Abbiamo quindi scelto di escludere dal set le identità relative a uomini nelle fasce $[25,34]$ e $[35,44]$, e quelle relative a donne nella fascia $[25,34]$. In entrambi i casi abbiamo rimosso soltanto identità per le quali la deviazione standard dell'età risulta inferiore a $5.5$, per un totale di $3249$ identità. Il risultato di tale operazione è visibile in figura~\ref{fig:Ids per gender and mean age after the drop}.
 
 \begin{figure}[ht]
 \centering
@@ -83,21 +83,28 @@ Abbiamo quindi scelto di escludere dal set le identità relative a uomini nelle 
 \end{figure}
 
 Successivamente a tale operazione, al training set sono state sottratte ulteriori $480$ identità, scelte casualmente, che hanno formato il \emph{validation set}. La tecnica di validazione utilizzata consiste quindi nell'approccio training e validation set \emph{vanilla}, quindi senza l'utilizzo di approcci tipo \emph{cross-validation} e simili, in quanto troppo esose dal punto di vista computazionale.
-\todo{Aggiungere test set, quanti sample ci sono nel training set, quanti nel validation set. Aggiungere pure da qualche parte che mancano le annotazioni per 210 identità e che queste identità le abbiamo brutalmente ignorate.}
 
+In conclusione:
+\begin{itemize}
+	\item Il training set è composto da $4692$ identità per un totale di $1.68$ milioni di immagini.
+	\item Il validation set è composto da $480$ identità per un totale di $170363$ immagini.
+	\item Il test set è composto da $500$ identità per un totale di $169372$ immagini.
+\end{itemize}
 \subsubsection{Face detection}
 \label{subsubsec:face_detection}
 
 \emph{Descrivere il metodo utilizzato per effettuare il rilevamento del volto. Se si utilizza un approccio noto o i volti già estratti con framework esistenti, si specifichi questa informazione.}
 
 Per il rilevamento del volto non abbiamo utilizzato un face detector, in quanto nelle annotazioni del dataset VGGFace2, già citate nella sezione~\ref{subsubsec:dataset}, sono riportate sia per il training set che per il test set, informazioni inerenti alle bounding boxes relative ai volti dei soggetti immortalati. Tali informazioni definiscono quindi la \textbf{region of interest} (ROI) di ogni immagine.
-Ovviamente, qualora questa rete dovesse essere utilizzata per un'applicazione reale, andrebbe aggiunto un face detector a monte del sistema di age estimation. \todo{Dire come sono stati estratti questi volti o citare qualche parte nella quale ci sia scritto}
+Ovviamente, qualora questa rete dovesse essere utilizzata per un'applicazione reale, andrebbe aggiunto un face detector a monte del sistema di age estimation.
+
+Ad esempio, per ricavare le annotazioni da noi utilizzate è stato utilizzato un face detector basato su una versione di \emph{SSD} che usa ResNet-10 come rete backbone \cite{miviagender}.
 
 \subsubsection{Face pre-processing} 
 
 \emph{Descrivere e motivare tutte le tecniche di pre-processing applicate sulle immagini del volto.}
 
-Il pre-processing è stato suddiviso per semplicità in due fasi. La prima fase precede quella di data augmentation, e consiste nel ritaglio del volto del soggetto. Il ritaglio viene effettuato su di una regione individuata dalla ROI(sezione~\ref{subsubsec:face_detection}) allargata di un fattore $0.3$ \todo{citare paper VGGFace2}, ovviamente non andando oltre i limiti dettati dalla risoluzione dell'immagine. Tale operazione permette di ritagliare oltre al volto del soggetto l'intera testa. Questa operazione viene effettuata prima della data augmentation perché alcune operazioni lì implementate modificano la posizione del volto all'interno dell'immagine, e quindi le ROI risulterebbero invalide. Tuttavia, qualora il sistema di age estimation dovesse essere utilizzato insieme ad un face detector, quest'ultimo dovrebbe ricevere in input le immagini già sottoposte ad augmentation, in quanto questa tecnica mira ad introdurre nel dataset modifiche dell'immagine più o meno tipiche del mondo reale, che si presenterebbero sull'immagine prima che questa possa essere sottoposta a rilevamento del volto.
+Il pre-processing è stato suddiviso per semplicità in due fasi. La prima fase precede quella di data augmentation, e consiste nel ritaglio del volto del soggetto. Il ritaglio viene effettuato su di una regione individuata dalla ROI(sezione~\ref{subsubsec:face_detection}) allargata di un fattore $0.3$ \cite{vggface2dataset}, ovviamente non andando oltre i limiti dettati dalla risoluzione dell'immagine. Tale operazione permette di ritagliare oltre al volto del soggetto l'intera testa. Questa operazione viene effettuata prima della data augmentation perché alcune operazioni lì implementate modificano la posizione del volto all'interno dell'immagine, e quindi le ROI risulterebbero invalide. Tuttavia, qualora il sistema di age estimation dovesse essere utilizzato insieme ad un face detector, quest'ultimo dovrebbe ricevere in input le immagini già sottoposte ad augmentation, in quanto questa tecnica mira ad introdurre nel dataset modifiche dell'immagine più o meno tipiche del mondo reale, che si presenterebbero sull'immagine prima che questa possa essere sottoposta a rilevamento del volto.
 
 Nella seconda fase di pre-processing, che viene effettuata a valle della data augmentation, ogni immagine viene ridimensionata alla dimensione di input della rete, e viene eseguita anche una normalizzazione. 
 
@@ -106,7 +113,9 @@ Nel caso in cui, invece, l'immagine dovesse essere sottocampionata, verrà utili
 
 In entrambi i casi, il ridimensionamento viene effettuato mantenendo le proporzioni originali dell'immagine, e nel caso in cui l'immagine ritagliata non fosse quadrata viene aggiunto del padding. 
 
-Dopo le operazioni di ridimensionamento, ad ogni immagine viene sottratta la media, per ogni canale, delle immagini del dataset VGGFace2\todo{Specificare anche perché la facciamo (riguarda la convergenza, sta scritto sul paper del MIVIA)}.
+Dopo le operazioni di ridimensionamento, ad ogni immagine viene sottratta la media, per ogni canale, delle immagini del dataset VGGFace2.
+
+Dopo le operazioni di ridimensionamento, ad ogni immagine viene sottratta la media, per ogni canale, delle immagini del dataset VGGFace. Ciò permette alla distribuzione degli input di essere centrata in $0$, permettendoci di sfruttare tutti i vantaggi della non linearità della ReLu (sezione~\ref{sec:ccn_relu}) ed ottenere una convergenza più veloce \cite{miviaage}.
 
 \begin{figure}[ht]
 \centering
@@ -141,46 +150,56 @@ I filtri applicati sono:
 Per ogni immagine, viene scelto casualmente se applicare o meno un filtro. In caso positivo, viene scelto casualmente uno dei filtri insieme ad un valore di intensità che ricada nell'intervallo predisposto per ognuno di essi.
 
 Gli intervalli all'interno dei quali viene scelta l'intensità di applicazione di ogni filtro sono uguali a quelli presenti nelle implementazioni del Mivia Gender Recognition Framework \cite{miviagender}, eventualmente personalizzati, secondo i valori esplicitamente indicati, sulla base di alcune prove effettuate manualmente.
-I valori scelti empiricamente fanno sì che l'effetto dell'applicazione del filtro non sia completamente distruttivo e il risultato sia ancora riconoscibile all'occhio umano rispetto all'immagine originale. \todo{aggiungere immagine flippata e immagine originale alla carrellata di effetti}
+I valori scelti empiricamente fanno sì che l'effetto dell'applicazione del filtro non sia completamente distruttivo e il risultato sia ancora riconoscibile all'occhio umano rispetto all'immagine originale.
 
 \begin{figure}[ht]
-\begin{subfigure}{0.2\textwidth}
+\begin{subfigure}[t]{0.18\textwidth}
+\includegraphics[width=\textwidth]{./Images/preprocessed.jpg}
+\caption{Nessun effetto applicato}
+\label{sfig:corruption_contrast}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.18\textwidth}
 \includegraphics[width=\textwidth]{./Images/contrast_severity_0.2.jpg}
 \caption{Contrasto aumentato di $0.2$}
 \label{sfig:corruption_contrast}
 \end{subfigure}\hfill
-\begin{subfigure}{0.2\textwidth}
+\begin{subfigure}[t]{0.18\textwidth}
 \includegraphics[width=\textwidth]{./Images/brightness_severity_-0.3.jpg}
 \caption{Luminosità ridotta del $30\%$}
 \label{sfig:corruption_brightness}
 \end{subfigure}\hfill
-\begin{subfigure}{0.2\textwidth}
+\begin{subfigure}[t]{0.18\textwidth}
 \includegraphics[width=\textwidth]{./Images/gaussian_blur_severity_2.0.jpg}
 \caption{Blur gaussiana con deviazione standard $0.2$}
 \label{sfig:corruption_gaussian_blur}
 \end{subfigure}\hfill
-\begin{subfigure}{0.2\textwidth}
+\begin{subfigure}[t]{0.18\textwidth}
 \includegraphics[width=\textwidth]{./Images/gaussian_noise_severity_0.1.jpg}
 \caption{Rumore gaussiano con deviazione standard $0.1$}
 \label{sfig:corruption_gaussian_noise}
 \end{subfigure}\hfill
 
-\begin{subfigure}{0.2\textwidth}
+\begin{subfigure}[t]{0.18\textwidth}
+\includegraphics[width=\textwidth]{./Images/horizontal_flip.jpg}
+\caption{rovesciamento rispetto all’asse verticale}
+\label{sfig:corruption_skew}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.18\textwidth}
 \includegraphics[width=\textwidth]{./Images/skew.jpg}
 \caption{inclinazione nello spazio tridimensionale}
 \label{sfig:corruption_skew}
 \end{subfigure}\hfill
-\begin{subfigure}{0.2\textwidth}
+\begin{subfigure}[t]{0.18\textwidth}
 \includegraphics[width=\textwidth]{./Images/spatter_severity_3.jpg}
 \caption{Spatter con severità $3.0$}
 \label{sfig:corruption_spatter}
 \end{subfigure}\hfill
-\begin{subfigure}{0.2\textwidth}
+\begin{subfigure}[t]{0.18\textwidth}
 \includegraphics[width=\textwidth]{./Images/random_crop_severity_0.3.jpg}
 \caption{Ritaglio del $30\%$}
 \label{sfig:corruption_random_crop}
 \end{subfigure}\hfill
-\begin{subfigure}{0.2\textwidth}
+\begin{subfigure}[t]{0.18\textwidth}
 \includegraphics[width=\textwidth]{./Images/rotation_severity_7.0.jpg}
 \caption{Rotazione di $7.0 \degree$}
 \label{sfig:corruption_rotation}
