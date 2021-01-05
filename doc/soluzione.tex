@@ -149,46 +149,56 @@ I filtri applicati sono:
 Per ogni immagine, viene scelto casualmente se applicare o meno un filtro. In caso positivo, viene scelto casualmente uno dei filtri insieme ad un valore di intensità che ricada nell'intervallo predisposto per ognuno di essi.
 
 Gli intervalli all'interno dei quali viene scelta l'intensità di applicazione di ogni filtro sono uguali a quelli presenti nelle implementazioni del Mivia Gender Recognition Framework \cite{miviagender}, eventualmente personalizzati, secondo i valori esplicitamente indicati, sulla base di alcune prove effettuate manualmente.
-I valori scelti empiricamente fanno sì che l'effetto dell'applicazione del filtro non sia completamente distruttivo e il risultato sia ancora riconoscibile all'occhio umano rispetto all'immagine originale. \todo{aggiungere immagine flippata e immagine originale alla carrellata di effetti}
+I valori scelti empiricamente fanno sì che l'effetto dell'applicazione del filtro non sia completamente distruttivo e il risultato sia ancora riconoscibile all'occhio umano rispetto all'immagine originale.
 
 \begin{figure}[ht]
-\begin{subfigure}{0.2\textwidth}
+\begin{subfigure}[t]{0.18\textwidth}
+\includegraphics[width=\textwidth]{./Images/preprocessed.jpg}
+\caption{Nessun effetto applicato}
+\label{sfig:corruption_contrast}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.18\textwidth}
 \includegraphics[width=\textwidth]{./Images/contrast_severity_0.2.jpg}
 \caption{Contrasto aumentato di $0.2$}
 \label{sfig:corruption_contrast}
 \end{subfigure}\hfill
-\begin{subfigure}{0.2\textwidth}
+\begin{subfigure}[t]{0.18\textwidth}
 \includegraphics[width=\textwidth]{./Images/brightness_severity_-0.3.jpg}
 \caption{Luminosità ridotta del $30\%$}
 \label{sfig:corruption_brightness}
 \end{subfigure}\hfill
-\begin{subfigure}{0.2\textwidth}
+\begin{subfigure}[t]{0.18\textwidth}
 \includegraphics[width=\textwidth]{./Images/gaussian_blur_severity_2.0.jpg}
 \caption{Blur gaussiana con deviazione standard $0.2$}
 \label{sfig:corruption_gaussian_blur}
 \end{subfigure}\hfill
-\begin{subfigure}{0.2\textwidth}
+\begin{subfigure}[t]{0.18\textwidth}
 \includegraphics[width=\textwidth]{./Images/gaussian_noise_severity_0.1.jpg}
 \caption{Rumore gaussiano con deviazione standard $0.1$}
 \label{sfig:corruption_gaussian_noise}
 \end{subfigure}\hfill
 
-\begin{subfigure}{0.2\textwidth}
+\begin{subfigure}[t]{0.18\textwidth}
+\includegraphics[width=\textwidth]{./Images/horizontal_flip.jpg}
+\caption{rovesciamento rispetto all’asse verticale}
+\label{sfig:corruption_skew}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.18\textwidth}
 \includegraphics[width=\textwidth]{./Images/skew.jpg}
 \caption{inclinazione nello spazio tridimensionale}
 \label{sfig:corruption_skew}
 \end{subfigure}\hfill
-\begin{subfigure}{0.2\textwidth}
+\begin{subfigure}[t]{0.18\textwidth}
 \includegraphics[width=\textwidth]{./Images/spatter_severity_3.jpg}
 \caption{Spatter con severità $3.0$}
 \label{sfig:corruption_spatter}
 \end{subfigure}\hfill
-\begin{subfigure}{0.2\textwidth}
+\begin{subfigure}[t]{0.18\textwidth}
 \includegraphics[width=\textwidth]{./Images/random_crop_severity_0.3.jpg}
 \caption{Ritaglio del $30\%$}
 \label{sfig:corruption_random_crop}
 \end{subfigure}\hfill
-\begin{subfigure}{0.2\textwidth}
+\begin{subfigure}[t]{0.18\textwidth}
 \includegraphics[width=\textwidth]{./Images/rotation_severity_7.0.jpg}
 \caption{Rotazione di $7.0 \degree$}
 \label{sfig:corruption_rotation}
