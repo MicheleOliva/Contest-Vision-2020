@@ -97,7 +97,9 @@ In conclusione:
 \emph{Descrivere il metodo utilizzato per effettuare il rilevamento del volto. Se si utilizza un approccio noto o i volti già estratti con framework esistenti, si specifichi questa informazione.}
 
 Per il rilevamento del volto non abbiamo utilizzato un face detector, in quanto nelle annotazioni del dataset VGGFace2, già citate nella sezione~\ref{subsubsec:dataset}, sono riportate sia per il training set che per il test set, informazioni inerenti alle bounding boxes relative ai volti dei soggetti immortalati. Tali informazioni definiscono quindi la \textbf{region of interest} (ROI) di ogni immagine.
-Ovviamente, qualora questa rete dovesse essere utilizzata per un'applicazione reale, andrebbe aggiunto un face detector a monte del sistema di age estimation. \todo{Dire come sono stati estratti questi volti o citare qualche parte nella quale ci sia scritto}
+Ovviamente, qualora questa rete dovesse essere utilizzata per un'applicazione reale, andrebbe aggiunto un face detector a monte del sistema di age estimation. 
+
+Ad esempio, per ricavare le annotazioni da noi utilizzate è stato utilizzato un face detector basato su una versione di \emph{SSD} che usa ResNet-10 come rete backbone \cite{miviagender}.
 
 \subsubsection{Face pre-processing} 
 
