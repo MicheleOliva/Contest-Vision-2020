@@ -11,11 +11,13 @@ L'architettura scelta è MobileNetV3 Large \cite{mobilenetv3}. Le reti neurali c
 
 Per essere efficiente, MobileNetV3 presenta un numero ridotto di pesi da addestrare rispetto ad altre architetture della letteratura, e ciò l'ha resa un ottimo candidato per l'addestramento con le risorse limitate di Google Colab (VRAM e 12 ore di tempo macchina). A parità di tempo, ci è possibile addestrare la rete su più immagini, quindi è possibile utilizzare un dataset estremamente ricco di campioni che, secondo i risultati di \cite{miviaage}, garantisce ottime prestazioni anche a reti più leggere.
 
-Il nostro modello è una versione personalizzata dell'implementazione di MobileNetV3 Large sul framework Keras\footnote{\url{https://keras.io/api/applications/}}. Il modello viene adattato per diventare un regressore sostituendo il layer di classificazione con un layer di dimensione unitaria con attivazione lineare (ReLU). Questo ci ha permesso di astrarci dalla rappresentazione dell'età, in modo da lasciarla definita nell'intervallo \([0, +\infty)\), e di utilizzare la ben nota in letteratura Mean Squared Error (MSE) loss function
+Il nostro modello è una versione personalizzata dell'implementazione di MobileNetV3 Large sul framework Keras\footnote{\url{https://www.tensorflow.org/api_docs/python/tf/keras/applications/MobileNetV3Large}}. In questa nostra versione distinguiamo il \emph{bottom}, cioè i livelli più bassi, quelli che svolgono le operazioni di estrazione delle feature dall'input, ed il \emph{top}, cioè gli ultimi sei livelli della rete, che producono l'output finale sulla base della feature estratte ai livelli inferiori. Il modello viene adattato per diventare un regressore sostituendo il top per la classificazione con un top di output unitario con attivazione Rectified Linear Unit (ReLU). Questo ci ha permesso di astrarci dalla rappresentazione dell'età, in modo da lasciarla definita nell'intervallo \([0, +\infty)\), e di utilizzare la ben nota in letteratura Mean Squared Error (MSE) loss function
 \begin{displaymath}
 \text{MSE} = \frac{1}{n} \sum_{i=1}^{n} \left(Y_i - \hat{Y}_i\right),
 \end{displaymath}
 che tiene conto anche dell'entità della differenza tra la stima dell'età e la \emph{ground truth}.
+
+Si noti infine che nel model summary visualizzato dalla nostra implementazione il terzultimo livello viene denominato \emph{Logits}. Si tratta semplicemente del nome che l'implementazione sulla quale ci siamo basati dà al livello precedente a quello di output, ma non ha nulla a che vedere con la funzione matematica logit\footnote{\url{https://github.com/tensorflow/tensorflow/blob/v2.4.0/tensorflow/python/keras/applications/mobilenet_v3.py}, alla definizione della classe MobileNetV3, riga 312}.
 
 \subsection{Procedura di addestramento}
 \subsubsection{Dataset}
@@ -192,17 +194,13 @@ I valori scelti empiricamente fanno sì che l'effetto dell'applicazione del filt
 \subsubsection{Training from scratch o fine tuning}
 \emph{Specificare se la rete viene addestrata con inizializzazione random o partendo da pesi pre-addestrati, motivando la scelta e fornendo dettagli sulla strategia di inizializzazione.}
 
-%\begin{comment}
-Come base per il nostro addestramento abbiamo realizzato una versione di MobileNetV3Large basata su di un'implementazione già disponibile in TensorFlow\footnote{\url{https://www.tensorflow.org/api_docs/python/tf/keras/applications/MobileNetV3Large}}. In questa nostra versione distinguiamo il \emph{bottom}, cioè i livelli più bassi, quelli che svolgono le operazioni di estrazione delle feature dall'input, ed il \emph{top}, cioè gli ultimi sei livelli della rete, che producono l'output finale della rete sulla base della feature estratte ai livelli inferiori.
+Come già precisato nel paragrafo~\ref{sec:cnn_relu}, come base per il nostro addestramento abbiamo realizzato una versione di MobileNetV3Large basata su di un'implementazione già disponibile in Keras. 
 
 Abbiamo inizializzato il \emph{bottom} con pesi appresi su ImageNet\todo{linkare/citare qualcosa}, mentre per quanto riguarda il \emph{top} abbiamo inizializzato l'unico livello che richiede pesi, quello convoluzionale, in maniera randomica. In particolare, per questo livello abbiamo lasciato l'inizializzazione di default prevista dall'implementazione, ovvero l'inizializzazione uniforme di Glorot, sebbene di solito si preferisca l'inizializzazione uniforme di He per layer con funzione d'attivazione ReLU\todo{aggiornare quando scegliamo modello definitivo}, in quanto le due inizializzazioni differiscono soltanto per un fattore al numeratore della varianza della distribuzione utilizzata (1 in Glorot, 2 in He), ed il fatto di non cambiare l'inizializzazione ci ha permesso di non dover modificare l'implementazione della rete.\todo{dire che se la rete avesse fatto schifo saremmo comunque venuti a modificare questo parametro}
 
 Abbiamo scelto di seguire questa strada in quanto il fatto di partire da pesi appresi su di un dataset generico e molto vasto permette di ridurre i tempi di convergenza dell'algoritmo di addestramento\cite{miviaage}. 
 
 Ovviamente non abbiamo potuto riutilizzare i pesi ImageNet per il \emph{top} della rete, in quanto ImageNet è un dataset tipicamente utilizzato per la classificazione.
-
-Si noti infine che nel model summary visualizzato dalla nostra implementazione il terzultimo livello viene denominato \emph{Logits}. Si tratta semplicemente del nome che l'implementazione sulla quale ci siamo basati dà al livello precedente a quello di output, ma non ha nulla a che vedere con la funzione matematica logit, è solo frutto di una scelta dei nomi a nostro parere abbastanza confusionaria.
-%\end{comment}
 
 \subsubsection{Procedura di training}
 \todo{Indicare probabilità di corruzioni e probabilità di corruzioni frequenti. Indicare anche che non facciamo regolarizzazione (weight decay o regolarizzazione L1 o L2) perché c’è già la Batch Normalization nel modello e i risultati sono in linea con il paper di Age Estimation del MIVIA anche senza.}
