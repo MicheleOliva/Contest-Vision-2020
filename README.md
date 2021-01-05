@@ -5,8 +5,17 @@
 ## Training a new model
 
 ```
-$ train.py [-c /path/to/config] [-d /path/to/checkpoint/directory]
+$ train.py
 ```
+For now, training parameters can be modified inside the script itself. Please check the commented boxes before running:
+
+```python
+#### PARAMETERS #####
+some_parameter = xyz
+#####################
+```
+
+The script will create a new directory in the current working directory to save checkpoints in.
 
 The input ``csv`` must be in the format
 ```
@@ -15,6 +24,8 @@ The input ``csv`` must be in the format
 where ``Gender`` is currently not used, so it can be any value.
 
 The script will generate some ``cache`` files in the current working directory, which you can substitute to the ``csv`` files in the configuration to make things run faster.
+
+## Resuming training
 
 
 ## Evaluating a model
