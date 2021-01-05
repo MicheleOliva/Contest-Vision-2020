@@ -26,9 +26,9 @@ def test_generator(csv_path, dataset_path, desired_shape):
     with open(csv_path, 'r') as csvfile:
         annotations = csv.reader(csvfile)
         for row in annotations:
-            img = cv2.imread(os.path.join(dataset_path, row[2]))
+            img = cv2.imread(os.path.join(dataset_path, row[0]))
             img = np.array(img)
-            roi = np.array(row[4:], dtype='int')
+            roi = np.array(row[1:], dtype='int')
             img = preprocessor.cut(img, roi)
             img = preprocessor.post_augmentation([img])
             yield np.array(img)
@@ -55,7 +55,7 @@ with open(args.csv, 'r') as annotations_file:
         output = csv.writer(output_file)
         
         for (row, age) in zip(annotations, pred):
-            output.writerow([row[2], age])
+            output.writerow([row[0], age])
 
 
         
