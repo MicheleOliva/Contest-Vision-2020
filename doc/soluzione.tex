@@ -91,9 +91,7 @@ Successivamente a tale operazione, al training set sono state sottratte ulterior
 \emph{Descrivere il metodo utilizzato per effettuare il rilevamento del volto. Se si utilizza un approccio noto o i volti già estratti con framework esistenti, si specifichi questa informazione.}
 
 Per il rilevamento del volto non abbiamo utilizzato un face detector, in quanto nelle annotazioni del dataset VGGFace2, già citate nella sezione~\ref{subsubsec:dataset}, sono riportate sia per il training set che per il test set, informazioni inerenti alle bounding boxes relative ai volti dei soggetti immortalati. Tali informazioni definiscono quindi la \textbf{region of interest} (ROI) di ogni immagine.
-Ovviamente, qualora questa rete dovesse essere utilizzata per un'applicazione reale, andrebbe aggiunto un face detector a monte del sistema di age estimation. 
-
-Ad esempio, per ricavare le annotazioni da noi utilizzate è stato utilizzato un face detector basato su una versione di \emph{SSD} che usa ResNet-10 come rete backbone \cite{miviagender}.
+Ovviamente, qualora questa rete dovesse essere utilizzata per un'applicazione reale, andrebbe aggiunto un face detector a monte del sistema di age estimation. \todo{Dire come sono stati estratti questi volti o citare qualche parte nella quale ci sia scritto}
 
 \subsubsection{Face pre-processing} 
 
@@ -143,56 +141,46 @@ I filtri applicati sono:
 Per ogni immagine, viene scelto casualmente se applicare o meno un filtro. In caso positivo, viene scelto casualmente uno dei filtri insieme ad un valore di intensità che ricada nell'intervallo predisposto per ognuno di essi.
 
 Gli intervalli all'interno dei quali viene scelta l'intensità di applicazione di ogni filtro sono uguali a quelli presenti nelle implementazioni del Mivia Gender Recognition Framework \cite{miviagender}, eventualmente personalizzati, secondo i valori esplicitamente indicati, sulla base di alcune prove effettuate manualmente.
-I valori scelti empiricamente fanno sì che l'effetto dell'applicazione del filtro non sia completamente distruttivo e il risultato sia ancora riconoscibile all'occhio umano rispetto all'immagine originale.
+I valori scelti empiricamente fanno sì che l'effetto dell'applicazione del filtro non sia completamente distruttivo e il risultato sia ancora riconoscibile all'occhio umano rispetto all'immagine originale. \todo{aggiungere immagine flippata e immagine originale alla carrellata di effetti}
 
 \begin{figure}[ht]
-\begin{subfigure}[t]{0.18\textwidth}
-\includegraphics[width=\textwidth]{./Images/preprocessed.jpg}
-\caption{Nessun effetto applicato}
-\label{sfig:corruption_contrast}
-\end{subfigure}\hfill
-\begin{subfigure}[t]{0.18\textwidth}
+\begin{subfigure}{0.2\textwidth}
 \includegraphics[width=\textwidth]{./Images/contrast_severity_0.2.jpg}
 \caption{Contrasto aumentato di $0.2$}
 \label{sfig:corruption_contrast}
 \end{subfigure}\hfill
-\begin{subfigure}[t]{0.18\textwidth}
+\begin{subfigure}{0.2\textwidth}
 \includegraphics[width=\textwidth]{./Images/brightness_severity_-0.3.jpg}
 \caption{Luminosità ridotta del $30\%$}
 \label{sfig:corruption_brightness}
 \end{subfigure}\hfill
-\begin{subfigure}[t]{0.18\textwidth}
+\begin{subfigure}{0.2\textwidth}
 \includegraphics[width=\textwidth]{./Images/gaussian_blur_severity_2.0.jpg}
 \caption{Blur gaussiana con deviazione standard $0.2$}
 \label{sfig:corruption_gaussian_blur}
 \end{subfigure}\hfill
-\begin{subfigure}[t]{0.18\textwidth}
+\begin{subfigure}{0.2\textwidth}
 \includegraphics[width=\textwidth]{./Images/gaussian_noise_severity_0.1.jpg}
 \caption{Rumore gaussiano con deviazione standard $0.1$}
 \label{sfig:corruption_gaussian_noise}
 \end{subfigure}\hfill
 
-\begin{subfigure}[t]{0.18\textwidth}
-\includegraphics[width=\textwidth]{./Images/horizontal_flip.jpg}
-\caption{rovesciamento rispetto all’asse verticale}
-\label{sfig:corruption_skew}
-\end{subfigure}\hfill
-\begin{subfigure}[t]{0.18\textwidth}
+\begin{subfigure}{0.2\textwidth}
 \includegraphics[width=\textwidth]{./Images/skew.jpg}
 \caption{inclinazione nello spazio tridimensionale}
 \label{sfig:corruption_skew}
 \end{subfigure}\hfill
-\begin{subfigure}[t]{0.18\textwidth}
+\begin{subfigure}{0.2\textwidth}
 \includegraphics[width=\textwidth]{./Images/spatter_severity_3.jpg}
 \caption{Spatter con severità $3.0$}
 \label{sfig:corruption_spatter}
 \end{subfigure}\hfill
-\begin{subfigure}[t]{0.18\textwidth}
+\begin{subfigure}{0.2\textwidth}
 \includegraphics[width=\textwidth]{./Images/random_crop_severity_0.3.jpg}
 \caption{Ritaglio del $30\%$}
 \label{sfig:corruption_random_crop}
 \end{subfigure}\hfill
-\begin{subfigure}[t]{0.18\textwidth}
+\begin{subfigure}{0.2\textwidth}
 \includegraphics[width=\textwidth]{./Images/rotation_severity_7.0.jpg}
 \caption{Rotazione di $7.0 \degree$}
 \label{sfig:corruption_rotation}
@@ -203,14 +191,18 @@ I valori scelti empiricamente fanno sì che l'effetto dell'applicazione del filt
 
 \subsubsection{Training from scratch o fine tuning}
 \emph{Specificare se la rete viene addestrata con inizializzazione random o partendo da pesi pre-addestrati, motivando la scelta e fornendo dettagli sulla strategia di inizializzazione.}
-Come base per il nostro addestramento abbiamo realizzato una versione di MobileNetV3Large, basata sull'implementazione già disponibile in TensorFlow\footnote{https://www.tensorflow.org/api_docs/python/tf/keras/applications/MobileNetV3Large}, nella quale i livelli più bassi, che svolgono le operazioni di estrazione delle feature dall'input, sono inizializzati con pesi appresi su ImageNet\todo{linkare/citare qualcosa}, mentre negli ultimi sei livelli della rete (il \emph{top}), che producono l'output finale della rete sulla base della feature estratte ai livelli inferiori, vi è soltanto un livello che richiede dei pesi, quello convoluzionale, che abbiamo inizializzato in maniera randomica. In particolare, per questo livello abbiamo lasciato l'inizializzazione di default prevista dall'implementazione, ovvero l'inizializzazione uniforme di Glorot, sebbene di solito si preferisca l'inizializzazione uniforme di He per layer con funzione d'attivazione ReLU\todo{aggiornare quando scegliamo modello definitivo}, in quanto le due inizializzazioni differiscono soltanto per un fattore al numeratore della varianza della distribuzione utilizzata (1 in Glorot, 2 in He), ed il fatto di non modificare l'inizializzazione ci ha permesso di non dover modificare l'implementazione della rete.\todo{dire che se la rete avesse fatto schifo saremmo comunque venuti a modificare questo parametro}
 
-Abbiamo scelto di seguire questa strada in quanto il fatto di partire da pesi appresi su di un dataset generico e molto vasto permette di velocizzare i tempi di convergenza dell'algoritmo di addestramento\cite{miviaage}. 
+%\begin{comment}
+Come base per il nostro addestramento abbiamo realizzato una versione di MobileNetV3Large basata su di un'implementazione già disponibile in TensorFlow\footnote{\url{https://www.tensorflow.org/api_docs/python/tf/keras/applications/MobileNetV3Large}}. In questa nostra versione distinguiamo il \emph{bottom}, cioè i livelli più bassi, quelli che svolgono le operazioni di estrazione delle feature dall'input, ed il \emph{top}, cioè gli ultimi sei livelli della rete, che producono l'output finale della rete sulla base della feature estratte ai livelli inferiori.
 
-Ovviamente non abbiamo potuto riutilizzare i pesi per il \emph{top} della rete in quanto ImageNet è un dataset tipicamente utilizzato per la classificazione.
+Abbiamo inizializzato il \emph{bottom} con pesi appresi su ImageNet\todo{linkare/citare qualcosa}, mentre per quanto riguarda il \emph{top} abbiamo inizializzato l'unico livello che richiede pesi, quello convoluzionale, in maniera randomica. In particolare, per questo livello abbiamo lasciato l'inizializzazione di default prevista dall'implementazione, ovvero l'inizializzazione uniforme di Glorot, sebbene di solito si preferisca l'inizializzazione uniforme di He per layer con funzione d'attivazione ReLU\todo{aggiornare quando scegliamo modello definitivo}, in quanto le due inizializzazioni differiscono soltanto per un fattore al numeratore della varianza della distribuzione utilizzata (1 in Glorot, 2 in He), ed il fatto di non cambiare l'inizializzazione ci ha permesso di non dover modificare l'implementazione della rete.\todo{dire che se la rete avesse fatto schifo saremmo comunque venuti a modificare questo parametro}
 
-Si noti infine che nel model summary visualizzato dalla nostra implementazione il terzultimo livello viene denominato \emph{Logits}. Si tratta semplicemente del nome che l'implementazione sulla quale ci siamo basati dà al livello precedente a quello di output, ma non ha nulla a che vedere con la funzione matematica \emph{logit}, è solo frutto di una scelta dei nomi a nostro parere abbastanza confusionaria.
+Abbiamo scelto di seguire questa strada in quanto il fatto di partire da pesi appresi su di un dataset generico e molto vasto permette di ridurre i tempi di convergenza dell'algoritmo di addestramento\cite{miviaage}. 
 
+Ovviamente non abbiamo potuto riutilizzare i pesi ImageNet per il \emph{top} della rete, in quanto ImageNet è un dataset tipicamente utilizzato per la classificazione.
+
+Si noti infine che nel model summary visualizzato dalla nostra implementazione il terzultimo livello viene denominato \emph{Logits}. Si tratta semplicemente del nome che l'implementazione sulla quale ci siamo basati dà al livello precedente a quello di output, ma non ha nulla a che vedere con la funzione matematica logit, è solo frutto di una scelta dei nomi a nostro parere abbastanza confusionaria.
+%\end{comment}
 
 \subsubsection{Procedura di training}
 \todo{Indicare probabilità di corruzioni e probabilità di corruzioni frequenti. Indicare anche che non facciamo regolarizzazione (weight decay o regolarizzazione L1 o L2) perché c’è già la Batch Normalization nel modello e i risultati sono in linea con il paper di Age Estimation del MIVIA anche senza.}
