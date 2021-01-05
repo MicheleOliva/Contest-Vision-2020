@@ -67,6 +67,10 @@ if resume:
   print(f"Found {last_model}. Loading...")
   model = load_model(last_model, compile=True)
   initial_epoch = last_model_epochs
+  # get the number of classes
+  final_layer = model.get_layer(index=-1)
+  classes = final_layer.output_shape[1] # fist dimension (index 0) is always batch dimension
+  print(f'Found {classes} classes')
 
 
 # Se non si riprende il training
@@ -216,7 +220,7 @@ warmup_params = {
 }
 # Settare a true se si vuole cambiare learning rate
 override_lr = False
-new_lr_value = None # settare al nuovo valore desiderato del learning rate
+new_lr_factor = None # il nuovo learning rate sarà pari a quello precedente moltiplicato per questo fattore
 ##########################################################################################
 
 if warmup:
@@ -232,7 +236,8 @@ if warmup:
   print('Warmup done!')
 
 if override_lr:
-    K.set_value(model.optimizer.lr, new_lr_value)
+    curr_lr = K.get_value(model.optimizer.lr)
+    K.set_value(model.optimizer.lr, new_lr_factor*curr_lr)
 
 print(f'Learning rate: {K.get_value(model.optimizer.lr)}')
 

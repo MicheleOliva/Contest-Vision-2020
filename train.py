@@ -198,11 +198,12 @@ tensorboard = TensorBoard(log_dir=logdir,
 training_epochs = 10000
 # Settare a true se si vuole cambiare learning rate
 override_lr = False
-new_lr_value = None # settare al nuovo valore desiderato del learning rate
+new_lr_factor = None # il nuovo learning rate sarà pari a quello precedente moltiplicato per questo fattore
 ##########################################################################################
 
 if override_lr:
-    K.set_value(model.optimizer.lr, new_lr_value)
+    curr_lr = K.get_value(model.optimizer.lr)
+    K.set_value(model.optimizer.lr, new_lr_factor*curr_lr)
 
 print(f'Learning rate: {K.get_value(model.optimizer.lr)}')
 
