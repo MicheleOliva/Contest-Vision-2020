@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import os
 from keras.models import load_model
 import argparse
@@ -11,6 +13,8 @@ from dataset_utils.preprocessing import CustomPreprocessor
 # Argomenti da riga di comando
 argparser = argparse.ArgumentParser(description='Evaluates the last saved model in the current working directory. You can specify a model to evaluate with --model.')
 argparser.add_argument('-m', '--model', help='model path to evaluate')
+argparser.add_argument('csv', help="csv (or cache) file containing images' paths, bounding boxes and ground truth")
+argparser.add_argument('dataset', help="directory containing images' paths")
 args = argparser.parse_args()
 # Modello
 
@@ -52,8 +56,8 @@ model.summary()
 input_shape = tuple(model.get_layer(index=0).inputs[0].shape[1:])
 
 #### Parametri generatore #################################################################
-eval_csv_path = '/content/drive/Shareddrives/Progettone/Age Estimation/caches/eval_csv.cache' # METTI DUMP .cache
-eval_dataset_root_path = '/content/eval'
+eval_csv_path = args.csv
+eval_dataset_root_path = args.dataset
 eval_batch_size = 1
 eval_epoch_mode = 'full' # Len del generator è il numero di identities
 ###########################################################################################

@@ -1,11 +1,8 @@
+#!/usr/bin/env python3
+
 import os
 import pickle
 import sys
-
-#### PATH LIBRERIE #######################################################################
-#sys.path.insert(0, "/content/Contest-Vision-2020/pymodules/dataset_utils")
-##########################################################################################
-
 from datetime import datetime
 from tensorflow.keras.applications import MobileNetV3Large
 from keras import Model, Sequential
@@ -150,7 +147,7 @@ eval_generator = DataGenerator(mode='validation', preprocessor=eval_preprocessor
 
 #### Parametri per le callback ###########################################################
 path = "."
-min_delta = 0.01 # Quanto deve scendere il mae per esser considerato migliorato
+min_delta = 0.1 # Quanto deve scendere il mae per esser considerato migliorato
 checkpoint_monitor = 'val_mae' # Solo per il model_checkpoint
 monitor = 'val_loss'
 mode = 'auto' # Controllare che funzioni, ossia il mae deve scendere per essere considerato migliorato

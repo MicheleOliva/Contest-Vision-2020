@@ -1,10 +1,8 @@
+#!/usr/bin/env python3
+
 import os
 import pickle
 import sys
-
-#### PATH LIBRERIE #######################################################################
-#sys.path.insert(0, "/content/Contest-Vision-2020/pymodules/dataset_utils")
-##########################################################################################
 import tensorflow as tf
 from datetime import datetime
 from tensorflow.keras.applications import MobileNetV3Large

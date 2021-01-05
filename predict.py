@@ -1,10 +1,7 @@
+#!/usr/bin/env python3
+
 import os
 import sys
-
-#### PATH LIBRERIE #######################################################################
-#sys.path.insert(0, "/content/Contest-Vision-2020/pymodules/dataset_utils")
-##########################################################################################
-
 from keras.models import load_model
 import argparse
 import re
@@ -15,10 +12,10 @@ import csv
 
 
 # Argomenti da riga di comando
-argparser = argparse.ArgumentParser(description='Tests the model given given parameter.')
-argparser.add_argument('csv', help='path to csv with images and roi annotations')
-argparser.add_argument('dataset', help='path to the dataset')
-argparser.add_argument('model', help='path to the model')
+argparser = argparse.ArgumentParser(description='Generates predictions.')
+argparser.add_argument('csv', help="csv containing images' paths and bounding boxes")
+argparser.add_argument('dataset', help="directory containing images' paths")
+argparser.add_argument('model', help="direcotory containing a Keras model")
 args = argparser.parse_args()
 
 OUTPUT_PATH = 'predictions.csv'
@@ -35,7 +32,6 @@ def test_generator(csv_path, dataset_path, desired_shape):
             img = preprocessor.cut(img, roi)
             img = preprocessor.post_augmentation([img])
             yield np.array(img)
-
 
 
 if not os.path.isdir(args.model):
