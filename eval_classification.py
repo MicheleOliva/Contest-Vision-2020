@@ -28,10 +28,10 @@ def compute_classification_mae(y_true, y_pred):
     return np.mean(errors_np)
 
 
-EVAL_CSV_PATH = 'C:\\Users\\Francesco\\Desktop\\python_test_environment\\fake_eval.csv'
-EVAL_SET_PATH = 'C:\\Users\\Francesco\\Documents\\Uni\\Magistrale\\Secondo anno\\Artificial Vision\\Progetto finale age estimation\\Dataset\\train'
+EVAL_CSV_PATH = '/content/drive/Shareddrives/Progettone/Age Estimation/caches/eval_csv.cache'
+EVAL_SET_PATH = '/content/eval'
 MODE = 'validation'
-BATCH_SIZE = 4
+BATCH_SIZE = 1
 NUM_CLASSES = 101
 EPOCH_MODE = 'full'
 
