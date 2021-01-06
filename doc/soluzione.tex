@@ -1,6 +1,6 @@
 Tale descrizione deve contemplare almeno gli elementi riportati nelle seguenti sottosezioni.
 
-\subsection{Convolutional neural network} \label{sec:cnn_relu} \todo{specificare input size (quando l'avremo scelta)}
+\subsection{Convolutional neural network} \label{sec:cnn_relu}
 \emph{Descrivere in questa sezione l’architettura della convolutional neural network
 sviluppata nell’ambito del progetto. Se si utilizza un’architettura nota, si riportino gli elementi fondamentali della rete e le eventuali modifiche effettuate ma, soprattutto, si motivi la scelta.
 Definire in ogni caso se la rete è stata progettata come regressore (output:
@@ -11,7 +11,7 @@ L'architettura scelta è MobileNetV3 Large \cite{mobilenetv3}. Le reti neurali c
 
 Per essere efficiente, MobileNetV3 presenta un numero ridotto di pesi da addestrare rispetto ad altre architetture della letteratura, e ciò l'ha resa un ottimo candidato per l'addestramento con le risorse limitate di Google Colab (VRAM e 12 ore di tempo macchina). A parità di tempo, ci è possibile addestrare la rete su più immagini, quindi è possibile utilizzare un dataset estremamente ricco di campioni che, secondo i risultati di \cite{miviaage}, garantisce ottime prestazioni anche a reti più leggere.
 
-Il nostro modello è una versione personalizzata dell'implementazione di MobileNetV3 Large sul framework Keras\footnote{\url{https://www.tensorflow.org/api_docs/python/tf/keras/applications/MobileNetV3Large}}. In questa nostra versione distinguiamo il \emph{bottom}, cioè i livelli più bassi, quelli che svolgono le operazioni di estrazione delle feature dall'input, ed il \emph{top}, cioè gli ultimi sei livelli della rete, che producono l'output finale sulla base della feature estratte ai livelli inferiori. Il modello viene adattato per diventare un regressore sostituendo il top per la classificazione con un top di output unitario con attivazione Rectified Linear Unit (ReLU). Questo ci ha permesso di astrarci dalla rappresentazione dell'età, in modo da lasciarla definita nell'intervallo \([0, +\infty)\), e di utilizzare la ben nota in letteratura Mean Squared Error (MSE) loss function
+Il nostro modello è una versione personalizzata dell'implementazione di MobileNetV3 Large sul framework Keras\footnote{\url{https://www.tensorflow.org/api_docs/python/tf/keras/applications/MobileNetV3Large}}. In questa nostra versione distinguiamo il \emph{bottom}, cioè i livelli più bassi, quelli che svolgono le operazioni di estrazione delle feature dall'input, ed il \emph{top}, cioè gli ultimi sei livelli della rete, che producono l'output finale sulla base della feature estratte ai livelli inferiori. Per quanto riguarda la input size, l'abbiamo fissata a 224x224, mentre per quanto riguarda l'output abbiamo adattato il modello per diventare un regressore, sostituendo il top per la classificazione con un top di output unitario con attivazione Rectified Linear Unit (ReLU). Questo ci ha permesso di astrarci dalla rappresentazione dell'età, in modo da lasciarla definita nell'intervallo \([0, +\infty)\), e di utilizzare la ben nota in letteratura Mean Squared Error (MSE) loss function
 \begin{displaymath}
 \text{MSE} = \frac{1}{n} \sum_{i=1}^{n} \left(Y_i - \hat{Y}_i\right),
 \end{displaymath}
@@ -88,8 +88,8 @@ Successivamente a tale operazione, al training set sono state sottratte ulterior
 
 In conclusione:
 \begin{itemize}
-	\item Il training set è composto da $4692$ identità per un totale di $1.68$ milioni di immagini.
-	\item Il validation set è composto da $480$ identità per un totale di $170363$ immagini.
+	\item Il training set è composto da $4692$ identità per un totale di $1.68$ milioni di immagini;
+	\item Il validation set è composto da $480$ identità per un totale di $170363$ immagini;
 	\item Il test set è composto da $500$ identità per un totale di $169372$ immagini.
 \end{itemize}
 \subsubsection{Face detection}
@@ -213,14 +213,14 @@ I valori scelti empiricamente fanno sì che l'effetto dell'applicazione del filt
 
 Come già precisato nel paragrafo~\ref{sec:cnn_relu}, come base per il nostro addestramento abbiamo realizzato una versione di MobileNetV3Large basata su di un'implementazione già disponibile in Keras. 
 
-Abbiamo inizializzato il \emph{bottom} con pesi appresi su ImageNet\cite{imagenet}, mentre per quanto riguarda il \emph{top} abbiamo inizializzato l'unico livello che richiede pesi, quello convoluzionale, in maniera randomica. In particolare, per questo livello abbiamo lasciato l'inizializzazione di default prevista dall'implementazione, ovvero l'inizializzazione uniforme di Glorot, sebbene di solito si preferisca l'inizializzazione uniforme di He per layer con funzione d'attivazione ReLU\todo{aggiornare quando scegliamo modello definitivo}, in quanto le due inizializzazioni differiscono soltanto per un fattore al numeratore della varianza della distribuzione utilizzata (1 in Glorot, 2 in He), ed il fatto di non cambiare l'inizializzazione ci ha permesso di non dover modificare l'implementazione della rete.\todo{dire che se la rete avesse fatto schifo saremmo comunque venuti a modificare questo parametro}
+Abbiamo inizializzato il \emph{bottom} con pesi appresi su ImageNet\cite{imagenet}, mentre per quanto riguarda il \emph{top} abbiamo inizializzato l'unico livello che richiede pesi, quello convoluzionale, in maniera randomica. In particolare, per questo livello abbiamo lasciato l'inizializzazione di default prevista dall'implementazione, ovvero l'inizializzazione uniforme di Glorot, sebbene di solito si preferisca l'inizializzazione uniforme di He per layer con funzione d'attivazione ReLU\todo{aggiornare quando scegliamo modello definitivo}, in quanto le due inizializzazioni differiscono soltanto per un fattore al numeratore della varianza della distribuzione utilizzata (1 in Glorot, 2 in He), ed il fatto di non cambiare l'inizializzazione ci ha permesso di non dover modificare l'implementazione della rete (ovviamente, se la rete avesse prodotto risultati diversi da quelli attesi, saremmo ritornati anche su questo punto).
 
 Abbiamo scelto di seguire questa strada in quanto il fatto di partire da pesi appresi su di un dataset generico e molto vasto permette di ridurre i tempi di convergenza dell'algoritmo di addestramento\cite{miviaage}. 
 
 Ovviamente non abbiamo potuto riutilizzare i pesi ImageNet per il \emph{top} della rete, in quanto ImageNet è un dataset tipicamente utilizzato per la classificazione.
 
 \subsubsection{Procedura di training}
-\todo{Indicare probabilità di corruzioni e probabilità di corruzioni frequenti. Indicare anche che non facciamo regolarizzazione (weight decay o regolarizzazione L1 o L2) perché c’è già la Batch Normalization nel modello e i risultati sono in linea con il paper di Age Estimation del MIVIA anche senza.}
+\todo{Indicare probabilità di corruzioni e probabilità di corruzioni frequenti, batch size.}
 \emph{Dettagliare e motivare almeno le seguenti scelte: numero di epoche di addestramento, tipo di ottimizzatore, learning rate scheduling (tecnica di riduzione, learning rate iniziale, fattore di riduzione). Fornire dettagli su eventuali elementi aggiuntivi: batch normalization, weight decay, early stopping etc. Per ognuna delle scelte, riportare i valori esatti dei parametri utilizzati, per rendere l’esperimento riproducibile. Motivare la scelta di tali valori.}
 
 \begin{comment}
