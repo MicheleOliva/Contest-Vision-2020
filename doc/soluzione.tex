@@ -257,9 +257,18 @@ Avevamo anche predisposto delle callback per la riduzione automatica del learnin
 
 La rete è stata allenata per un totale di $19$ epoche, tuttavia scegliamo come modello definitivo quello all'epoca XX, in quanto le epoche successive non hanno apportato miglioramenti significativi alle metriche osservate. \todo{mettere numero vero di epoca alla quale ci fermiamo}
 
-\begin{comment}
 \begin{figure}[ht]
 	\centering
-	\caption{SCRIVI QUA}
+	\hfill
+	\begin{subfigure}[b]{0.47\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{epoch_loss}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.47\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{epoch_mae}
+	\end{subfigure}
+	\hfill
+	\caption{Andamento delle metriche durante l'addestramento.}
 \end{figure}
-\end{comment}
