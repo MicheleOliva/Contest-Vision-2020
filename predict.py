@@ -55,7 +55,7 @@ pred = np.around(pred).astype('int') # arrotondamento per eccesso e difetto (1.1
 with open(args.csv, 'r') as annotations_file:
     annotations = csv.reader(annotations_file)
 
-    with open(OUTPUT_PATH, 'w') as output_file:
+    with open(OUTPUT_PATH, 'w', newline='') as output_file:
         output = csv.writer(output_file)
         
         for (row, age) in zip(annotations, pred):
