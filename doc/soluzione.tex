@@ -1,14 +1,14 @@
-Tale descrizione deve contemplare almeno gli elementi riportati nelle seguenti sottosezioni.
-
 \subsection{Convolutional neural network}
 
 \label{sec:cnn_relu}
 
-\emph{Descrivere in questa sezione l’architettura della convolutional neural network
+\begin{comment}
+Descrivere in questa sezione l’architettura della convolutional neural network
 sviluppata nell’ambito del progetto. Se si utilizza un’architettura nota, si riportino gli elementi fondamentali della rete e le eventuali modifiche effettuate ma, soprattutto, si motivi la scelta.
 Definire in ogni caso se la rete è stata progettata come regressore (output:
 numero reale da 0 a 100 che rappresenta l’età, da approssimare all’intero più
-vicino) o come classificatore (output: una delle 101 classi da 0 a 100) e fornire dettagli e motivazioni sulla funzione di costo scelta.}
+vicino) o come classificatore (output: una delle 101 classi da 0 a 100) e fornire dettagli e motivazioni sulla funzione di costo scelta.
+\end{comment}
 
 L'architettura scelta è MobileNetV3 Large \cite{mobilenetv3}. Le reti neurali convoluzionali (CNNs) MobileNet sono conosciute per essere progettate pensando all'applicazione su sistemi mobili e/o embedded, cercando un trade-off tra prestazioni e risorse computazionali richieste. Hanno introdotto tecniche che migliorano l'efficienza, come la \emph{depthwise separable convolution} (MobileNetV1), i \emph{linear bottleneck} e la \emph{inverted residual structure} (MobileNetV2), la \emph{squeeze and excitation} (ResNet) e le funzioni di attivazione \emph{swish}. MobileNetV3, nelle sue versioni Small e Large, è il risultato di una combinazione di questi blocchi, ottimizzata tramite \emph{platform-aware NAS} e l'algoritmo \emph{NetAdapt} \cite{mobilenetv3}. 
 
@@ -26,14 +26,14 @@ Si noti infine che nel model summary visualizzato dalla nostra implementazione i
 \subsubsection{Dataset}
 \label{subsubsec:dataset}
 
-Il dataset utilizzato per addestrare la nostra rete a compiere il task assegnato è il dataset chiamato \emph{VGG-Face2 Mivia Age}, anche detto \emph{VMAGE}\cite{miviaage}.
+Il dataset utilizzato per addestrare la nostra rete a compiere il task assegnato è il dataset chiamato \emph{VGG-Face2 Mivia Age}, anche detto \emph{VMAGE} \cite{miviaage}.
 
 Quest'ultimo dataset contiene $3.067.620$ immagini di $8921$ soggetti. Ad ogni immagine è associata l'età del soggetto, tale valore è una stima dell'età apparente del soggetto catturato.
 Il dataset ci è stato fornito già diviso in training set, che include $8.421$ identità, e test set, che include le rimanenti $500$.
 
-Le risorse che \textit{Google Colab} mette a disposizione sono risultate insufficienti per allenare la rete sull'intero training set, pertanto è stato necessario ridurre la grandezza di quest'ultimo. A tale scopo è stata svolta un analisi del training set e sono stati scelte le identità sulle quali svolgere l'addestramento della rete. Tale analisi è stata svolta combinando le annotazioni per VMAGE riguardanti la sola età con annotazioniper VGGFace2\footnote{Tali annotazioni sono reperibili al seguente link: \url{https://github.com/MiviaLab/GenderRecognitionFramework/releases/tag/0}} contenenti, tra le altre, informazioni riguardanti il genere e il numero di sample per ogni identità e, per ogni immagine, la regione dell'immagine contenente il volto del soggetto ivi rappresentato, che è stata utilizzata per svolgere operazioni dettagliate più avanti.
+Le risorse \todo{specifichiamo il disco} che Google Colab mette a disposizione sono risultate insufficienti per allenare la rete sull'intero training set, pertanto è stato necessario ridurre la grandezza di quest'ultimo. A tale scopo è stata svolta un analisi del training set e sono stati scelte le identità sulle quali svolgere l'addestramento della rete. Tale analisi è stata svolta combinando le annotazioni per VMAGE riguardanti la sola età con annotazioniper VGGFace2\footnote{Tali annotazioni sono reperibili al seguente link: \url{https://github.com/MiviaLab/GenderRecognitionFramework/releases/tag/0}} contenenti, tra le altre, informazioni riguardanti il genere e il numero di sample per ogni identità e, per ogni immagine, la regione dell'immagine contenente il volto del soggetto ivi rappresentato, che è stata utilizzata per svolgere operazioni dettagliate più avanti.
 
-Appurato quindi che era necessario ridurre il numero di campioni, ci siamo chiesti se vi fosse qualche sbilanciamento all'interno del dataset che potevamo mitigare durante il nostro processo di eliminazione di dati. Abbiamo pertanto svolto una prima analisi sul genere delle identità presenti.
+Appurato quindi che era necessario ridurre il numero di campioni, ci siamo chiesti se vi fosse qualche sbilanciamento all'interno del dataset che potevamo \todo{check periodo ipotetico} mitigare durante il nostro processo di eliminazione di dati. Abbiamo pertanto svolto una prima analisi sul genere delle identità presenti.
 
 \begin{figure}[ht]
 
@@ -98,25 +98,27 @@ In conclusione:
 \subsubsection{Face detection}
 \label{subsubsec:face_detection}
 
-\emph{Descrivere il metodo utilizzato per effettuare il rilevamento del volto. Se si utilizza un approccio noto o i volti già estratti con framework esistenti, si specifichi questa informazione.}
+\begin{comment}
+Descrivere il metodo utilizzato per effettuare il rilevamento del volto. Se si utilizza un approccio noto o i volti già estratti con framework esistenti, si specifichi questa informazione.
+\end{comment}
 
-Per il rilevamento del volto non abbiamo utilizzato un face detector, in quanto nelle annotazioni del dataset VGGFace2, già citate nel paragrafo~\ref{subsubsec:dataset}, sono riportate sia per il training set che per il test set, informazioni inerenti alle bounding boxes relative ai volti dei soggetti immortalati. Tali informazioni definiscono quindi la \textbf{region of interest} (ROI) di ogni immagine.
+Per il rilevamento del volto non abbiamo utilizzato un face detector, in quanto nelle annotazioni del dataset VGGFace2, già citate nel paragrafo~\ref{subsubsec:dataset}, sono riportate sia per il training set che per il test set, informazioni inerenti alle bounding boxes relative ai volti dei soggetti immortalati. Tali informazioni definiscono quindi la Region Of Interest (ROI) di ogni immagine.
 Ovviamente, qualora questa rete dovesse essere utilizzata per un'applicazione reale, andrebbe aggiunto un face detector a monte del sistema di age estimation.
 
 Ad esempio, per ricavare le annotazioni da noi utilizzate è stato utilizzato un face detector basato su una versione di \emph{SSD} che usa ResNet-10 come rete backbone \cite{miviagender}.
 
 \subsubsection{Face pre-processing} 
 
-\emph{Descrivere e motivare tutte le tecniche di pre-processing applicate sulle immagini del volto.}
+\begin{comment}
+Descrivere e motivare tutte le tecniche di pre-processing applicate sulle immagini del volto.
+\end{comment}
 
-Il pre-processing è stato suddiviso per semplicità in due fasi. La prima fase precede quella di data augmentation, e consiste nel ritaglio del volto del soggetto. Il ritaglio viene effettuato su di una regione individuata dalla ROI(paragrafo~\ref{subsubsec:face_detection}) allargata di un fattore $0.3$ \cite{vggface2dataset}, ovviamente non andando oltre i limiti dettati dalla risoluzione dell'immagine. Tale operazione permette di ritagliare oltre al volto del soggetto l'intera testa. Questa operazione viene effettuata prima della data augmentation perché alcune operazioni lì implementate modificano la posizione del volto all'interno dell'immagine, e quindi le ROI risulterebbero invalide. Tuttavia, qualora il sistema di age estimation dovesse essere utilizzato insieme ad un face detector, quest'ultimo dovrebbe ricevere in input le immagini già sottoposte ad augmentation, in quanto questa tecnica mira ad introdurre nel dataset modifiche dell'immagine più o meno tipiche del mondo reale, che si presenterebbero sull'immagine prima che questa possa essere sottoposta a rilevamento del volto.
+Il pre-processing è stato suddiviso per semplicità in due fasi. La prima fase precede quella di data augmentation, e consiste nel ritaglio del volto del soggetto. Il ritaglio viene effettuato su di una regione individuata dalla ROI (paragrafo~\ref{subsubsec:face_detection}) allargata di un fattore $0.3$ \cite{vggface2dataset}, ovviamente non andando oltre i limiti dettati dalla risoluzione dell'immagine. Tale operazione permette di ritagliare oltre al volto del soggetto l'intera testa. Questa operazione viene effettuata prima della data augmentation perché alcune operazioni lì implementate modificano la posizione del volto all'interno dell'immagine, e quindi le ROI risulterebbero invalide. Tuttavia, qualora il sistema di age estimation dovesse essere utilizzato insieme ad un face detector, quest'ultimo dovrebbe ricevere in input le immagini già sottoposte ad augmentation, in quanto questa tecnica mira ad introdurre nel dataset modifiche dell'immagine più o meno tipiche del mondo reale, che si presenterebbero sull'immagine prima che questa possa essere sottoposta a rilevamento del volto.
 
-Nella seconda fase di pre-processing, che viene effettuata a valle della data augmentation, ogni immagine viene ridimensionata alla dimensione di input della rete, e viene eseguita anche una normalizzazione. 
+Nella seconda fase di pre-processing, che viene effettuata a valle della data augmentation, ogni immagine viene ridimensionata alla dimensione di input della rete, e viene eseguita anche una normalizzazione.\todo{non si capisce tanto che ci riferiamo alla sottrazione delle medie} 
 
-Nel caso in cui l'immagine necessiti di essere ingrandita verrà effettuato un sovracampionamento con interpolazione cubica, in quanto questo algoritmo garantisce ottimi risultati, pur presentando una complessità computazionale non eccessiva. In particolare, una delle caratteristiche dell'interpolazione cubica che risulta particolarmente adatta al nostro dataset, considerato che in esso vi sono molte immagini aventi risoluzione inferiore all'input size della rete, è l'assenza di pixelation nell'output.
-Nel caso in cui, invece, l'immagine dovesse essere sottocampionata, verrà utilizzata un'interpolazione lineare. 
-
-In entrambi i casi, il ridimensionamento viene effettuato mantenendo le proporzioni originali dell'immagine, e nel caso in cui l'immagine ritagliata non fosse quadrata viene aggiunto del padding. 
+Nel caso in cui l'immagine necessiti di essere ingrandita verrà effettuato un sovracampionamento con interpolazione cubica, in quanto questo algoritmo garantisce ottimi risultati, pur presentando una complessità computazionale non eccessiva. In particolare, una delle caratteristiche dell'interpolazione cubica che risulta particolarmente adatta al nostro dataset è l'assenza di pixelation nell'output, considerato che vi sono molte immagini aventi risoluzione inferiore all'input size della rete.
+Nel caso in cui, invece, l'immagine dovesse essere sottocampionata, verrà utilizzata un'interpolazione lineare. In entrambi i casi, il ridimensionamento viene effettuato mantenendo le proporzioni originali dell'immagine, e nel caso in cui l'immagine ritagliata non fosse quadrata viene aggiunto del padding. 
 
 Dopo le operazioni di ridimensionamento, ad ogni immagine viene sottratta la media, per ogni canale, delle immagini del dataset VGGFace. Ciò permette alla distribuzione degli input di essere centrata in $0$, permettendoci di sfruttare tutti i vantaggi della non linearità della ReLu (paragrafo~\ref{sec:cnn_relu}) ed ottenere una convergenza più veloce \cite{miviaage}.
 
@@ -138,11 +140,14 @@ Dopo le operazioni di ridimensionamento, ad ogni immagine viene sottratta la med
 \end{figure}
 
 \subsubsection{Data augmentation}
-\emph{Descrivere e motivare tutte le policy di augmentation implementate per estendere il dataset o per aumentarne la rappresentatività.}
+\begin{comment}
+Descrivere e motivare tutte le policy di augmentation implementate per estendere il dataset o per aumentarne la rappresentatività.
+\end{comment}
+
 Per la data augmentation, durante l'addestramento applichiamo una serie di filtri in maniera casuale. Non essendo stato formulato uno use-case specifico per il sistema, lo scopo della fase di data augmentation è quello di aumentare la rappresentatività del training set, con modifiche dell'immagine tipiche del setting di acquisizione del nostro dataset (come indicato nel paragrafo~\ref{sec:intro.intention}), oltre che a fornire resilienza ad attacchi basilari. Questa fase è stata implementata senza aumentare la cardinalità del dataset, considerato che questo è già sufficientemente grande.
 
 I filtri applicati sono:
-\begin{enumerate*}[label={\alph*)}]
+\begin{enumerate*}[label={(\arabic*)}]
 \item \emph{rumore gaussiano additivo} con media 0 e deviazione standard nell'intervallo $[0.08, 0.15]$, come prevenzione ad attacchi semplici che sfruttano questo effetto ed anche per tenere in conto il rumore introdotto dal sensore fotografico;
 \item \emph{blur gaussiano} con deviazione standard nell'intervallo $[1, 2.5]$, presente soprattutto in immagini di cui si fa un sovracampionamento tramite filtro bicubico o in immagini con errori di messa a fuoco;
 \item \emph{ritaglio} \cite{miviagender}, per cui l'immagine viene tagliata ulteriormente per simulare fotografie in cui la faccia non è ripresa completamente o errori del face detector;
@@ -158,27 +163,27 @@ I valori scelti empiricamente fanno sì che l'effetto dell'applicazione del filt
 \begin{figure}[ht]
 \begin{subfigure}[t]{0.18\textwidth}
 \includegraphics[width=\textwidth]{./Images/preprocessed.jpg}
-\caption{Nessun effetto applicato}
+\caption{originale}
 \label{sfig:corruption_contrast}
 \end{subfigure}\hfill
 \begin{subfigure}[t]{0.18\textwidth}
 \includegraphics[width=\textwidth]{./Images/contrast_severity_0.2.jpg}
-\caption{Contrasto aumentato di $0.2$}
+\caption{contrasto aumentato di $0.2$}
 \label{sfig:corruption_contrast}
 \end{subfigure}\hfill
 \begin{subfigure}[t]{0.18\textwidth}
 \includegraphics[width=\textwidth]{./Images/brightness_severity_-0.3.jpg}
-\caption{Luminosità ridotta del $30\%$}
+\caption{luminosità ridotta del $30\%$}
 \label{sfig:corruption_brightness}
 \end{subfigure}\hfill
 \begin{subfigure}[t]{0.18\textwidth}
 \includegraphics[width=\textwidth]{./Images/gaussian_blur_severity_2.0.jpg}
-\caption{Blur gaussiana con deviazione standard $0.2$}
+\caption{blur gaussiano con dev.\@ std.\@ $0.2$}
 \label{sfig:corruption_gaussian_blur}
 \end{subfigure}\hfill
 \begin{subfigure}[t]{0.18\textwidth}
 \includegraphics[width=\textwidth]{./Images/gaussian_noise_severity_0.1.jpg}
-\caption{Rumore gaussiano con deviazione standard $0.1$}
+\caption{rumore gaussiano con dev.\@ std.\@ $0.1$}
 \label{sfig:corruption_gaussian_noise}
 \end{subfigure}\hfill
 
@@ -194,37 +199,41 @@ I valori scelti empiricamente fanno sì che l'effetto dell'applicazione del filt
 \end{subfigure}\hfill
 \begin{subfigure}[t]{0.18\textwidth}
 \includegraphics[width=\textwidth]{./Images/spatter_severity_3.jpg}
-\caption{Spatter con severità $3.0$}
+\caption{spatter con severità $3.0$}
 \label{sfig:corruption_spatter}
 \end{subfigure}\hfill
 \begin{subfigure}[t]{0.18\textwidth}
 \includegraphics[width=\textwidth]{./Images/random_crop_severity_0.3.jpg}
-\caption{Ritaglio del $30\%$}
+\caption{ritaglio del $30\%$}
 \label{sfig:corruption_random_crop}
 \end{subfigure}\hfill
 \begin{subfigure}[t]{0.18\textwidth}
 \includegraphics[width=\textwidth]{./Images/rotation_severity_7.0.jpg}
-\caption{Rotazione di $7.0 \degree$}
+\caption{rotazione di $7.0 \degree$}
 \label{sfig:corruption_rotation}
 \end{subfigure}\hfill
-\caption{Possibili applicazioni dei filtri}
+\caption{Esempi di applicazioni dei filtri}
 \label{sfig:data_augmentation}
 \end{figure}
 
 \subsubsection{Training from scratch o fine tuning}
-\emph{Specificare se la rete viene addestrata con inizializzazione random o partendo da pesi pre-addestrati, motivando la scelta e fornendo dettagli sulla strategia di inizializzazione.}
+\begin{comment}
+	Specificare se la rete viene addestrata con inizializzazione random o partendo da pesi pre-addestrati, motivando la scelta e fornendo dettagli sulla strategia di inizializzazione.
+\end{comment}
 
 Come già precisato nel paragrafo~\ref{sec:cnn_relu}, come base per il nostro addestramento abbiamo realizzato una versione di MobileNetV3Large basata su di un'implementazione già disponibile in Keras. 
 
-Abbiamo inizializzato il \emph{bottom} con pesi appresi su ImageNet\cite{imagenet}, mentre per quanto riguarda il \emph{top} abbiamo inizializzato l'unico livello che richiede pesi, quello convoluzionale, in maniera randomica. In particolare, per questo livello abbiamo lasciato l'inizializzazione di default prevista dall'implementazione, ovvero l'inizializzazione uniforme di Glorot, sebbene di solito si preferisca l'inizializzazione uniforme di He per layer con funzione d'attivazione ReLU\todo{aggiornare quando scegliamo modello definitivo}, in quanto le due inizializzazioni differiscono soltanto per un fattore al numeratore della varianza della distribuzione utilizzata (1 in Glorot, 2 in He), ed il fatto di non cambiare l'inizializzazione ci ha permesso di non dover modificare l'implementazione della rete (ovviamente, se la rete avesse prodotto risultati diversi da quelli attesi, saremmo ritornati anche su questo punto).
+Abbiamo inizializzato il \emph{bottom} con pesi appresi su ImageNet \cite{imagenet}, mentre per quanto riguarda il \emph{top} abbiamo inizializzato l'unico livello che richiede pesi, quello convoluzionale, in maniera randomica. In particolare, per questo livello abbiamo lasciato l'inizializzazione di default prevista dall'implementazione, ovvero l'inizializzazione uniforme di Glorot, sebbene di solito si preferisca l'inizializzazione uniforme di He per layer con funzione d'attivazione ReLU\todo{aggiornare quando scegliamo modello definitivo}, in quanto le due inizializzazioni differiscono soltanto per un fattore al numeratore della varianza della distribuzione utilizzata (1 in Glorot, 2 in He), ed il fatto di non cambiare l'inizializzazione ci ha permesso di non dover modificare l'implementazione della rete (ovviamente, se la rete avesse prodotto risultati diversi da quelli attesi, saremmo ritornati anche su questo punto).
 
-Abbiamo scelto di seguire questa strada in quanto il fatto di partire da pesi appresi su di un dataset generico e molto vasto permette di ridurre i tempi di convergenza dell'algoritmo di addestramento\cite{miviaage}. 
+Abbiamo scelto di seguire questa strada in quanto il fatto di partire da pesi appresi su di un dataset generico e molto vasto permette di ridurre i tempi di convergenza dell'algoritmo di addestramento \cite{miviaage}. 
 
 Ovviamente non abbiamo potuto riutilizzare i pesi ImageNet per il \emph{top} della rete, in quanto ImageNet è un dataset tipicamente utilizzato per la classificazione.
 
 \subsubsection{Procedura di training}
 \todo{Indicare probabilità di corruzioni e probabilità di corruzioni frequenti, batch size.}
-\emph{Dettagliare e motivare almeno le seguenti scelte: numero di epoche di addestramento, tipo di ottimizzatore, learning rate scheduling (tecnica di riduzione, learning rate iniziale, fattore di riduzione). Fornire dettagli su eventuali elementi aggiuntivi: batch normalization, weight decay, early stopping etc. Per ognuna delle scelte, riportare i valori esatti dei parametri utilizzati, per rendere l’esperimento riproducibile. Motivare la scelta di tali valori.}
+\begin{comment}
+	Dettagliare e motivare almeno le seguenti scelte: numero di epoche di addestramento, tipo di ottimizzatore, learning rate scheduling (tecnica di riduzione, learning rate iniziale, fattore di riduzione). Fornire dettagli su eventuali elementi aggiuntivi: batch normalization, weight decay, early stopping etc. Per ognuna delle scelte, riportare i valori esatti dei parametri utilizzati, per rendere l’esperimento riproducibile. Motivare la scelta di tali valori.
+\end{comment}
 
 \begin{comment}
 	- Learning rate OK
@@ -242,14 +251,14 @@ Ovviamente non abbiamo potuto riutilizzare i pesi ImageNet per il \emph{top} del
 		- Ci siamo basati sul MAE. Avremmo potuto ripartire da capo e cambiare learning rate prima, ma non abbiamo avuto tempo.
 \end{comment}
 
-È stato scelto Adam \cite{adam} perché in molti casi offre prestazioni paragonabili a SGD richiedendo meno operazioni di tuning dei parametri. In particolare gestisce i momenti in maniera adattiva e rende le implementazioni "classiche" del weight decay poco incisive. Tutto ciò ci ha permesso di ridurre il numero di tentativi (e quindi il tempo) necessari a trovare una buona configurazione dell'ottimizzatore. Difatti, l'algoritmo ci ha richiesto soltanto di intervenire in diminuzione sul learning rate quando le metriche monitorate non miglioravano significativamente. 
+Come ottimizzatore è stato scelto Adam \cite{adam} perché in molti casi offre prestazioni paragonabili a SGD richiedendo meno operazioni di tuning dei parametri. In particolare gestisce i momenti in maniera adattiva e rende le implementazioni "classiche" del weight decay poco incisive. Tutto ciò ci ha permesso di ridurre il numero di tentativi (e quindi il tempo) necessari a trovare una buona configurazione dell'ottimizzatore. Difatti, l'algoritmo ci ha richiesto soltanto di intervenire in diminuzione sul learning rate quando le metriche monitorate non miglioravano significativamente. 
 Per quanto riguarda gli altri parametri, i valori di default riportati in \cite{adam} e forniti dall'implementazione Keras di Adam sono risultati ottimali.
 
 Infine, Adam offre il vantaggio non indifferente dell'avere learning rate adattivi per ogni peso della rete.
 
 Per ciò che concerne le tecniche di regolarizzazione, MobileNetV3 include all'uopo livelli di batch normalization e dropout. Non abbiamo messo in atto strategie di weight decay perché gli approcci "classici" a questa tecnica (in pratica quelli basati su regolarizzazione $L_2$) sono poco efficaci con Adam \cite{adam_no_wd} e visti i risultati sul validation set non ci è sembrato necessario approfondire ulteriormente l'argomento. 
 
-PROCEDURA DI TRAINING IN GENERALE (learning rate, numero di epoche etc.)
+PROCEDURA DI TRAINING IN GENERALE (learning rate, numero di epoche etc.)\todo{eliminare questo}
 Infine, per quanto riguarda il learning rate, abbiamo eseguito 2000\cite{adam_warmup} step di warmup, partendo con un learning rate pari 0 ed incrementandolo fino a raggiungere il valore di default previsto per Adam, cioè $0.001$. Successivamente, abbiamo ridotto il learning rate di un fattore 20 in tre momenti diversi:
 \begin{itemize}
 	\item dopo l'epoca 6, in quanto la fase oscillatoria sul validation set della loss e del MAE era terminata ed abbiamo avuto valori paragonabili di queste metriche per due epoche consecutive; possiamo notare come successivamente a questa diminuzione vi sia una sostanziale riduzione dei valori assunti da entrambe le funzioni;
