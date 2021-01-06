@@ -213,7 +213,7 @@ I valori scelti empiricamente fanno sì che l'effetto dell'applicazione del filt
 
 Come già precisato nel paragrafo~\ref{sec:cnn_relu}, come base per il nostro addestramento abbiamo realizzato una versione di MobileNetV3Large basata su di un'implementazione già disponibile in Keras. 
 
-Abbiamo inizializzato il \emph{bottom} con pesi appresi su ImageNet\todo{linkare/citare qualcosa}, mentre per quanto riguarda il \emph{top} abbiamo inizializzato l'unico livello che richiede pesi, quello convoluzionale, in maniera randomica. In particolare, per questo livello abbiamo lasciato l'inizializzazione di default prevista dall'implementazione, ovvero l'inizializzazione uniforme di Glorot, sebbene di solito si preferisca l'inizializzazione uniforme di He per layer con funzione d'attivazione ReLU\todo{aggiornare quando scegliamo modello definitivo}, in quanto le due inizializzazioni differiscono soltanto per un fattore al numeratore della varianza della distribuzione utilizzata (1 in Glorot, 2 in He), ed il fatto di non cambiare l'inizializzazione ci ha permesso di non dover modificare l'implementazione della rete.\todo{dire che se la rete avesse fatto schifo saremmo comunque venuti a modificare questo parametro}
+Abbiamo inizializzato il \emph{bottom} con pesi appresi su ImageNet\cite{imagenet}, mentre per quanto riguarda il \emph{top} abbiamo inizializzato l'unico livello che richiede pesi, quello convoluzionale, in maniera randomica. In particolare, per questo livello abbiamo lasciato l'inizializzazione di default prevista dall'implementazione, ovvero l'inizializzazione uniforme di Glorot, sebbene di solito si preferisca l'inizializzazione uniforme di He per layer con funzione d'attivazione ReLU\todo{aggiornare quando scegliamo modello definitivo}, in quanto le due inizializzazioni differiscono soltanto per un fattore al numeratore della varianza della distribuzione utilizzata (1 in Glorot, 2 in He), ed il fatto di non cambiare l'inizializzazione ci ha permesso di non dover modificare l'implementazione della rete.\todo{dire che se la rete avesse fatto schifo saremmo comunque venuti a modificare questo parametro}
 
 Abbiamo scelto di seguire questa strada in quanto il fatto di partire da pesi appresi su di un dataset generico e molto vasto permette di ridurre i tempi di convergenza dell'algoritmo di addestramento\cite{miviaage}. 
 
@@ -257,6 +257,7 @@ Avevamo anche predisposto delle callback per la riduzione automatica del learnin
 
 La rete è stata allenata per un totale di $19$ epoche, tuttavia scegliamo come modello definitivo quello all'epoca XX, in quanto le epoche successive non hanno apportato miglioramenti significativi alle metriche osservate. \todo{mettere numero vero di epoca alla quale ci fermiamo}
 
+\begin{comment}
 \begin{figure}[ht]
 	\centering
 	\begin{tikzpicture}
@@ -295,3 +296,4 @@ La rete è stata allenata per un totale di $19$ epoche, tuttavia scegliamo come 
 	\end{tikzpicture}
 	\caption{SCRIVI QUA}
 \end{figure}
+\end{comment}

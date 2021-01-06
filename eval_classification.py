@@ -18,11 +18,12 @@ def compute_classification_mae(y_true, y_pred):
         y_pred (np.array): array di prediction nel formato [0.1,0.5,0.8,0,0,0,....]
     """
     errors = []
-    for gt_sample, pred_sample in zip(y_true, y_pred):
-        predicted_age = np.where(pred_sample < 0.5)[0][0] - 1
-        real_age = np.where(gt_sample == 0)[0][0] - 1
-        error = abs(predicted_age - real_age)
-        errors.append(error)
+    for gt_batch, pred_batch in zip(y_true, y_pred):
+        for gt_sample, pred_sample in zip(gt_batch, pred_batch):
+            predicted_age = np.where(pred_sample < 0.5)[0][0] - 1
+            real_age = np.where(gt_sample == 0)[0][0] - 1
+            error = abs(predicted_age - real_age)
+            errors.append(error)
     errors_np = np.array(errors)
     return np.mean(errors_np)
 
@@ -30,7 +31,7 @@ def compute_classification_mae(y_true, y_pred):
 EVAL_CSV_PATH = '/content/drive/Shareddrives/Progettone/Age Estimation/caches/eval_csv.cache'
 EVAL_SET_PATH = '/content/eval'
 MODE = 'validation'
-BATCH_SIZE = 1
+BATCH_SIZE = 128
 NUM_CLASSES = 101
 EPOCH_MODE = 'full'
 
@@ -65,16 +66,18 @@ data_generator = DataGenerator(MODE, preprocessor, None, None, data_loader, BATC
 print('Performing validation...')
 gt_array = []
 prediction_array = []
-for i in range(0, len(data_generator)):
-    if i % 1000 == 0:
-      print(f'Processed {i} samples')
+generator_len = len(data_generator)
+print(f'Num. batches: {generator_len}')
+for i in range(0, generator_len):
+    if i % 10 == 0:
+      print(f'Processed {i*BATCH_SIZE} samples')
 
     x, y = data_generator[i]
 
     prediction = model.predict(x)
 
-    gt_array.append(y[0]) # [0] removes batch dimension
-    prediction_array.append(prediction[0]) # [0] removes batch dimension
+    gt_array.append(y) # [0] removes batch dimension
+    prediction_array.append(prediction) # [0] removes batch dimension
 
 print('\n')
 
