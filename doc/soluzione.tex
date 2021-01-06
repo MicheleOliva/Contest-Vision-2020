@@ -1,6 +1,9 @@
 Tale descrizione deve contemplare almeno gli elementi riportati nelle seguenti sottosezioni.
 
-\subsection{Convolutional neural network} \label{sec:cnn_relu}
+\subsection{Convolutional neural network}
+
+\label{sec:cnn_relu}
+
 \emph{Descrivere in questa sezione l’architettura della convolutional neural network
 sviluppata nell’ambito del progetto. Se si utilizza un’architettura nota, si riportino gli elementi fondamentali della rete e le eventuali modifiche effettuate ma, soprattutto, si motivi la scelta.
 Definire in ogni caso se la rete è stata progettata come regressore (output:
@@ -115,7 +118,7 @@ Nel caso in cui, invece, l'immagine dovesse essere sottocampionata, verrà utili
 
 In entrambi i casi, il ridimensionamento viene effettuato mantenendo le proporzioni originali dell'immagine, e nel caso in cui l'immagine ritagliata non fosse quadrata viene aggiunto del padding. 
 
-Dopo le operazioni di ridimensionamento, ad ogni immagine viene sottratta la media, per ogni canale, delle immagini del dataset VGGFace. Ciò permette alla distribuzione degli input di essere centrata in $0$, permettendoci di sfruttare tutti i vantaggi della non linearità della ReLu (sezione~\ref{sec:ccn_relu}) ed ottenere una convergenza più veloce \cite{miviaage}.
+Dopo le operazioni di ridimensionamento, ad ogni immagine viene sottratta la media, per ogni canale, delle immagini del dataset VGGFace. Ciò permette alla distribuzione degli input di essere centrata in $0$, permettendoci di sfruttare tutti i vantaggi della non linearità della ReLu (sezione~\ref{sec:cnn_relu}) ed ottenere una convergenza più veloce \cite{miviaage}.
 
 \begin{figure}[ht]
 \centering
