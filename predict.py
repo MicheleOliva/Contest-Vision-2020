@@ -13,9 +13,9 @@ import csv
 
 # Argomenti da riga di comando
 argparser = argparse.ArgumentParser(description='Generates predictions.')
-argparser.add_argument('csv', help="csv containing images' paths and bounding boxes")
-argparser.add_argument('dataset', help="directory containing images' paths")
-argparser.add_argument('model', help="direcotory containing a Keras model")
+argparser.add_argument('csv', help="csv containing images' paths and bounding boxes", type=str)
+argparser.add_argument('dataset', help="directory containing images' paths", type=str)
+argparser.add_argument('model', help="direcotory containing a Keras model", type=str)
 args = argparser.parse_args()
 
 OUTPUT_PATH = 'predictions.csv'
@@ -26,7 +26,10 @@ def test_generator(csv_path, dataset_path, desired_shape):
     with open(csv_path, 'r') as csvfile:
         annotations = csv.reader(csvfile)
         for row in annotations:
-            img = cv2.imread(os.path.join(dataset_path, row[0]))
+            img_path = os.path.join(dataset_path, row[0])
+            img = cv2.imread(img_path)
+            if img is None:
+                raise ValueError(f'Unable to read image {img_path}')
             img = np.array(img)
             roi = np.array(row[1:], dtype='int')
             img = preprocessor.cut(img, roi)
@@ -35,12 +38,13 @@ def test_generator(csv_path, dataset_path, desired_shape):
 
 
 if not os.path.isdir(args.model):
-    print("ERROR: model argument is not a directory")
+    print(f"ERROR: model argument {args.model} is not a directory")
     exit(0)
 
 model = load_model(args.model, compile=True)
 model.summary()
 input_shape = tuple(model.get_layer(index=0).inputs[0].shape[1:])[:2]
+print(f'Input shape: {input_shape}')
 
 pred = model.predict(test_generator(args.csv, args.dataset, input_shape), verbose=1)
 pred = np.array(pred).reshape(-1) # Diventa un array lineare
