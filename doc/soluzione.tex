@@ -28,7 +28,7 @@ Si noti infine che nel model summary visualizzato dalla nostra implementazione i
 
 Il dataset utilizzato per addestrare la nostra rete a compiere il task assegnato è il dataset chiamato \emph{VGG-Face2 Mivia Age}, anche detto \emph{VMAGE} \cite{miviaage}.
 
-Quest'ultimo dataset contiene $3.067.620$ immagini di $8921$ soggetti. Ad ogni immagine è associata l'età del soggetto, tale valore è una stima dell'età apparente del soggetto catturato.
+Quest'ultimo dataset contiene $3.067.620$ immagini di $8.921$ soggetti. Ad ogni immagine è associata l'età del soggetto, tale valore è una stima dell'età apparente del soggetto catturato.
 Il dataset ci è stato fornito già diviso in training set, che include $8.421$ identità, e test set, che include le rimanenti $500$.
 
 Le risorse \todo{specifichiamo il disco} che Google Colab mette a disposizione sono risultate insufficienti per allenare la rete sull'intero training set, pertanto è stato necessario ridurre la grandezza di quest'ultimo. A tale scopo è stata svolta un analisi del training set e sono stati scelte le identità sulle quali svolgere l'addestramento della rete. Tale analisi è stata svolta combinando le annotazioni per VMAGE riguardanti la sola età con annotazioniper VGGFace2\footnote{Tali annotazioni sono reperibili al seguente link: \url{https://github.com/MiviaLab/GenderRecognitionFramework/releases/tag/0}} contenenti, tra le altre, informazioni riguardanti il genere e il numero di sample per ogni identità e, per ogni immagine, la regione dell'immagine contenente il volto del soggetto ivi rappresentato, che è stata utilizzata per svolgere operazioni dettagliate più avanti.
@@ -77,7 +77,7 @@ Successivamente abbiamo analizzato, per ogni identità, la \emph{media} e la \em
 
 Come si evince dai grafici in figura~\ref{sfig:Ids per gender and mean age} e in figura~\ref{sfig:Images per gender and mean age}, ci sono delle fasce d'età sovrarappresentate rispetto alle altre, in particolare le fasce d'età $[25,34]$ e $[35,44]$.
 
-Abbiamo quindi scelto di escludere dal set le identità relative a uomini nelle fasce $[25,34]$ e $[35,44]$, e quelle relative a donne nella fascia $[25,34]$. In entrambi i casi abbiamo rimosso soltanto identità per le quali la deviazione standard dell'età risulta inferiore a $5.5$, per un totale di $3249$ identità. Il risultato di tale operazione è visibile in figura~\ref{fig:Ids per gender and mean age after the drop}.
+Abbiamo quindi scelto di escludere dal set le identità relative a uomini nelle fasce $[25,34]$ e $[35,44]$, e quelle relative a donne nella fascia $[25,34]$. In entrambi i casi abbiamo rimosso soltanto identità per le quali la deviazione standard dell'età risulta inferiore a $5.5$, per un totale di $3.249$ identità. Il risultato di tale operazione è visibile in figura~\ref{fig:Ids per gender and mean age after the drop}.
 
 \begin{figure}[ht]
 \centering
@@ -91,9 +91,9 @@ Successivamente a tale operazione, al training set sono state sottratte ulterior
 
 In conclusione:
 \begin{itemize}
-	\item Il training set è composto da $4692$ identità per un totale di $1.68$ milioni di immagini;
-	\item Il validation set è composto da $480$ identità per un totale di $170363$ immagini;
-	\item Il test set è composto da $500$ identità per un totale di $169372$ immagini.
+	\item Il training set è composto da $4.692$ identità per un totale di $1,68$ milioni di immagini;
+	\item Il validation set è composto da $480$ identità per un totale di $170.363$ immagini;
+	\item Il test set è composto da $500$ identità per un totale di $169.372$ immagini.
 \end{itemize}
 \subsubsection{Face detection}
 \label{subsubsec:face_detection}
