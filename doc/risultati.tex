@@ -1,1 +1,63 @@
 \emph{Descrivere gli esperimenti effettuati e, per ognuno di essi, riportare i risultati sul training e sul validation set in forma tabellare. Analizzare e commentare i risultati nel dettaglio, tirando fuori delle conclusioni motivate dai risultati sperimentali. Eventuali esperimenti aggiuntivi possono essere riportati in questa sezione.}
+
+\subsection{Descrizione esperimenti}
+
+\begin{comment}
+    3 esperimenti:
+    - regressore 224x244
+    - classificatore 224x224
+    - regressore 96x96
+    Come cosa aggiuntiva, epoche non full che fanno comunque paura
+\end{comment}
+
+Abbiamo considerato nei nostri esperimenti tre tipi di reti, tutte basate su MobileNetV3 Large:
+\begin{itemize}
+    \item regressore con dimensione di input $96 \times 96$;
+    \item regressore con dimensione di input $224 \times 224$;
+    \item classificatore con dimensione di input $224 \times 224$.
+\end{itemize}
+
+Siccome eseguire un'epoca di addestramento, con successiva validazione su tutto il nostro validation set, richiede un tempo considerevole (almeno 2 ore e 30 minuti, anche impostando come input size $96 \times 96$), al fine di avere dei primi feedback riguardo l'appropriatezza della nostra procedura di training in tempi ragionevoli, abbiamo condotto inizialmente degli addestramenti che definiamo \emph{light}. Questi sono caratterizzati da epoche che non esplorano tutto il training set, ma un suo sottoinsieme (causale per ogni epoca) tale da contenere un numero di immagini multiplo del numero di identità, in modo che l'insieme dei dati sottoposti alla rete sia comunque bilanciato da questo punto di vista.
+Per questioni di tempo, abbiamo seguito questo approccio soltanto per allenare i due diversi regressori. I risultati hanno evidenziato come entrambe le reti promettessero buone performance, e, pertanto, abbiamo proseguito con un loro addestramento "classico", vale a dire utilizzando training e validation set completi.
+
+Come ultimo esperimento, abbiamo addestrato un classificatore con 101 classi (da 0 a 100 anni) ed input size $224 \times 224$. Come già detto, su quest'ultimo non abbiamo eseguito molte prove per mancanza di tempo.
+
+\subsection{Risultati e commenti}
+
+I risultati ottenuti sul nostro validation set sono riportati nella tabella seguente. Per completezza, riportiamo anche i risultati dei modelli addestrati con procedura \emph{light}.
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{ |c|c|c|c|c|c| } 
+        \hline
+        \textbf{Tipologia} & \textbf{Training} & \textbf{Input Size} & \textbf{Epoche} & \textbf{Validation MAE} \\
+        \hline
+        Regressore & \emph{light} & $96 \times 96$  & $43$ & $2.47$ \\
+        \hline
+        Regressore & \emph{light} & $224 \times 224$ & $77$ & $1.84$ \\
+        \hline
+        Regressore & \emph{full} & $96 \times 96$  & $20$ & $2.44$ \\
+        \hline
+        Regressore & \emph{full} & $224 \times 224$ & $14$ & $1.75$ \\
+        \hline   
+        Classificatore & \emph{full} & $224 \times 224$ & $8$ & $1.65$ \\
+        \hline
+    \end{tabular}
+    \caption{Risultati degli esperimenti effettuati. Il MAE indicato in tabella fa riferimento al validation set completo anche per i modelli addestrati con procedura \emph{light}.}
+\end{table}
+
+\subsection{Riguardo il classificatore}
+
+Il classificatore che abbiamo addestrato ha la stessa struttura dei regressori eccetto che per l'ultimo livello, il quale presenta un output di dimensione 101, corrispondente alle età da 0 a 100. 
+
+L'approccio che abbiamo utilizzato per la codifica della groundtruth e degli output, e per il calcolo della funzione di costo, è quello denominato \emph{ordinal regression} \cite{ordinalregression}. Esso prevede che vi sia una relazione d'ordine tra le classi, e che queste siano rappresentate come vettori di interi a valori in $\left\{0,1\right\}^n$, i quali assumono valore 1 fino alla classe di appartenenza di un campione, e zero dalla classe successiva in poi. Quindi, ad esempio, su 10 classi, la classe 3 viene rappresentata come:
+\begin{displaymath}
+    \begin{bmatrix}
+    1 & 1 & 1 & 1 & 0 & 0 & 0 & 0 & 0 & 0
+    \end{bmatrix}.
+\end{displaymath}
+Per quanto riguarda l'output del modello, ogni neurone dell'ultimo livello utilizza la funzione d'attivazione sigmoide, così come previsto in \cite{ordinalregression}, quindi la rete produce un vettore di probabilità. La classe predetta (e, nel nostro cas, l'età quindi) sarà pari all'indice del primo elemento dell'output con valore minore di 0.5 diminuito di 1. 
+
+In \cite{ordinalregression} si suggerisce di utilizzare come funzioni di costo l'errore quadratico tra previsione e groundtruth oppure la binary-crossentropy, e si specifica che entrambe producono risultati molto simili nella maggior parte dei casi. Noi abbiamo optato per la binary-crossentropy. 
+
+Per quanto riguarda la procedura di training, è la stessa utilizzata per i regressori, valori dei vari parametri inclusi, l'unico elemento che differisce è il fattore di riduzione del learning rate, che qui è pari a $0.1$, in quanto dalle prime prove sembrava garantire una convergenza leggermente più veloce.
