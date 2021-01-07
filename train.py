@@ -3,6 +3,7 @@
 import os
 import pickle
 import sys
+import tensorflow as tf
 from datetime import datetime
 from tensorflow.keras.applications import MobileNetV3Large
 from keras import Model, Sequential
@@ -14,9 +15,9 @@ from keras.metrics import MeanAbsoluteError
 from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger, ReduceLROnPlateau, TensorBoard
 from dataset_utils.data_augmentation import CustomAugmenter
 from dataset_utils.data_generation import DataGenerator
-from dataset_utils.data_loading import CustomDataLoader
+from dataset_utils.vgg_data_loader import VggDataLoader
 from dataset_utils.preprocessing import CustomPreprocessor
-from dataset_utils.output_encoding import CustomOutputEncoder
+from age_estimation_utils.custom_metrics import RoundedMae
 import argparse
 import re
 from keras import backend as K
@@ -34,6 +35,9 @@ datetime = datetime.today().strftime('%Y%m%d_%H%M%S')
 # Se si riprende il training
 if resume:
   print("Resuming training from latest model...")
+  # Disabilitiamo warmup
+  warmup = False
+
   # Cerchiamo il modello più recente in termini di epoche
   dir = os.listdir()
 
@@ -56,7 +60,8 @@ if resume:
       exit(0)
 
   print(f"Found {last_model}. Loading...")
-  model = load_model(last_model, compile=True)
+  rounded_mae = RoundedMae()
+  model = load_model(last_model, custom_objects={'rounded_mae':rounded_mae}, compile=True)
   initial_epoch = last_model_epochs
 
 
@@ -69,7 +74,7 @@ else:
   classifier_activation = 'relu'
   weights = 'imagenet'
   classes = 1
-  input_shape = (96, 96, 3)
+  input_shape = (224, 224, 3)
   alpha = 1.0
   ##########################################################################################
 
@@ -97,10 +102,15 @@ else:
   # Compiliamo il modello
   optimizer = Adam()
   loss = MeanSquaredError()
-  metrics = [MeanAbsoluteError(name='mae')]
+  rounded_mae = RoundedMae()
+  metrics = [MeanAbsoluteError(name='mae'),
+             rounded_mae]
 
   model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
   initial_epoch = 0
+
+  # abilitiamo warmup
+  warmup = True
 
   
 model.summary()
@@ -114,18 +124,16 @@ input_shape = tuple(model.get_layer(index=0).inputs[0].shape[1:])
 train_csv_path = '/content/drive/Shareddrives/Progettone/Age Estimation/caches/train_cvs.cache' # METTI DUMP .cache
 train_dataset_root_path = '/content/train'
 train_batch_size = 32
-train_epoch_mode = 'identities' # Len del generator è il numero di identities
+train_epoch_mode = 'full' # Len del generator è il numero di identities
 corruptions_prob = 0.5
 frequent_corruptions_prob = 0.85
-epoch_multiplier = 50
 ##########################################################################################
 
 train_preprocessor = CustomPreprocessor(desired_shape=input_shape[:2])
 train_augmenter = CustomAugmenter(corruptions_prob, frequent_corruptions_prob)
-train_encoder = CustomOutputEncoder()
-train_loader = CustomDataLoader(mode='training', csv_path=train_csv_path, csv_names=None, dataset_root_path=train_dataset_root_path, batch_size=train_batch_size)
+train_loader = VggDataLoader(mode='training', csv_path=train_csv_path, csv_names=None, dataset_root_path=train_dataset_root_path, batch_size=train_batch_size)
 
-train_generator = DataGenerator(mode='training', preprocessor=train_preprocessor, data_augmenter=train_augmenter, output_encoder=train_encoder, data_loader=train_loader, batch_size=train_batch_size, epoch_mode=train_epoch_mode, epoch_multiplier=epoch_multiplier)
+train_generator = DataGenerator(mode='training', preprocessor=train_preprocessor, data_augmenter=train_augmenter, output_encoder=None, data_loader=train_loader, batch_size=train_batch_size, epoch_mode=train_epoch_mode)
 
 # Generatori per l'evaluation
 
@@ -133,27 +141,26 @@ train_generator = DataGenerator(mode='training', preprocessor=train_preprocessor
 eval_csv_path = '/content/drive/Shareddrives/Progettone/Age Estimation/caches/eval_csv.cache' # METTI DUMP .cache
 eval_dataset_root_path = '/content/eval'
 eval_batch_size = 1
-eval_epoch_mode = 'identities' # Len del generator è il numero di identities
+eval_epoch_mode = 'full' # Len del generator è il numero di identities
 ###########################################################################################
 
 eval_preprocessor = CustomPreprocessor(desired_shape=input_shape[:2])
-eval_encoder = CustomOutputEncoder()
-eval_loader = CustomDataLoader(mode='validation', csv_path=eval_csv_path, csv_names=None, dataset_root_path=eval_dataset_root_path, batch_size=eval_batch_size)
+eval_loader = VggDataLoader(mode='validation', csv_path=eval_csv_path, csv_names=None, dataset_root_path=eval_dataset_root_path, batch_size=eval_batch_size)
 
-eval_generator = DataGenerator(mode='validation', preprocessor=eval_preprocessor, data_augmenter=None, output_encoder=eval_encoder, data_loader=eval_loader, batch_size=eval_batch_size, epoch_mode=eval_epoch_mode, epoch_multiplier=epoch_multiplier)
+eval_generator = DataGenerator(mode='validation', preprocessor=eval_preprocessor, data_augmenter=None, output_encoder=None, data_loader=eval_loader, batch_size=eval_batch_size, epoch_mode=eval_epoch_mode)
 
 
 ## Callbacks
 
 #### Parametri per le callback ###########################################################
 path = "."
-min_delta = 0.1 # Quanto deve scendere il mae per esser considerato migliorato
+min_delta = 0.1 # Quanto deve scendere la val_loss per esser considerato migliorato
 checkpoint_monitor = 'val_mae' # Solo per il model_checkpoint
 monitor = 'val_loss'
 mode = 'auto' # Controllare che funzioni, ossia il mae deve scendere per essere considerato migliorato
 factor = 0.2 # lr = lr * factor
-patience_lr = 5 # Cambiare in base alla lunghezza dell'epoca
-# patience_stop = 5
+patience_lr = 2 # Cambiare in base alla lunghezza dell'epoca
+patience_stop = 3
 checkpoint_path = os.path.join(path, "epoch{epoch:02d}_mae{val_mae:.2f}.model")
 save_best_only = False
 logdir = os.path.join(path, "tensorboard")
@@ -173,12 +180,12 @@ reduce_lr_plateau= ReduceLROnPlateau(monitor=monitor,
                                      cooldown=1, 
                                      min_delta=min_delta)
 
-#early_stopping = EarlyStopping(patience=patience_stop, 
-#                               verbose=1, 
-#                               restore_best_weights=True, 
-#                               monitor=monitor, 
-#                               mode=mode, 
-#                               min_delta=min_delta)
+early_stopping = EarlyStopping(patience=patience_stop, 
+                              verbose=1, 
+                              restore_best_weights=True, # significa che il modello che salviamo più in basso con la model.save è quello coi pesi migliori 
+                              monitor=monitor, 
+                              mode=mode, 
+                              min_delta=min_delta)
 
 model_checkpoint = ModelCheckpoint(checkpoint_path, 
                                    verbose=1, 
@@ -191,21 +198,40 @@ tensorboard = TensorBoard(log_dir=logdir,
                           write_graph=True, 
                           write_images=True)
 
-
 # Fit del modello
 
 #### Parametri di training ###############################################################
 training_epochs = 10000
+# Change this if you want to override warmup policy
+# warmup = True
+warmup_params = {
+  'target_lr': 0.001, # Adam's default
+  'n_warmup_steps': 2/(1-0.999), # 2/(1-beta2), like in https://arxiv.org/pdf/1910.04209.pdf
+}
 # Settare a true se si vuole cambiare learning rate
 override_lr = False
 new_lr_factor = None # il nuovo learning rate sarà pari a quello precedente moltiplicato per questo fattore
 ##########################################################################################
+
+if warmup:
+  print('Performing warmup...')
+  lr_increase = warmup_params['target_lr']/warmup_params['n_warmup_steps']
+  K.set_value(model.optimizer.lr, 0)
+  for i in range(0, min(int(warmup_params['n_warmup_steps']), len(train_generator))):
+    batch = train_generator[i]
+    model.train_on_batch(batch[0], batch[1])
+    K.set_value(model.optimizer.lr, lr_increase*(i+1))
+  # Re-shuffle identities and do some good stuff
+  train_generator.on_epoch_end()
+  print('Warmup done!')
 
 if override_lr:
     curr_lr = K.get_value(model.optimizer.lr)
     K.set_value(model.optimizer.lr, new_lr_factor*curr_lr)
 
 print(f'Learning rate: {K.get_value(model.optimizer.lr)}')
+
+print('Starting model training...')
 
 # Print output to stdout in addition to console: command | tee -a /path/to/file ('command' is the command you use to run this script)
 history = model.fit(train_generator, 
@@ -214,10 +240,11 @@ history = model.fit(train_generator,
                     epochs=training_epochs, 
                     callbacks=[model_checkpoint, 
                                logger, 
-                               reduce_lr_plateau,
+                               # reduce_lr_plateau,
+                               # early_stopping,
                                tensorboard],
                     use_multiprocessing=False,
-                    shuffle=False)
+                    shuffle=False) # lo shuffe ce lo gestiamo nel data loader
 
 
 # Saving last model
