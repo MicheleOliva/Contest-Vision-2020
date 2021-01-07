@@ -11,6 +11,8 @@ The input ``csv`` file must be in the format
 /path/to/image, x_min, x_max, width, height 
 ```
 
+> This file is ``to_predict.csv``, attached to the Moodle assignment.
+
 The script will generate a ``predictions.csv`` file in the current working directory, in the format
 ```
 /path/to/image, predicted_age
