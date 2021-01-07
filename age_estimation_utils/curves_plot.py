@@ -2,7 +2,7 @@ import csv
 import matplotlib.pyplot as plt
 
 
-TRAINING_LOG_CSV_PATH = './training_log.csv'
+TRAINING_LOG_CSV_PATH = 'G:\\Drive condivisi\\Progettone\\Age Estimation\\consegna\\training_log.csv'
 
 epoch_num = []
 training_loss = []
@@ -40,7 +40,7 @@ plt.xticks(epoch_num)
 # cambiare range asse y
 plt.axis([0, None, 0, y_max_loss])
 # etichette sugli assi
-plt.xlabel('Training epochs')
+plt.xlabel('Epoche')
 plt.ylabel('MSE')
 # legenda
 plt.legend(['Training', 'Validation'])
@@ -48,7 +48,7 @@ plt.legend(['Training', 'Validation'])
 plt.plot(lr_changed, [training_loss[i-1] for i in lr_changed], lr_points_style)
 plt.plot(lr_changed, [val_loss[i-1] for i in lr_changed], lr_points_style)
 # titolo grafico
-plt.title('MSE curves')
+plt.title('Curve MSE')
 #plt.show()
 
 # plot mae
@@ -60,7 +60,7 @@ plt.xticks(epoch_num)
 # cambiare range asse y
 plt.axis([0, None, 0, y_max_mae])
 # etichette sugli assi
-plt.xlabel('Training epochs')
+plt.xlabel('Epoche')
 plt.ylabel('MAE')
 # legenda
 plt.legend(['Training', 'Validation'])
@@ -68,5 +68,5 @@ plt.legend(['Training', 'Validation'])
 plt.plot(lr_changed, [training_mae[i-1] for i in lr_changed], lr_points_style)
 plt.plot(lr_changed, [val_mae[i-1] for i in lr_changed], lr_points_style)
 # titolo grafico
-plt.title('MAE curves')
+plt.title('Curve MAE')
 plt.show()
