@@ -1,7 +1,7 @@
 
 from keras.models import load_model
 
-model = load_model('G:/Drive condivisi/Progettone/Age Estimation/train_francesco/train_first/20201228_110909_MNV3L_96x96_c1_a1.0_imagenet')
+model = load_model('')
 
 print('Loaded model!')
 
@@ -11,7 +11,7 @@ from dataset_utils.data_generation import DataGenerator
 
 
 BATCH_SIZE = 1
-data_loader = CustomDataLoader(mode='testing', csv_names=None, csv_path='C:/Users/Francesco/Desktop/python_test_environment/eval_csv.csv', dataset_root_path='C:/Users/Francesco/Documents/Uni/Magistrale/Secondo anno/Artificial Vision/Progetto finale age estimation/Dataset/train', batch_size=BATCH_SIZE)
+data_loader = CustomDataLoader(mode='testing', csv_names=None, csv_path='', dataset_root_path='', batch_size=BATCH_SIZE)
 
 from dataset_utils.preprocessing import CustomPreprocessor
 preprocessor = CustomPreprocessor(desired_shape=(96,96))

@@ -1,5 +1,5 @@
 """
-Codice per convertire i dizionari nel formato fatto da Michele nella divisione del dataset
+Codice per convertire i dizionari nel formato utilizzato nella divisione del dataset
 nel formato richiesto dai data loader.
 """
 
@@ -16,13 +16,13 @@ with open(eval_dict_path, 'rb') as eval_dict_in:
 
 dictionary = eval_dict_dump # DIZIONARIO DA CONVERTIRE
 
-francesco_dict = {}
-francesco_list = []
+new_dict = {}
+new_list = []
 num_samples = 0
 for path in dictionary.keys():
     identity_id = dictionary[path]['ID']
-    if identity_id not in francesco_dict.keys():
-        francesco_dict[identity_id] = {
+    if identity_id not in new_dict.keys():
+        new_dict[identity_id] = {
             'index': 0,
             'metadata': []
         }
@@ -36,11 +36,11 @@ for path in dictionary.keys():
         },
         'path': path
     }
-    francesco_dict[identity_id]['metadata'].append(id_data)
-    if identity_id not in francesco_list:
-        francesco_list.append(identity_id)
+    new_dict[identity_id]['metadata'].append(id_data)
+    if identity_id not in new_list:
+        new_list.append(identity_id)
     num_samples += 1
     
 print(f'Num samples: {num_samples}')
-print(f'Num ids: {len(francesco_list)}')
-print(f'Num dictionary keys: {len(francesco_dict.keys())}')
+print(f'Num ids: {len(new_list)}')
+print(f'Num dictionary keys: {len(new_dict.keys())}')

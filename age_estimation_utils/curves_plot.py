@@ -2,7 +2,7 @@ import csv
 import matplotlib.pyplot as plt
 
 
-TRAINING_LOG_CSV_PATH = 'G:\\Drive condivisi\\Progettone\\Age Estimation\\consegna\\training_log.csv'
+TRAINING_LOG_CSV_PATH = ''
 
 epoch_num = []
 training_loss = []

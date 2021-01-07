@@ -173,9 +173,6 @@ class CustomDataLoader():
         if self.num_samples < self.batch_size:
             raise ValueError('The number of samples is smaller than the batch size')
         
-        # TODO:
-        # GESTIRE BENE situazioni del tipo non ho batch_size identità diverse, ma con quelle che ho apparo comunque a 64 immagini (farò qualche batch con più immagini
-        # provenienti dalla stessa identità, ma pazienza)
         if self.mode != 'testing':
             if len(self.identities) < self.batch_size:
                 raise ValueError('The number of identities is smaller than the batch size')
