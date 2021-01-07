@@ -225,7 +225,7 @@ I valori scelti empiricamente fanno sì che l'effetto dell'applicazione del filt
 
 Come già precisato nel paragrafo~\ref{sec:cnn_relu}, come base per il nostro addestramento abbiamo realizzato una versione di MobileNetV3Large basata su di un'implementazione già disponibile in Keras. 
 
-Abbiamo inizializzato il \emph{bottom} con pesi appresi su ImageNet \cite{imagenet}, mentre per quanto riguarda il \emph{top} abbiamo inizializzato l'unico livello che richiede pesi, quello convoluzionale, in maniera randomica. In particolare, per questo livello abbiamo lasciato l'inizializzazione di default prevista dall'implementazione, ovvero l'inizializzazione uniforme di Glorot, sebbene di solito si preferisca l'inizializzazione uniforme di He per layer con funzione d'attivazione ReLU\todo{aggiornare quando scegliamo modello definitivo}, in quanto le due inizializzazioni differiscono soltanto per un fattore al numeratore della varianza della distribuzione utilizzata (1 in Glorot, 2 in He), ed il fatto di non cambiare l'inizializzazione ci ha permesso di non dover modificare l'implementazione della rete (ovviamente, se la rete avesse prodotto risultati diversi da quelli attesi, saremmo ritornati anche su questo punto).
+Abbiamo inizializzato il \emph{bottom} con pesi appresi su ImageNet \cite{imagenet}, mentre per quanto riguarda il \emph{top} abbiamo inizializzato l'unico livello che richiede pesi, quello convoluzionale, in maniera randomica. In particolare, per questo livello abbiamo lasciato l'inizializzazione di default prevista dall'implementazione, ovvero l'inizializzazione uniforme di Glorot, sebbene di solito si preferisca l'inizializzazione uniforme di He per layer con funzione d'attivazione ReLU, in quanto le due inizializzazioni differiscono soltanto per un fattore al numeratore della varianza della distribuzione utilizzata (1 in Glorot, 2 in He), ed il fatto di non cambiare l'inizializzazione ci ha permesso di non dover modificare l'implementazione della rete (ovviamente, se la rete avesse prodotto risultati diversi da quelli attesi, saremmo ritornati anche su questo punto).
 
 Abbiamo scelto di seguire questa strada in quanto il fatto di partire da pesi appresi su di un dataset generico e molto vasto permette di ridurre i tempi di convergenza dell'algoritmo di addestramento \cite{miviaage}. 
 
@@ -260,16 +260,16 @@ Infine, Adam offre il vantaggio non indifferente dell'avere learning rate adatti
 
 Per ciò che concerne le tecniche di regolarizzazione, MobileNetV3 include all'uopo livelli di batch normalization e dropout. Non abbiamo messo in atto strategie di weight decay perché gli approcci "classici" a questa tecnica (in pratica quelli basati su regolarizzazione $L_2$) sono poco efficaci con Adam \cite{adam_no_wd} e visti i risultati sul validation set non ci è sembrato necessario approfondire ulteriormente l'argomento. 
 
-PROCEDURA DI TRAINING IN GENERALE (learning rate, numero di epoche etc.)\todo{eliminare questo}
-Infine, per quanto riguarda il learning rate, abbiamo eseguito 2000\cite{adam_warmup} step di warmup, partendo con un learning rate pari 0 ed incrementandolo fino a raggiungere il valore di default previsto per Adam, cioè $0.001$. Successivamente, abbiamo ridotto il learning rate di un fattore 20 in tre momenti diversi:
+Infine, per quanto riguarda il learning rate, abbiamo eseguito $2000$ step di warmup, partendo con un learning rate pari 0 ed incrementandolo fino a raggiungere il valore di default previsto per Adam, cioè $0.001$. Il numero di step di warmup da eseguire è stato determinato secondo quanto indicato in \cite{adam_warmup}. Successivamente, abbiamo ridotto il learning rate di un fattore 0.2 in tre momenti diversi:
 \begin{itemize}
-	\item dopo l'epoca 6, in quanto la fase oscillatoria sul validation set della loss e del MAE era terminata ed abbiamo avuto valori paragonabili di queste metriche per due epoche consecutive; possiamo notare come successivamente a questa diminuzione vi sia una sostanziale riduzione dei valori assunti da entrambe le funzioni;
-	\item dopo l'epoca 12, perché il MSE e il MAE avevano ripreso ad oscillare, seppur in un intervallo particolarmente ridotto;
-	\item dopo l'epoca 16, perché le metriche si erano praticamente stabilizzate sui nuovi valori, e volevamo verificare se vi fosse ancora margine di miglioramento.
+	\item dopo l'epoca 7, in quanto la fase oscillatoria sul validation set della loss e del MAE era terminata ed abbiamo avuto valori paragonabili di queste metriche per due epoche consecutive; possiamo notare come successivamente a questa diminuzione vi sia una sostanziale riduzione dei valori assunti da entrambe le funzioni;
+	\item dopo l'epoca 13, perché nelle epoche precedenti il modello non era migliorato;
+	\item dopo l'epoca 16, perché le metriche si erano praticamente stabilizzate su nuovi valori, e volevamo verificare se vi fosse ancora margine di miglioramento.
 \end{itemize}
+Le curve che descrivono l'andamento delle metriche osservate sono riportate in figura~\ref{fig:metrics}.
 Avevamo anche predisposto delle callback per la riduzione automatica del learning rate e per l'early stopping, tuttavia abbiamo scelto di non utilizzarle perché l'osservazione diretta delle curve ci ha permesso maggiore controllo. Questi strumenti potrebbero essere impiegati dopo questo primo esperimento per un eventuale addestramento sull'intero training set.
 
-La rete è stata allenata per un totale di $19$ epoche, tuttavia scegliamo come modello definitivo quello all'epoca XX, in quanto le epoche successive non hanno apportato miglioramenti significativi alle metriche osservate. \todo{mettere numero vero di epoca alla quale ci fermiamo}
+La rete è stata allenata per un totale di $19$ epoche, tuttavia scegliamo come modello definitivo quello all'epoca $14$, in quanto le epoche successive non hanno apportato miglioramenti significativi alle metriche osservate.
 
 \begin{figure}[ht]
 	\centering
@@ -284,5 +284,6 @@ La rete è stata allenata per un totale di $19$ epoche, tuttavia scegliamo come 
 		\includegraphics[width=\textwidth]{epoch_mae}
 	\end{subfigure}
 	\hfill
-	\caption{Andamento delle metriche durante l'addestramento.}
+	\caption{Andamento delle metriche durante l'addestramento. I punti in rosso indicano le epoche dopo le quali è stato abbassato il learning rate $\alpha$.}
+	\label{fig:metrics}
 \end{figure}
