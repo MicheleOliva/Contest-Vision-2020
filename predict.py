@@ -6,6 +6,7 @@ from keras.models import load_model
 import argparse
 import re
 from dataset_utils.preprocessing import CustomPreprocessor
+from age_estimation_utils.custom_metrics import RoundedMae
 import cv2
 import numpy as np
 import csv
@@ -38,7 +39,8 @@ if not os.path.isdir(args.model):
     print("ERROR: model argument is not a directory")
     exit(0)
 
-model = load_model(args.model, compile=True)
+rounded_mae = RoundedMae()
+model = load_model(args.model, custom_objects={'rounded_mae':rounded_mae}, compile=True)
 model.summary()
 input_shape = tuple(model.get_layer(index=0).inputs[0].shape[1:])[:2]
 
