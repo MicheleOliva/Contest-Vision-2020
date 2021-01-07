@@ -142,6 +142,7 @@ Ancora, in questa fase del preprocessing, dopo le operazioni di ridimensionament
 \end{figure}
 
 \subsubsection{Data augmentation}
+\label{sec:data_augmentation}
 \begin{comment}
 Descrivere e motivare tutte le policy di augmentation implementate per estendere il dataset o per aumentarne la rappresentatività.
 \end{comment}
@@ -151,16 +152,16 @@ Per la data augmentation, durante l'addestramento applichiamo una serie di filtr
 I filtri applicati sono:
 \begin{enumerate*}[label={(\arabic*)}]
 \item \emph{rumore gaussiano additivo} con media 0 e deviazione standard nell'intervallo $[0.08, 0.15]$, come prevenzione ad attacchi semplici che sfruttano questo effetto ed anche per tenere in conto il rumore introdotto dal sensore fotografico;
-\item \emph{blur gaussiano} con deviazione standard nell'intervallo $[1, 2.5]$, presente soprattutto in immagini di cui si fa un sovracampionamento tramite filtro bicubico o in immagini con errori di messa a fuoco;
 \item \emph{ritaglio} \cite{miviagender}, per cui l'immagine viene tagliata ulteriormente per simulare fotografie in cui la faccia non è ripresa completamente o errori del face detector;
-\item \emph{rotazione} nell'intervallo $[-10 \degree, 10 \degree ]$, \item \emph{rovesciamento} rispetto all'asse verticale e \item \emph{inclinazione} \cite{miviagender} nello spazio tridimensionale per rendere la rete invariante rispetto all'inclinazione/orientamento del volto all'interno dell'immagine;
-\item \emph{spatter} \cite{miviagender}, ossia schizzi e macchie per rendere la rete invariante rispetto a possibili coperture del viso, sia digitali che volontarie;
 \item \emph{variazione di luminosità} nell'intervallo $[-50\%, -10\%] \cup [10\%, 50\%]$ e \item \emph{variazione di contrasto} nell'intervallo $[0.1, 0.4] \cup [1.5, 5.0]$, per l'invarianza rispetto a condizioni di luce diverse.
+\item \emph{rotazione} nell'intervallo $[-10 \degree, 10 \degree ]$, \item \emph{rovesciamento} rispetto all'asse verticale e \item \emph{inclinazione} \cite{miviagender} nello spazio tridimensionale per rendere la rete invariante rispetto all'inclinazione/orientamento del volto all'interno dell'immagine;
+\item \emph{blur gaussiano} con deviazione standard nell'intervallo $[1, 2.5]$, presente soprattutto in immagini di cui si fa un sovracampionamento tramite filtro bicubico o in immagini con errori di messa a fuoco;
+\item \emph{spatter} \cite{miviagender}, ossia schizzi e macchie per rendere la rete invariante rispetto a possibili coperture del viso, sia digitali che volontarie;
 \end{enumerate*}
-Per ogni immagine, viene scelto casualmente se applicare o meno un filtro. In caso positivo, viene scelto casualmente uno dei filtri insieme ad un valore di intensità che ricada nell'intervallo predisposto per ognuno di essi.
+Per ogni immagine, viene scelto casualmente se applicare o meno un filtro. In caso positivo, viene scelto casualmente uno dei filtri insieme ad un valore di intensità che ricada nell'intervallo predisposto per ognuno di essi. In particolare, identifichiamo due categorie di filtri: filtri frequenti e non. I filtri frequenti sono quelli da 1 a 6, ed hanno una probabilità maggiore di essere scelti, in quanto rappresentano corruzioni più frequenti per la nostra applicazione di riferimento (\ref{sec:intro.intention}). I rimanenti filtri sono non frequenti, e ovviamente hanno una probabilità minore di essere applicati. L'intensità di applicazione viene sempre scelta in maniera uniforme.
 
 Gli intervalli all'interno dei quali viene scelta l'intensità di applicazione di ogni filtro sono uguali a quelli presenti nelle implementazioni del Mivia Gender Recognition Framework \cite{miviagender}, eventualmente personalizzati, secondo i valori esplicitamente indicati, sulla base di alcune prove effettuate manualmente.
-I valori scelti empiricamente fanno sì che l'effetto dell'applicazione del filtro non sia completamente distruttivo e il risultato sia ancora riconoscibile all'occhio umano rispetto all'immagine originale.
+I valori scelti empiricamente fanno sì che l'effetto dell'applicazione del filtro non sia completamente distruttiva e il risultato sia ancora riconoscibile all'occhio umano rispetto all'immagine originale.
 
 \begin{figure}[ht]
 \begin{subfigure}[t]{0.18\textwidth}
@@ -252,6 +253,10 @@ Ovviamente non abbiamo potuto riutilizzare i pesi ImageNet per il \emph{top} del
 	- Numero di epoche OK
 		- Ci siamo basati sul MAE. Avremmo potuto ripartire da capo e cambiare learning rate prima, ma non abbiamo avuto tempo.
 \end{comment}
+
+Per l'addestramento della rete abbiamo scelto una batch size di 64 ed abbiamo cercato, per quanto possibile, di avere dei batch bilanciati dal punto di vista delle identità. A tale scopo, abbiamo realizzato un generatore di batch tale che questi includano sample appartenenti tutti ad identità diverse, ovviamente fino a che il numero di immagini residue per l'epoca lo permette. Inoltre, ad ogni epoca eseguiamo un mescolamento delle identità e delle immagini ad esse associate, in modo che nessuna epoca sia uguale alla precedente.
+
+Inoltre, come anticipato nel paragrafo~\ref{sec:data_augmentation}, gestiamo l'applicazione dei filtri alle immagini con delle probabilità. Per il nostro addestramento, applichiamo filtri con probabilità $0.5$. I filtri frequenti hanno una probabilità del $85\%$ di essere scelti, mentre i restanti del $15\%$. 
 
 Come ottimizzatore è stato scelto Adam \cite{adam} perché in molti casi offre prestazioni paragonabili a SGD richiedendo meno operazioni di tuning dei parametri. In particolare gestisce i momenti in maniera adattiva e rende le implementazioni "classiche" del weight decay poco incisive. Tutto ciò ci ha permesso di ridurre il numero di tentativi (e quindi il tempo) necessari a trovare una buona configurazione dell'ottimizzatore. Difatti, l'algoritmo ci ha richiesto soltanto di intervenire in diminuzione sul learning rate quando le metriche monitorate non miglioravano significativamente. 
 Per quanto riguarda gli altri parametri, i valori di default riportati in \cite{adam} e forniti dall'implementazione Keras di Adam sono risultati ottimali.
