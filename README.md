@@ -1,6 +1,6 @@
 # Contest Vision 2020: Gruppo 2
 
-## Reproducing the experiment
+## Computing predictions
 An example Colab Notebook can be found [here](https://colab.research.google.com/drive/1PT-gXpWP29AtDasRErDQYFy8U-B8r3RI?usp=sharing).
 
 ```
@@ -48,7 +48,7 @@ The script will generate some ``cache`` files in the current working directory, 
 ```
 $ train.py --resume
 ```
-The script will automatically search for the most recent model, i.e. the one with the highes epoch count, and resume training. Please beware of the parameters.
+The script will automatically search for the most recent model, i.e. the one with the highest epoch count, and resume training. Please beware of the parameters.
 
 ### Evaluating a model
 
