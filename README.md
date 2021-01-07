@@ -59,3 +59,17 @@ $ eval.py [-m /path/to/model] /path/to/csv /path/to/dataset
 ```
 
 If you don't specify a model path, the script will search for the most recent trained model in the current working directory. Also, you can point to a ``cache`` file instead of a ``csv`` file, the same used in the training phase.
+
+## Loading model with custom code
+
+If you want to load our model within your own code, please provide our `RoundedMae` custom metric as a custom object to the load function, otherwise Keras won't be able to load the model.
+This can be done in the following way:
+
+```python
+from age_estimation_utils.custom_metrics import RoundedMae
+
+MODEL_PATH = '/path/to/model'
+
+rounded_mae = RoundedMae()
+model = load_model(MODEL_PATH, custom_objects={'rounded_mae':rounded_mae}, compile=True)
+```
