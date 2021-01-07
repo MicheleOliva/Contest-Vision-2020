@@ -1,4 +1,6 @@
-\emph{Descrivere gli esperimenti effettuati e, per ognuno di essi, riportare i risultati sul training e sul validation set in forma tabellare. Analizzare e commentare i risultati nel dettaglio, tirando fuori delle conclusioni motivate dai risultati sperimentali. Eventuali esperimenti aggiuntivi possono essere riportati in questa sezione.}
+\begin{comment}
+    Descrivere gli esperimenti effettuati e, per ognuno di essi, riportare i risultati sul training e sul validation set in forma tabellare. Analizzare e commentare i risultati nel dettaglio, tirando fuori delle conclusioni motivate dai risultati sperimentali. Eventuali esperimenti aggiuntivi possono essere riportati in questa sezione.
+\end{comment}
 
 \subsection{Descrizione esperimenti}
 
@@ -18,33 +20,39 @@ Abbiamo considerato nei nostri esperimenti tre tipi di reti, tutte basate su Mob
 \end{itemize}
 
 Siccome eseguire un'epoca di addestramento, con successiva validazione su tutto il nostro validation set, richiede un tempo considerevole (almeno 2 ore e 30 minuti, anche impostando come input size $96 \times 96$), al fine di avere dei primi feedback riguardo l'appropriatezza della nostra procedura di training in tempi ragionevoli, abbiamo condotto inizialmente degli addestramenti che definiamo \emph{light}. Questi sono caratterizzati da epoche che non esplorano tutto il training set, ma un suo sottoinsieme (causale per ogni epoca) tale da contenere un numero di immagini multiplo del numero di identità, in modo che l'insieme dei dati sottoposti alla rete sia comunque bilanciato da questo punto di vista.
-Per questioni di tempo, abbiamo seguito questo approccio soltanto per allenare i due diversi regressori. I risultati hanno evidenziato come entrambe le reti promettessero buone performance, e, pertanto, abbiamo proseguito con un loro addestramento "classico", vale a dire utilizzando training e validation set completi.
+Per questioni di tempo, abbiamo seguito questo approccio soltanto per allenare i due diversi regressori. I risultati hanno evidenziato come entrambe le reti promettessero buone performance, e, pertanto, abbiamo proseguito con un loro addestramento "classico" (in seguito chiamato \emph{full}), vale a dire utilizzando training e validation set completi.
 
 Come ultimo esperimento, abbiamo addestrato un classificatore con 101 classi (da 0 a 100 anni) ed input size $224 \times 224$. Come già detto, su quest'ultimo non abbiamo eseguito molte prove per mancanza di tempo.
 
 \subsection{Risultati e commenti}
 
-I risultati ottenuti sul nostro validation set sono riportati nella tabella seguente. Per completezza, riportiamo anche i risultati dei modelli addestrati con procedura \emph{light}.
+I risultati ottenuti sul nostro validation set sono riportati nella tabella seguente. Per completezza, riportiamo anche i risultati dei modelli addestrati con procedura \emph{light}. 
 
 \begin{table}[ht]
     \centering
-    \begin{tabular}{ |c|c|c|c|c|c| } 
+    \begin{tabular}{ |c|c|c|c|c| } 
         \hline
-        \textbf{Tipologia} & \textbf{Training} & \textbf{Input Size} & \textbf{Epoche} & \textbf{Validation MAE} \\
+        \textbf{Tipologia} & \textbf{Training} & \textbf{Input Size} & \textbf{Epoche} & \textbf{val.\@ MAE} \\
         \hline
         Regressore & \emph{light} & $96 \times 96$  & $43$ & $2.47$ \\
         \hline
         Regressore & \emph{light} & $224 \times 224$ & $77$ & $1.84$ \\
         \hline
-        Regressore & \emph{full} & $96 \times 96$  & $20$ & $2.44$ \\
+        Regressore & \emph{full} & $96 \times 96$ & $20$ & $2.44$ \\
         \hline
         Regressore & \emph{full} & $224 \times 224$ & $14$ & $1.75$ \\
         \hline   
-        Classificatore & \emph{full} & $224 \times 224$ & $8$ & $1.65$ \\
+        Classificatore & \emph{full} & $224 \times 224$ & $8$ & $1.64$ \\
         \hline
     \end{tabular}
     \caption{Risultati degli esperimenti effettuati. Il MAE indicato in tabella fa riferimento al validation set completo anche per i modelli addestrati con procedura \emph{light}.}
 \end{table}
+
+In primo luogo notiamo come le prestazioni dei modelli addestrati su epoche \emph{light} siano molto simili alle loro controparti addestrate sull'intero training set. Questo mostra quanto creare dei batch bilanciati dal punto di vista delle identità ed eseguire ad ogni epoca un mescolamento dei dati sia importante affinché la rete impari feature robuste e non si faccia trascinare da pattern eventualmente presenti nella sequenza di dati. Vale la pena notare, comunque, che il numero di epoche per i modelli sottoposti a training \emph{light} è di gran lunga maggiore rispetto ai modelli addestrati con tecnica \emph{full}, di conseguenza, statisticamente, i modelli \emph{light} "visualizzano" un numero di immagini paragonabile ai modelli \emph{full}, quindi possiamo concludere che la convergenza avviene in tempi simili.
+
+Il secondo elemento di riflessione è dato dal fatto che il regressore con input size $96 \times 96$ presenta un MAE sul validation set inferiore ad un anno rispetto a quello con input size $224 \times 224$. Questo è frutto sicuramente delle buone capacità di generalizzazione ottenute nonostante la minore input size, ma anche del fatto che molte immagini nel dataset hanno dimensioni davvero ridotte, per cui sono relativamente pochi i campioni sui quali una maggiore dimensione di input riesce a fare la differenza.
+
+\todo{Il classificatore è forte, Tempi di esecuzione}
 
 \subsection{Riguardo il classificatore}
 
@@ -56,7 +64,7 @@ L'approccio che abbiamo utilizzato per la codifica della groundtruth e degli out
     1 & 1 & 1 & 1 & 0 & 0 & 0 & 0 & 0 & 0
     \end{bmatrix}.
 \end{displaymath}
-Per quanto riguarda l'output del modello, ogni neurone dell'ultimo livello utilizza la funzione d'attivazione sigmoide, così come previsto in \cite{ordinalregression}, quindi la rete produce un vettore di probabilità. La classe predetta (e, nel nostro cas, l'età quindi) sarà pari all'indice del primo elemento dell'output con valore minore di 0.5 diminuito di 1. 
+Per quanto riguarda l'output del modello, ogni neurone dell'ultimo livello utilizza la funzione d'attivazione sigmoide, così come previsto in \cite{ordinalregression}, quindi la rete produce un vettore di probabilità. La classe predetta (l'età, nel nostro caso) sarà pari all'indice del primo elemento dell'output con valore minore di 0.5 diminuito di 1. 
 
 In \cite{ordinalregression} si suggerisce di utilizzare come funzioni di costo l'errore quadratico tra previsione e groundtruth oppure la binary-crossentropy, e si specifica che entrambe producono risultati molto simili nella maggior parte dei casi. Noi abbiamo optato per la binary-crossentropy. 
 
