@@ -1,6 +1,8 @@
 # Contest Vision 2020: Gruppo 2
 
 ## Reproducing the experiment
+An example Colab Notebook can be found [here](https://colab.research.google.com/drive/1PT-gXpWP29AtDasRErDQYFy8U-B8r3RI?usp=sharing).
+
 ```
 $ predict.py /path/to/csv /path/to/dataset /path/to/model
 ```
@@ -15,10 +17,9 @@ The script will generate a ``predictions.csv`` file in the current working direc
 ```
 with ``predicted_age`` rounded to the nearest integer.
 
-An already annotated ``csv`` for predictions is avalable [HERE]()
-**ADD LINK**.
-
 ## Usage
+
+An example Colab Notebook can be found [here](https://drive.google.com/file/d/1E0LlyhxDXdHvXirGupq6wlXo2bY95gQg/view?usp=sharing).
 
 ### Training a new model
 
@@ -56,14 +57,3 @@ $ eval.py [-m /path/to/model] /path/to/csv /path/to/dataset
 ```
 
 If you don't specify a model path, the script will search for the most recent trained model in the current working directory. Also, you can point to a ``cache`` file instead of a ``csv`` file, the same used in the training phase.
-
-
-# OLD PARAMETERS
-
-
-## ``eval.py``
-
-```python
-eval_csv_path = '/content/drive/Shareddrives/Progettone/Age Estimation/caches/eval_csv.cache'
-eval_dataset_root_path = '/content/eval'
-```
