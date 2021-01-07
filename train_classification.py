@@ -131,7 +131,7 @@ input_shape = tuple(model.get_layer(index=0).inputs[0].shape[1:])
 #### Parametri generatore ################################################################
 train_csv_path = '/content/drive/Shareddrives/Progettone/Age Estimation/caches/train_cvs.cache' # METTI DUMP .cache
 train_dataset_root_path = '/content/train'
-train_batch_size = 32
+train_batch_size = 64
 train_epoch_mode = 'full' # Len del generator è il numero di identities
 corruptions_prob = 0.5
 frequent_corruptions_prob = 0.85
@@ -150,7 +150,7 @@ train_generator = DataGenerator(mode='training', gt_encoder=gt_encoder, preproce
 #### Parametri generatore #################################################################
 eval_csv_path = '/content/drive/Shareddrives/Progettone/Age Estimation/caches/eval_csv.cache' # METTI DUMP .cache
 eval_dataset_root_path = '/content/eval'
-eval_batch_size = 1
+eval_batch_size = 64
 eval_epoch_mode = 'full' # Len del generator è il numero di identities
 ###########################################################################################
 
@@ -219,8 +219,8 @@ warmup_params = {
   'n_warmup_steps': 2/(1-0.999), # 2/(1-beta2), like in https://arxiv.org/pdf/1910.04209.pdf
 }
 # Settare a true se si vuole cambiare learning rate
-override_lr = False
-new_lr_factor = None # il nuovo learning rate sarà pari a quello precedente moltiplicato per questo fattore
+override_lr = True
+new_lr_factor = 0.1 # il nuovo learning rate sarà pari a quello precedente moltiplicato per questo fattore
 ##########################################################################################
 
 if warmup:
