@@ -1,1 +1,1 @@
- # Artificial Vision - Computer Engineering Master's Degree @ Unisa
+ # Artificial Vision Contest - Computer Engineering Master's Degree @ Unisa
