@@ -2,7 +2,7 @@
 
 ## Description
 
-Project developed as part of the final exam for the Artificial Vision class of the Computer Engineering Master's Degree @ UNISA.
+Project developed as part of the final exam for the Artificial Vision class of the Computer Engineering Master's Degree at Università degli Studi di Salerno.
 
 The project consisted in designing, implementing and testing a DCNN-based system for apparent age estimation.
 
